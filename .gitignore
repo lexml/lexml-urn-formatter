@@ -15,6 +15,7 @@ project/plugins/project/
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
+<<<<<<< HEAD
 
 /bin/
 /target/
@@ -22,3 +23,5 @@ project/plugins/project/
 /.classpath
 /.project
 /.settings/
+=======
+>>>>>>> branch 'master' of https://github.com/laurocesar/lexml-parser-urn2label.git
