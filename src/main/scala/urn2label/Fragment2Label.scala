@@ -50,7 +50,7 @@ object Fragment2Label {
     case ("cpt", _) => None
     case ("par", Unico :: _) => Some("Parágrafo Único.")
     case ("par", Algum(n) :: cs) =>
-      Some("Parágrafo " + formatOrdinal(n) + formatComplementos(cs))
+      Some("§ " + formatOrdinal(n) + formatComplementos(cs))
     case ("inc", n :: cs) =>
       Some(formatRomano(n.n).toUpperCase + formatComplementos(cs))
     case ("ali", n :: cs) =>
