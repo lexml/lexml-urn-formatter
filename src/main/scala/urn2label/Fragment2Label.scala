@@ -2,7 +2,7 @@ package urn2label
 
 import br.gov.lexml.parser.pl.output.LexmlRenderer
 
-object FragmentFormatter {
+object Fragment2Label {
 
   abstract sealed class Numero {
     val n: Int
@@ -20,7 +20,7 @@ object FragmentFormatter {
     case x => Algum(x.toInt)
   }
 
-  def format(urnFrag: String) = {
+  def format(urnFrag: String): String = {
     val urnFinal =
       urnFrag
         .split("_").toList
@@ -28,7 +28,10 @@ object FragmentFormatter {
         .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_))))
         .last
 
-    formatComp(urnFinal)
+    formatComp(urnFinal) match {
+      case Some(x) => x
+      case None => ""
+    }
   }
 
   type FormattedComp = String
@@ -41,11 +44,11 @@ object FragmentFormatter {
     "sub" -> "Subseção")
 
   def formatComp: Comp => Option[FormattedComp] = {
-    case ("art", Unico :: _) => Some("Artigo único. ")
+    case ("art", Unico :: _) => Some("Art. Único.")
     case ("art", Algum(n) :: cs) =>
       Some("Art. " + formatOrdinal(n) + formatComplementos(cs))
     case ("cpt", _) => None
-    case ("par", Unico :: _) => Some("Parágrafo Único. ")
+    case ("par", Unico :: _) => Some("Parágrafo Único.")
     case ("par", Algum(n) :: cs) =>
       Some("Parágrafo " + formatOrdinal(n) + formatComplementos(cs))
     case ("inc", n :: cs) =>

@@ -12,6 +12,6 @@ object App extends App {
       , "art1-1"
       , "art1-2")
 
-  l.foreach { x => println(x + "=>" + FragmentFormatter.format(x)) }
+  l.foreach { x => println(x + "=>" + Fragment2Label.format(x)) }
 
 }

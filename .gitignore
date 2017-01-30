@@ -15,13 +15,12 @@ project/plugins/project/
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
-<<<<<<< HEAD
 
+# Eclipse specific
 /bin/
 /target/
 /.cache-main
 /.classpath
 /.project
 /.settings/
-=======
->>>>>>> branch 'master' of https://github.com/laurocesar/lexml-parser-urn2label.git
+/.cache-tests
