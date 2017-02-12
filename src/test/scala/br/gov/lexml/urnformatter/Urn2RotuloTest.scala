@@ -9,6 +9,11 @@ class Urn2RotuloTest extends TestCase {
     assertEquals(Urn2Rotulo.format("art1"), "Art. 1º")
   }
   
+  def testLabel_art1_cpt() {
+    assertEquals(Urn2Rotulo.format("art1_cpt"), "Art. 1º")
+  }
+
+  
   def testLabel_art1u() {
     assertEquals(Urn2Rotulo.format("art1u"), "Art. Único.")
   }
@@ -38,6 +43,10 @@ class Urn2RotuloTest extends TestCase {
   def testLabel_art1_par1u() {
     assertEquals(Urn2Rotulo.format("art1_par1u"), "Parágrafo Único.")
   }
+    def testLabel_art1_par1u_cpt() {
+    assertEquals(Urn2Rotulo.format("art1_par1u_cpt"), "Parágrafo Único.")
+  }
+
   def testLabel_art1_par1() {
     assertEquals(Urn2Rotulo.format("art1_par1"), "§ 1º")
   }
@@ -156,10 +165,6 @@ class Urn2RotuloTest extends TestCase {
   def testLabel_art1_par1u_omi() {
     assertEquals(Urn2Rotulo.format("art1_par1u_omi1"), "")
   }
-  def testLabel_art1_par1u_cpt() {
-    assertEquals(Urn2Rotulo.format("art1_par1u_cpt"), "")
-  }
-
 
 
 }

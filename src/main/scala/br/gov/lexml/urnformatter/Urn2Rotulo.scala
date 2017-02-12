@@ -16,6 +16,8 @@ object Urn2Rotulo {
   final case class Algum(n: Int) extends Numero
 
   val compRe = "^([a-z]+)((?:1u|[0-9-])*)$".r
+  val compDropCpt = "_cpt$".r
+  
   type Comp = (String, List[Numero])
 
   def readInt: String => Numero = {
@@ -24,8 +26,11 @@ object Urn2Rotulo {
   }
 
   def format(urnFrag: String): String = {
+    
+    
     val urnFinal =
-      urnFrag
+      compDropCpt
+        .replaceFirstIn(urnFrag, "")
         .split("_").toList
         .flatMap(compRe.findFirstMatchIn(_))
         .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_))))
@@ -36,6 +41,7 @@ object Urn2Rotulo {
       case None => ""
     }
   }
+
 
   type FormattedComp = String
 
@@ -88,5 +94,11 @@ object Urn2Rotulo {
 
   def formatComplementos(cs: List[Numero]): String = cs.map(c => formatComplemento(c.n+1)).map("-" + _).mkString("")
   def formatComplemento(n: Int): String = formatAlfa(n - 1).toUpperCase
+  
+  def lastNth[A](n: Int, l:List[A]): A = l match {
+    case tail if (tail.length == n) => tail.head
+    case _ :: tail => lastNth(n, tail)
+    case _ => throw new NoSuchElementException
+}
 
 }
