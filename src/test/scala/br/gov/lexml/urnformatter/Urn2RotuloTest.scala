@@ -163,7 +163,7 @@ class Urn2RotuloTest extends TestCase {
     assertEquals(Urn2Rotulo.format("art1_par1u_alt1"), "")
   }
   def testLabel_art1_par1u_omi() {
-    assertEquals(Urn2Rotulo.format("art1_par1u_omi1"), "")
+    assertEquals(Urn2Rotulo.format("art1_cpt_alt1_omi1"), "")
   }
 
 
