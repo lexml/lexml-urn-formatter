@@ -1,29 +1,16 @@
 package br.gov.lexml.urnformatter
 
-import br.gov.lexml.parser.pl.output.LexmlRenderer
-
 /**
  * Formata uma URN como um rótulo
  */
 object Urn2Rotulo {
+  
+  import Urn2Format._
 
-  abstract sealed class Numero {
-    val n: Int
-  }
-  final case object Unico extends Numero {
-    override val n = 1
-  }
-  final case class Algum(n: Int) extends Numero
-
-  val compRe = "^([a-z]+)((?:1u|[0-9-])*)$".r
   val compDropCpt = "_cpt$".r
   
   type Comp = (String, List[Numero])
 
-  def readInt: String => Numero = {
-    case "1u" => Unico
-    case x => Algum(x.toInt)
-  }
 
   def format(urnFrag: String): String = {
     
@@ -86,14 +73,6 @@ object Urn2Rotulo {
     case _ => None
   }
 
-  def formatOrdinal(num: Int): String = LexmlRenderer.renderOrdinal(num)
-
-  def formatRomano(n: Int): String = LexmlRenderer.renderRomano(n)
-
-  def formatAlfa(n: Int): String = LexmlRenderer.renderAlphaSeq(n - 1)
-
-  def formatComplementos(cs: List[Numero]): String = cs.map(c => formatComplemento(c.n+1)).map("-" + _).mkString("")
-  def formatComplemento(n: Int): String = formatAlfa(n - 1).toUpperCase
   
   def lastNth[A](n: Int, l:List[A]): A = l match {
     case tail if (tail.length == n) => tail.head
