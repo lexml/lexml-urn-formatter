@@ -19,6 +19,13 @@ class Uren2NomeTest extends TestCase {
     assertEquals("título II-A", Urn2Nome.format("tit2-1"))
     
     assertEquals("caput do artigo 1º do título II-A", Urn2Nome.format("tit2-1_art1_cpt"))
+    
+    assertEquals("inciso I", Urn2Nome.format("inc_1"))
+    
+    assertEquals("alínea a", Urn2Nome.format("ali_1"))
+    
+    assertEquals("item 1", Urn2Nome.format("ali_1"))
+
 
   }
 
