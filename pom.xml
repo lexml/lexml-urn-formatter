@@ -5,8 +5,8 @@
 	<version>0.0.4-SNAPSHOT</version>
 
 	<properties>
-		<scala.version>2.11</scala.version>
-		<scala.lib.version>${scala.version}.6</scala.lib.version>
+		<scala.version>2.11.11</scala.version>
+		<scala.lib.version>${scala.version}</scala.lib.version>
 		
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 

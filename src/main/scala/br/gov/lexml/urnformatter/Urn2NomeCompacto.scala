@@ -12,9 +12,19 @@ object Urn2NomeCompacto {
       .flatMap(compRe.findFirstMatchIn(_))
       .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_))))
       .flatMap(formatComp(_))
-      .reverse
-    comps match {
-      case ((_, t) :: r) => (t + r.map({ case (g, txt) => "d" + g + " " + txt }).mkString(" ", " ", "")).trim()
+
+    val size = comps.size;
+    val aux = comps.zipWithIndex
+        .filter {
+            case (e, i) => !(e == (",","caput") && i < size - 1)
+            case _ => false
+        }
+        .map {
+            case (e, i) => e
+        }
+    
+    aux match {
+      case ((_, t) :: r) => (t + r.map({ case (g, txt) => g + " " + txt }).mkString("", "", "")).trim()
       case _ => ""
     }
   }
@@ -38,16 +48,16 @@ object Urn2NomeCompacto {
     case ("art", Algum(n) :: cs) =>
       Some(("o", "art. " + formatOrdinal(n) + formatComplementos(cs)))
     case ("cpt", _) =>
-      Some(("o", "caput"))
-    case ("par", Unico :: _) => Some(("o", "parágrafo único"))
+      Some((",", "caput"))
+    case ("par", Unico :: _) => Some((",", "parágrafo único"))
     case ("par", Algum(n) :: cs) =>
-      Some(("o", ", § " + formatOrdinal(n) + formatComplementos(cs)))
+      Some((", §", formatOrdinal(n) + formatComplementos(cs)))
     case ("inc", n :: cs) =>
-      Some(("o", ", " + formatRomano(n.n).toUpperCase + formatComplementos(cs)))
+      Some((",", formatRomano(n.n).toUpperCase + formatComplementos(cs)))
     case ("ali", n :: cs) =>
-      Some(("a", ", " + formatAlfa(n.n).toLowerCase + formatComplementos(cs)))
+      Some((",", formatAlfa(n.n).toLowerCase + formatComplementos(cs)))
     case ("ite", n :: cs) =>
-      Some(("o", ", " + n.n.toString + formatComplementos(cs)))
+      Some((",", n.n.toString + formatComplementos(cs)))
     case (tip, n :: cs) if agregadores contains tip => {
       val (g, t) = agregadores(tip)
       val ntxt = n match {
