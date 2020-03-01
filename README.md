@@ -9,6 +9,29 @@ Referências de implementação em:
 
 A URN dos dispositivos contém informação suficiente para gerar os rótulos de normas. 
 
+
+## Compilação Scala
+
+Scala precisa ser compilado com Java 8.
+
+First run `/usr/libexec/java_home -V` which will output something like the following:
+
+```sh
+% /usr/libexec/java_home -V
+Matching Java Virtual Machines (2):
+    11.0.4, x86_64:	"AdoptOpenJDK 11"	/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home
+    1.8.0_232, x86_64:	"AdoptOpenJDK 8"	/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
+```
+
+Then, use 
+
+```sh
+export JAVA_HOME=/usr/libexec/java_home -v 1.8`
+```
+
+Now when you run `java -version` you will see the version 1.8.
+
+
 ## Rótulo de Artigo
 
 ### artN 
