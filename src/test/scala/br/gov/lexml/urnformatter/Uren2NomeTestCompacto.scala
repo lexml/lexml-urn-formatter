@@ -9,6 +9,9 @@ class Uren2NomeCompactoTest extends TestCase {
     def testLabel_art1_cpt() { assertEquals("art. 1º, caput", Urn2NomeCompacto.format("art1_cpt")) }
     def testLabel_art1_par1u() { assertEquals("art. 1º, parágrafo único", Urn2NomeCompacto.format("art1_par1u")) }
 
+    def testLabel_art1_par1u_ali3() { assertEquals("art. 1º, parágrafo único, III", Urn2NomeCompacto.format("art1_par1u_inc3")) }
+    def testLabel_art1_par1u_ali3_inc2() { assertEquals("art. 1º, parágrafo único, III, b", Urn2NomeCompacto.format("art1_par1u_inc3_ali2")) }
+    
     def testLabel_art2() { assertEquals("art. 2º", Urn2NomeCompacto.format("art2")) }
     def testLabel_art2_cpt() { assertEquals("art. 2º, caput", Urn2NomeCompacto.format("art2_cpt")) }
     def testLabel_art2_cpt_inc1() { assertEquals("art. 2º, I", Urn2NomeCompacto.format("art2_cpt_inc1")) }
