@@ -26,7 +26,7 @@ Matching Java Virtual Machines (2):
 Then, use 
 
 ```sh
-export JAVA_HOME=/usr/libexec/java_home -v 1.8`
+export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
 ```
 
 Now when you run `java -version` you will see the version 1.8.
