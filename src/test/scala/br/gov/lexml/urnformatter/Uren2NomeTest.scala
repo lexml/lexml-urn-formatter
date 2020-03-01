@@ -4,7 +4,7 @@ import junit.framework.Assert.assertEquals
 import junit.framework.TestCase
 
 class Uren2NomeTest extends TestCase {
-  
+    
   def testLabel_art1() {
     assertEquals("artigo 1º", Urn2Nome.format("art1"))
 
@@ -24,7 +24,7 @@ class Uren2NomeTest extends TestCase {
     
     assertEquals("alínea a", Urn2Nome.format("ali_1"))
     
-    assertEquals("item 1", Urn2Nome.format("ali_1"))
+    assertEquals("item 1", Urn2Nome.format("ite_1"))
 
 
   }

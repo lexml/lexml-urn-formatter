@@ -7,12 +7,20 @@ object Urn2Nome {
   type Comp = (String, List[Numero])
 
   def format(urnFrag: String) = {
-    val comps = urnFrag
-      .split("_").toList
-      .flatMap(compRe.findFirstMatchIn(_))
-      .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_))))
-      .flatMap(formatComp(_))
-      .reverse
+    var comps: List[FormattedComp] = List()
+    if (urnFrag.matches("^(inc|ali|ite|art|tit|par)_((?:1u|[0-9-])*)$"))
+        comps = compReN.findFirstMatchIn(urnFrag)
+        .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_))))
+        .flatMap(formatComp(_))
+        .toList
+        .reverse
+    else 
+        comps = urnFrag
+        .split("_").toList
+        .flatMap(compRe.findFirstMatchIn(_))
+        .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_))))
+        .flatMap(formatComp(_))
+        .reverse
     comps match {
       case ((_, t) :: r) => (t + r.map({ case (g, txt) => "d" + g + " " + txt }).mkString(" ", " ", "")).trim()
       case _ => ""
