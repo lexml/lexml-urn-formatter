@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.gov.lexml</groupId>
 	<artifactId>lexml-urn-formatter</artifactId>
-	<version>0.0.5-SNAPSHOT</version>
+	<version>0.0.6</version>
 
 	<properties>
 		<scala.version>2.11.11</scala.version>
@@ -20,7 +20,7 @@
 		<url>https://github.com/lexml/${project.artifactId}</url>
 		<developerConnection>scm:git:https://github.com/lexml/${project.artifactId}.git</developerConnection>
 		<connection>scm:git:https://github.com/lexml/${project.artifactId}.git</connection>
-		<tag>HEAD</tag>
+		<tag>lexml-urn-formatter-0.0.6</tag>
 	</scm>
 
 	<distributionManagement>
