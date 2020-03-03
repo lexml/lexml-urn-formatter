@@ -5,7 +5,7 @@ import junit.framework.TestCase
 
 class Uren2NomeCompactoTest extends TestCase {
   
-    def testLabel_art1() { assertEquals("art. 1º", Urn2NomeCompacto.format("art1")) }
+    /* def testLabel_art1() { assertEquals("art. 1º", Urn2NomeCompacto.format("art1")) }
     def testLabel_art1_cpt() { assertEquals("art. 1º, caput", Urn2NomeCompacto.format("art1_cpt")) }
     def testLabel_art1_par1u() { assertEquals("art. 1º, parágrafo único", Urn2NomeCompacto.format("art1_par1u")) }
 
@@ -255,4 +255,12 @@ class Uren2NomeCompactoTest extends TestCase {
     
     def testLabel_art37() { assertEquals("art. 37", Urn2NomeCompacto.format("art37")) }
     def testLabel_art37_cpt() { assertEquals("art. 37, caput", Urn2NomeCompacto.format("art37_cpt")) }
+
+    def testLabel_tit1() { assertEquals("titulo 1", Urn2NomeCompacto.format("tit1")) }
+
+    def testLabel_tit1_cap1() { assertEquals("capítulo 1, titulo 1", Urn2NomeCompacto.format("tit1_cap1")) }
+
+    def testLabel_tit1_cap1_art2() { assertEquals("capítulo 1, titulo 1, art. 2º", Urn2NomeCompacto.format("tit1_cap1_art2")) } */
+
+    def testLabel_tit1_sec1_3() { assertEquals("tit. 1, secs. 1 a 3", Urn2NomeCompacto.format(List("tit2_sec1", "tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1"))) }
 }
