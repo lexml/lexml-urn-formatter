@@ -27,7 +27,7 @@
 		<repository>
 			<id>bintray-lexml</id>
 			<name>Bintray ${project.artifactId} Repository</name>
-			<url>https://api.bintray.com/maven/lexml/lexml/lexml-urn-formatter/;publish=1</url>
+			<url>https://api.bintray.com/maven/lexml/lexml/lexml-urn-formatter/;publish=1;</url>
 		</repository>
 	</distributionManagement>
 
