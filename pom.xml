@@ -28,8 +28,8 @@
 
 	<distributionManagement>
 		<repository>
-			<id>bintray-lexml-lexml</id>
-			<name>lexml-lexml</name>
+			<id>bintray-lexml</id>
+			<name>Bintray ${project.artifactId} Repository</name>
 			<url>https://api.bintray.com/maven/lexml/lexml/lexml-urn-formatter/;publish=1</url>
 		</repository>
 	</distributionManagement>
@@ -168,6 +168,24 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.2.1</version>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>3.0.0-M1</version>
+				<configuration>
+					<detail>true</detail>
+					<allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+					<tagNameFormat>@{project.version}</tagNameFormat>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
