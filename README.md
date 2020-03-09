@@ -104,3 +104,21 @@ Se a urn for de um bloco de alteração, vale as regras acima de acordo com o ú
 
 - Ex: `art3_cpt_alt1_art4_par2` = "§ 2º"
 - Ex: `art3_cpt_alt1_tit3` =  "TÍTULO III"
+
+## Release
+
+Para publicar uma versão no Bintray, você precisa de acesso ao repositório e configurar o acesso
+no maven. Insira o snippet abaixo - com o correto user_name e api_key - no `~/.m2/settings.xml`.
+
+```xml
+    <server>
+      <id>bintray-connexus-connexus-lexml</id>
+      <username>user_name</username>
+      <password>api_key</password>
+    </server>
+```
+
+Depois execute o comando abaixo para fazer o release do projeto:
+
+    mvn deploy
+
