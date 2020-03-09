@@ -25,3 +25,7 @@ project/plugins/project/
 /.settings/
 /.cache-tests
 /.DS_Store
+
+# IntelliJ Idea
+lexml-urn-formatter.iml
+.idea/
