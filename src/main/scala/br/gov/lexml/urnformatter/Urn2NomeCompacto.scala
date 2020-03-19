@@ -74,14 +74,14 @@ object Urn2NomeCompacto {
   }
 
   def format(urnFrag: String) = {
-    //var i = 0
+    var i = 0
     val comps = urnFrag
       .split("_").toList
       .flatMap(compRe.findFirstMatchIn(_))
       .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_))))
-      /* .map(m => {
+      .map(m => {
           if (agregadores contains m._1) i += 1; m
-      }) */
+      })
       .flatMap(formatComp(_))
 
     val size = comps.size;
@@ -94,8 +94,8 @@ object Urn2NomeCompacto {
             case (e, i) => e
         }
 
-    /* var (left, right) = aux.splitAt(i)
-    aux = left.reverse ++ right */
+    var (left, right) = aux.splitAt(i)
+    aux = left.reverse ++ right
     
     aux match {
       case ((_, t) :: r) => (t + r.map({ case (g, txt) => g + " " + txt }).mkString("", "", "")).trim()
@@ -109,14 +109,17 @@ object Urn2NomeCompacto {
     "prt" -> (",", "parte"),
     "liv" -> (",", "livro"),
     "cap" -> (",", "capítulo"),
-    "tit" -> (",", "titulo"),
+    "tit" -> (",", "título"),
     "sec" -> (",", "seção"),
-    "sub" -> (",", "subseção"))
+    "sub" -> (",", "subseção"),
+    "anx" -> (",", "anexo"))
 
   def formatComp: Comp => Option[FormattedComp] = {
-    case ("alt", _) => Some(("a", "alteração"))
-    case ("omi", _) => Some(("o", "omissis"))
-
+    case ("alt", _) => Some((",", "alteração"))
+    case ("omi", _) => Some((",", "omissis"))
+    case ("cpp", _) => Some((",", "componente principal"))
+    case ("lex", _) => Some((",", "raiz"))
+    
     case ("art", Unico :: _) =>
       Some((",", "art. único"))
     case ("art", Algum(n) :: cs) =>
@@ -136,7 +139,7 @@ object Urn2NomeCompacto {
       val (g, t) = agregadores(tip)
       val ntxt = n match {
         case Unico => "único"
-        case Algum(n) => n
+        case Algum(n) => if(t == "anexo") formatAlfa(n).toLowerCase else formatRomano(n).toUpperCase
       }
       Some((g, t + " " + ntxt + formatComplementos(cs)))
     }
