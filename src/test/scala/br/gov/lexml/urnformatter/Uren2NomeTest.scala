@@ -29,5 +29,22 @@ class Uren2NomeTest extends TestCase {
 
   }
 
+  def testAgrupadores() {
+    assertEquals("título I", Urn2Nome.format("tit1"))
+    assertEquals("capítulo I do título I", Urn2Nome.format("tit1_cap1"))
+    assertEquals("seção II do capítulo I do título I", Urn2Nome.format("tit1_cap1_sec2"))
+    assertEquals("subseção IV da seção II do capítulo I do título I", Urn2Nome.format("tit1_cap1_sec2_sub4"))
+    assertEquals("subseção IV da seção II do capítulo I do título I do livro III", Urn2Nome.format("liv3_tit1_cap1_sec2_sub4"))
+    assertEquals("livro III do anexo a", Urn2Nome.format("anx1_liv3"))
+
+    assertEquals("artigo 1º do componente principal da raiz", Urn2Nome.format("lex_cpp_art1"))
+    assertEquals("artigo 1º do anexo a do componente principal da raiz", Urn2Nome.format("lex_cpp_anx1_art1"))
+    assertEquals("artigo 2º do anexo a do componente principal da raiz", Urn2Nome.format("lex_cpp_anx1_art2"))
+  }
+
+  def testTratarUurn() {
+    assertEquals("artigo 1º", Urn2Nome.format("tit1_art1"))
+  }
+
   
 }
