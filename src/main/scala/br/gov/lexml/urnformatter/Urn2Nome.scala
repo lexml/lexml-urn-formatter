@@ -40,11 +40,15 @@ object Urn2Nome {
   def formatComp: Comp => Option[FormattedComp] = {
     case ("alt", _) => Some(("a", "alteração"))
     case ("omi", _) => Some(("o", "omissis"))
+    case ("cpp", _) => Some(("o", "componente principal"))
+    case ("lex", _) => Some(("a", "raiz"))
 
     case ("art", Unico :: _) =>
       Some(("o", "artigo único"))
     case ("art", Algum(n) :: cs) =>
       Some(("o", "artigo " + formatOrdinal(n) + formatComplementos(cs)))
+    case ("anx", Algum(n) :: cs) =>
+      Some(("o", "anexo " + formatAlfa(n) + formatComplementos(cs)))
     case ("cpt", _) =>
       Some(("o", "caput"))
     case ("par", Unico :: _) => Some(("o", "parágrafo único"))
