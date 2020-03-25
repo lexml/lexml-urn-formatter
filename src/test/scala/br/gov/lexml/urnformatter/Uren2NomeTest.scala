@@ -42,9 +42,5 @@ class Uren2NomeTest extends TestCase {
     assertEquals("artigo 2º do anexo a do componente principal da raiz", Urn2Nome.format("lex_cpp_anx1_art2"))
   }
 
-  def testTratarUurn() {
-    assertEquals("artigo 1º", Urn2Nome.format("tit1_art1"))
-  }
-
   
 }
