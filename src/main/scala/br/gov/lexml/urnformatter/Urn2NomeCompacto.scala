@@ -8,7 +8,7 @@ object Urn2NomeCompacto {
 
   type Comp = (String, List[Numero], List[Numero])
 
-  def format(urnsFrag: List[String]): List[String] = {
+  def format(urnsFrag: List[String]): String = {
     var i = 0
     var indexs: Map[String, Int] = Map[String, Int]()
     var nodes: ListBuffer[String] = ListBuffer[String]()
@@ -32,15 +32,18 @@ object Urn2NomeCompacto {
         }
     })
 
-    nodes.zipWithIndex
+    var elements = nodes.zipWithIndex
         .map(e => (e._1 contains '_', e._2))
         .filter(e => !e._1)
         .map(_._2)
         .toList
-        .flatMap(i => nomear(i, nodes.toList, edges.toList).toList)
+        .map(i => nomear(i, nodes.toList, edges.toList))
+        .filter(_.size > 0)
+
+    (if (elements.size > 1) elements.init.mkString(", ") + " e " else "") + elements.last
   }
 
-  def nomear(i: Int, nodes: List[String], edges: List[ListBuffer[Int]]): ListBuffer[String] = {
+  def nomear(i: Int, nodes: List[String], edges: List[ListBuffer[Int]]): String = {
       val childs = nodes.zipWithIndex.filter(edges(i) contains _._2).sortWith(_._1 < _._1)
         .map(e => {
           var aux = e._1.split("_").toList
@@ -56,7 +59,7 @@ object Urn2NomeCompacto {
       outChilds.foreach(e => {
           var aux = nomear(e._2, nodes, edges)
           if (aux.size > 0) {
-            aux.foreach(result append _) 
+            result append aux
             outChilds = outChilds diff List(e)
           }
       })
@@ -66,19 +69,22 @@ object Urn2NomeCompacto {
       val fchilds = finalChilds
       finalChilds.zipWithIndex.foreach{ case (y, i) => {
         finalChilds = finalChilds diff List(y)
+        var (urn_start, urn_end) = ((if (x >= 0 && x < fchilds.size) fchilds(x)._1 else ""), y._1)
         if (finalChilds.size > 0) {
             var next = finalChilds(0)
             if (x >= 0 && next._2 - y._2 > 1) {
-              result append format((fchilds(x)._1, y._1))
+              result append format((urn_start, urn_end))
               x = -1
-            } else if (next._2 - y._2 > 1) result append format(y._1)
+            } else if (next._2 - y._2 > 1) result append format(urn_end)
             else if (x == -1) x = i
         } else {
-          if (x == -1) result append format(y._1)
-          else result append format(fchilds(x)._1, y._1)
+          if (x == -1) result append format(urn_end)
+          else result append format((urn_start, urn_end))
         }
       }}
-      return result.sortWith(_ < _)
+
+      result = result
+      return (if(result.size > 0) (if (result.size > 1) result.init.mkString(", ") + " e " else "") + result.last else "")
   }
 
   def format(urnsFrag: (String, String)): String = {
@@ -115,7 +121,7 @@ object Urn2NomeCompacto {
     elements = left.reverse ++ right
     
     elements match {
-      case ((_, t) :: r) => (t + r.map({ case (g, txt) => g + " " + txt }).mkString("", "", "")).trim()
+      case ((_, t) :: r) => (t + r.map({ case (g, txt) => (if (g == ",") "" else " ")  + g + " " + txt }).mkString("", "", "")).trim()
       case _ => ""
     }
   }
@@ -145,7 +151,7 @@ object Urn2NomeCompacto {
     aux = left.reverse ++ right
     
     aux match {
-      case ((_, t) :: r) => (t + r.map({ case (g, txt) => g + " " + txt }).mkString("", "", "")).trim()
+      case ((_, t) :: r) => (t + r.map({ case (g, txt) => (if (g == ",") "" else " ") + g + " " + txt }).mkString("", "", "")).trim()
       case _ => ""
     }
   }
@@ -153,13 +159,13 @@ object Urn2NomeCompacto {
   type FormattedComp = (String, String)
 
   val agregadores: Map[String, (String, String)] = Map(
-    "prt" -> (",", "parte"),
-    "liv" -> (",", "livro"),
-    "cap" -> (",", "capítulo"),
-    "tit" -> (",", "título"),
-    "sec" -> (",", "seção"),
-    "sub" -> (",", "subseção"),
-    "anx" -> (",", "anexo"))
+    "prt" -> ("do", "Parte"),
+    "liv" -> ("do", "Livro"),
+    "cap" -> ("do", "Capítulo"),
+    "tit" -> ("do", "Título"),
+    "sec" -> ("da", "Seção"),
+    "sub" -> ("da", "Subseção"),
+    "anx" -> ("do", "Anexo"))
 
   def formatComp: Comp => Option[FormattedComp] = {
     case ("alt", _, _) => Some((",", "alteração"))
@@ -181,9 +187,9 @@ object Urn2NomeCompacto {
             }
             case _ => ""
         }
-        mtxt = " ao " + txt
+        mtxt = " a " + txt
       } 
-      Some((",", "art. " + formatOrdinal(n) + formatComplementos(cs) + mtxt))
+      Some((",", (if (mtxt =="") "art. " else "arts. ") + formatOrdinal(n) + formatComplementos(cs) + mtxt))
     }
     case ("cpt", _, _) =>
       Some((",", "caput"))
@@ -202,7 +208,7 @@ object Urn2NomeCompacto {
         }
         mtxt = " ao " + txt
       } 
-      Some((", §", formatOrdinal(n) + formatComplementos(cs) + mtxt))
+      Some((",", "§ " + formatOrdinal(n) + formatComplementos(cs) + mtxt))
     }
     case ("inc", n :: cs, e) => {
       var mtxt = ""
@@ -256,13 +262,13 @@ object Urn2NomeCompacto {
       val (g, t) = agregadores(tip)
       val ntxt = n match {
         case Unico => "único"
-        case Algum(n) => if(t == "anexo") formatAlfa(n).toLowerCase else formatRomano(n).toUpperCase
+        case Algum(n) => if(t == "Anexo") formatAlfa(n).toUpperCase else formatRomano(n).toUpperCase
       }
       var mtxt = ""
       if (e.size > 0) {
         var m::ts = e
         val txt = m match {
-            case Algum(m) => if(t == "anexo") formatAlfa(m).toLowerCase else formatRomano(m).toUpperCase
+            case Algum(m) => if(t == "Anexo") formatAlfa(m).toUpperCase else formatRomano(m).toUpperCase
             case _ => ""
         }
         mtxt = " a " + txt + formatComplementos(ts)
