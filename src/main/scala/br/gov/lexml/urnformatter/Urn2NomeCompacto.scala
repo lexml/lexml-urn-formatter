@@ -71,6 +71,10 @@ object Urn2NomeCompacto {
       finalChilds.zipWithIndex.foreach{ case (y, i) => {
         finalChilds = finalChilds diff List(y)
         var (urn_start, urn_end) = ((if (x >= 0 && x < fchilds.size) fchilds(x)._1 else ""), y._1)
+        if (urn_start contains "art")
+          urn_start = urn_start.substring(urn_start.indexOf("art"))
+        if (urn_end contains "art")
+          urn_end = urn_end.substring(urn_end.indexOf("art"))
         if (finalChilds.size > 0) {
             var next = finalChilds(0)
             if (x >= 0 && next._2 - y._2 > 1) {
