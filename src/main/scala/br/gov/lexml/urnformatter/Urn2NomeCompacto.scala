@@ -14,6 +14,7 @@ object Urn2NomeCompacto {
     var nodes: ListBuffer[String] = ListBuffer[String]()
     var edges: ListBuffer[ListBuffer[Int]] = ListBuffer[ListBuffer[Int]]()
 
+    /* Montagem da árvore de urns */
     urnsFrag.foreach(e => {
         val frags = e.split("_").toList
         var acc: String = ""
@@ -40,7 +41,7 @@ object Urn2NomeCompacto {
         .map(i => nomear(i, nodes.toList, edges.toList))
         .filter(_.size > 0)
 
-    (if (elements.size > 1) elements.init.mkString(", ") + " e " else "") + elements.last
+    if (elements.size > 0) (if (elements.size > 1) elements.init.mkString(", ") + " e " else "") + elements.last else ""
   }
 
   def nomear(i: Int, nodes: List[String], edges: List[ListBuffer[Int]]): String = {
@@ -82,8 +83,7 @@ object Urn2NomeCompacto {
           else result append format((urn_start, urn_end))
         }
       }}
-
-      result = result
+      
       return (if(result.size > 0) (if (result.size > 1) result.init.mkString(", ") + " e " else "") + result.last else "")
   }
 
