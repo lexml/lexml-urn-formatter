@@ -38,7 +38,10 @@ object Urn2NomeCompacto {
         .filter(e => !e._1)
         .map(_._2)
         .toList
-        .map(i => nomear(i, nodes.toList, edges.toList))
+        .map(i => {
+            if (nodes.zipWithIndex.filter(edges(i) contains _._2).size > 0) nomear(i, nodes.toList, edges.toList)
+            else format(nodes(i))
+        })
         .filter(_.size > 0)
 
     if (elements.size > 0) (if (elements.size > 1) elements.init.mkString(", ") + " e " else "") + elements.last else ""
