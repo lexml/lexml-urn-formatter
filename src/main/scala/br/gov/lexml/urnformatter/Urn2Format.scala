@@ -4,8 +4,9 @@ import br.gov.lexml.parser.pl.output.LexmlRenderer
 
 object Urn2Format {
 
-  val compReN = "^([a-z]+)_((?:1u|[0-9-])*)$".r
-  val compRe = "^([a-z]+)((?:1u|[0-9-])*)$".r
+  val compReN = "^([a-z]+\\*+?|[a-z]+)_((?:1u|[0-9-])*)$".r
+  val compRe = "^([a-z]+\\*+?|[a-z]+)((?:1u|[0-9-])*)$".r
+  val artRe = "^anx((?:1u|[0-9-])*)$".r
 
   abstract sealed class Numero {
     val n: Int

@@ -14,9 +14,19 @@ object Urn2NomeCompacto {
     var nodes: ListBuffer[String] = ListBuffer[String]()
     var edges: ListBuffer[ListBuffer[Int]] = ListBuffer[ListBuffer[Int]]()
 
+    nodes += "root"
+    edges += ListBuffer[Int]()
+    indexs("root") = 0
+
     /* Montagem da árvore de urns */
     urnsFrag.foreach(e => {
-        val frags = e.split("_").toList
+        var frag = e
+        var art_acc = "*"
+        while (frag contains "anx") {
+          frag = frag.replaceFirst("anx", "anz" + art_acc)
+          art_acc += "*"
+        }
+        val frags = frag.split("_").toList
         var acc: String = ""
 
         for(str <- frags) {
@@ -33,18 +43,16 @@ object Urn2NomeCompacto {
         }
     })
 
-    var elements = nodes.zipWithIndex
+    nodes.zipWithIndex
         .map(e => (e._1 contains '_', e._2))
         .filter(e => !e._1)
         .map(_._2)
+        .filter(_ > 0)
         .toList
-        .map(i => {
-            if (nodes.zipWithIndex.filter(edges(i) contains _._2).size > 0) nomear(i, nodes.toList, edges.toList)
-            else format(nodes(i))
-        })
+        .map(edges(0) += _)
         .filter(_.size > 0)
 
-    if (elements.size > 0) (if (elements.size > 1) elements.init.mkString(", ") + " e " else "") + elements.last else ""
+    nomear(0, nodes.toList, edges.toList)
   }
 
   def nomear(i: Int, nodes: List[String], edges: List[ListBuffer[Int]]): String = {
@@ -107,7 +115,7 @@ object Urn2NomeCompacto {
       .flatMap(compRe.findFirstMatchIn(_))
       .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_)), List[Numero]()))
       .map(m => {
-          if (agregadores contains m._1) i += 1; m
+          if (agregadores contains m._1.replace("anz", "anx").replace("*", "")) i += 1; m
       })
       .to[ListBuffer]
 
@@ -133,14 +141,14 @@ object Urn2NomeCompacto {
     }
   }
 
-  def format(urnFrag: String) = {
+  def format(urnFrag: String) = {  
     var i = 0
     val comps = urnFrag
       .split("_").toList
       .flatMap(compRe.findFirstMatchIn(_))
       .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_)), List()))
       .map(m => {
-          if (agregadores contains m._1) i += 1; m
+          if (agregadores contains m._1.replace("anz", "anx").replace("*", "")) i += 1; m
       })
       .flatMap(formatComp(_))
 
@@ -165,14 +173,14 @@ object Urn2NomeCompacto {
 
   type FormattedComp = (String, String)
 
-  val agregadores: Map[String, (String, String)] = Map(
-    "prt" -> ("do", "Parte"),
-    "liv" -> ("do", "Livro"),
-    "cap" -> ("do", "Capítulo"),
-    "tit" -> ("do", "Título"),
-    "sec" -> ("da", "Seção"),
-    "sub" -> ("da", "Subseção"),
-    "anx" -> ("do", "Anexo"))
+  val agregadores: Map[String, (String, String, String)] = Map(
+    "prt" -> ("do", "Parte", "Partes"),
+    "liv" -> ("do", "Livro", "Livros"),
+    "cap" -> ("do", "Capítulo", "Capítulos"),
+    "tit" -> ("do", "Título", "Títulos"),
+    "sec" -> ("da", "Seção", "Seções"),
+    "sub" -> ("da", "Subseção", "Subseções"),
+    "anx" -> ("do", "Anexo", "Anexos"))
 
   def formatComp: Comp => Option[FormattedComp] = {
     case ("alt", _, _) => Some((",", "alteração"))
@@ -182,105 +190,105 @@ object Urn2NomeCompacto {
     
     case ("art", Unico :: _, _) =>
       Some((",", "art. único"))
-    case ("art", Algum(n) :: cs, e) => {
+    case ("art", n :: cs, e) => {
       var mtxt = ""
       if (e.size > 0) {
-        val txt = e match {
-            case m::ts => {
-                m match {
-                    case Algum(m) => formatOrdinal(m) + formatComplementos(ts)
-                    case _ => ""
-                }
-            }
-            case _ => ""
-        }
-        mtxt = " a " + txt
+        var m::ts = e
+        mtxt = " " + ((n, m) match {
+          case (Algum(n), Algum(m)) => if((m - n).abs == 1) "e" else "a"
+          case _ => "a"
+        }) + " " + (m match {
+          case Algum(m) => formatOrdinal(m) + formatComplementos(ts)
+          case _ => ""
+        })
       } 
-      Some((",", (if (mtxt =="") "art. " else "arts. ") + formatOrdinal(n) + formatComplementos(cs) + mtxt))
+      Some((",", (if (mtxt =="") "art. " else "arts. ") + formatOrdinal(n.n) + formatComplementos(cs) + mtxt))
     }
     case ("cpt", _, _) =>
       Some((",", "caput"))
     case ("par", Unico :: _, _) => Some((",", "parágrafo único"))
-    case ("par", Algum(n) :: cs, e) => {
+    case ("par", n :: cs, e) => {
       var mtxt = ""
       if (e.size > 0) {
-        val txt = e match {
-            case m::ts => {
-                m match {
-                    case Algum(m) => formatOrdinal(m) + formatComplementos(ts)
-                    case _ => ""
-                }
-            }
-            case _ => ""
-        }
-        mtxt = " ao " + txt
+        var m::ts = e
+        mtxt = " " + ((n, m) match {
+          case (Algum(n), Algum(m)) => if((m - n).abs == 1) "e" else "ao"
+          case _ => "ao"
+        }) + " " + (m match {
+          case Algum(m) => formatOrdinal(m) + formatComplementos(ts)
+          case _ => ""
+        })
       } 
-      Some((",", "§ " + formatOrdinal(n) + formatComplementos(cs) + mtxt))
+      Some((",", "§ " + formatOrdinal(n.n) + formatComplementos(cs) + mtxt))
     }
     case ("inc", n :: cs, e) => {
       var mtxt = ""
       if (e.size > 0) {
-        val txt = e match {
-            case m::ts => {
-                m match {
-                    case Algum(m) => formatRomano(m).toUpperCase + formatComplementos(ts)
-                    case _ => ""
-                }
-            }
-            case _ => ""
-        }
-        mtxt = " a " + txt
+        var m::ts = e
+        mtxt = " " + ((n, m) match {
+          case (Algum(n), Algum(m)) => if((m - n).abs == 1) "e" else "a"
+          case _ => "a"
+        }) + " " + (m match {
+          case Algum(m) => formatRomano(m).toUpperCase + formatComplementos(ts)
+          case _ => ""
+        })
       } 
       Some((",", formatRomano(n.n).toUpperCase + formatComplementos(cs) + mtxt))
     }
     case ("ali", n :: cs, e) => {
       var mtxt = ""
       if (e.size > 0) {
-        val txt = e match {
-            case m::ts => {
-                m match {
-                    case Algum(m) => formatAlfa(m).toLowerCase + formatComplementos(ts)
-                    case _ => ""
-                }
-            }
-            case _ => ""
-        }
-        mtxt = " a " + txt
+        var m::ts = e
+        mtxt = " " + ((n, m) match {
+          case (Algum(n), Algum(m)) => if((m - n).abs == 1) "e" else "a"
+          case _ => "a"
+        }) + " " + (m match {
+          case Algum(m) => formatAlfa(m).toLowerCase + formatComplementos(ts)
+          case _ => ""
+        })
       } 
       Some((",", formatAlfa(n.n).toLowerCase + formatComplementos(cs) + mtxt))
     }
     case ("ite", n :: cs, e) => {
       var mtxt = ""
       if (e.size > 0) {
-        val txt = e match {
-            case m::ts => {
-                m match {
-                    case Algum(m) => m.toString + formatComplementos(ts)
-                    case _ => ""
-                }
-            }
-            case _ => ""
-        }
-        mtxt = " a " + txt
+        var m::ts = e
+        mtxt = " " + ((n, m) match {
+          case (Algum(n), Algum(m)) => if((m - n).abs == 1) "e" else "a"
+          case _ => "a"
+        }) + " " + (m match {
+          case Algum(m) => m.toString + formatComplementos(ts)
+          case _ => ""
+        })
       } 
       Some((",", n.n.toString + formatComplementos(cs) + mtxt))
     }
-    case (tip, n :: cs, e) if agregadores contains tip => {
-      val (g, t) = agregadores(tip)
-      val ntxt = n match {
-        case Unico => "único"
-        case Algum(n) => if(t == "Anexo") formatAlfa(n).toUpperCase else formatRomano(n).toUpperCase
-      }
+    case (tip, n :: cs, e) if (agregadores contains tip.replace("anz", "anx").replace("*", "")) => {
+      val (g, t, p) = agregadores(tip.replace("anz", "anx").replace("*", ""))
+            
       var mtxt = ""
       if (e.size > 0) {
         var m::ts = e
-        val txt = m match {
-            case Algum(m) => if(t == "Anexo") formatAlfa(m).toUpperCase else formatRomano(m).toUpperCase
+        mtxt = " " + ((n, m) match {
+          case (Algum(n), Algum(m)) => if((m - n).abs == 1) "e" else "a"
+          case _ => "a"
+        }) + " " + (m match {
+            case Algum(m) => if(t == "Anexo") {
+              if (tip == "anz***") formatAlfa(m).toUpperCase
+              else if (tip == "anz**") m.toString
+              else formatRomano(m).toUpperCase
+            } else formatRomano(m).toUpperCase
             case _ => ""
-        }
-        mtxt = " a " + txt + formatComplementos(ts)
+        }) + formatComplementos(ts)
       }
-      Some((g, t + " " + ntxt + formatComplementos(cs) + mtxt))
+      Some((g, (if (e.size > 0) p else t) + " " + (n match {
+        case Unico => "único"
+        case Algum(n) => if(t == "Anexo") {
+            if (tip == "anz***") formatAlfa(n).toUpperCase
+              else if (tip == "anz**") n.toString
+              else formatRomano(n).toUpperCase
+        } else formatRomano(n).toUpperCase
+      }) + formatComplementos(cs) + mtxt))
     }
     case _ => None
   }
