@@ -316,6 +316,10 @@ class Uren2NomeCompactoTest extends TestCase {
     def testLabel_anx10() { assertEquals("Anexo X", Urn2NomeCompacto.format(List("anx10"))) }
     
     def testLabel_anx1011() { assertEquals("Anexos X e XI", Urn2NomeCompacto.format(List("anx10", "anx11"))) }
+
+    def testLabel_anx1012() { assertEquals("Anexos X a XII", Urn2NomeCompacto.format(List("anx10", "anx11", "anx12"))) }
+
+    def testLabel_anx912() { assertEquals("Anexos IX e XII", Urn2NomeCompacto.format(List("anx9", "anx12"))) }
     
     def testLabel_art135711anx1tit() { assertEquals("arts. 1º, 3º, 5º, 7º e 11, art. 11 a 15, art. 17, Título 10 e art. 25 do Anexo I", Urn2NomeCompacto.format(List("tit1_sec1_art1", "tit1_sec1_art3", "tit1_sec1_art5", "art7", "tit50_sec1_art11", "anx1_art11", "anx1_art15", "anx1_art17",  "anx1_tit10", "anx1_art25"))) }    
     
