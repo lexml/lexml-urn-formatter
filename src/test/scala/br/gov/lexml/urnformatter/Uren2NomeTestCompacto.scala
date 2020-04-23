@@ -335,7 +335,7 @@ class Uren2NomeCompactoTest extends TestCase {
 
     def testLabel_anx10() { assertEquals("Anexo X", Urn2NomeCompacto.format(List("anx10"))) }
     
-    def testLabel_anx1011() { assertEquals("Anexos X e XI", Urn2NomeCompacto.format(List("anx10", "anx11"))) } */
+    def testLabel_anx1011() { assertEquals("Anexos X e XI", Urn2NomeCompacto.format(List("anx10", "anx11"))) } 
 
     def testLabel_anx1012() { assertEquals("Anexos X a XII", Urn2NomeCompacto.format(List("anx10", "anx11", "anx12"))) }
 
@@ -349,6 +349,6 @@ class Uren2NomeCompactoTest extends TestCase {
 
     def testLabel_art1_43() { assertEquals("arts. 1º a 21, 28 a 38, 38-A, 39 a 43", Urn2NomeCompacto.format(List("art1", "art2", "art3", "art4", "art5", "art6", "art7", "art8", "art9", "art10", "art11", "art12", "art13", "art14", "art15", "art16", "art17", "art18", "art19", "art20", "art21", "art28", "art29", "art30", "art31", "art32", "art33", "art34", "art35", "art36", "art37", "art38", "art38-A", "art39", "art40", "art41", "art42", "art43"))) }
 
-    def testLabel_art1_3A_6() { assertEquals("arts. 1º a 3º, 3º-A, 4º a 6º", Urn2NomeCompacto.format(List("art1", "art2", "art3", "art3-A", "art4", "art5", "art6"))) }
+    def testLabel_art1_3A_6() { assertEquals("arts. 1º a 3º, 3º-A, 4º a 6º", Urn2NomeCompacto.format(List("art1", "art2", "art3", "art3-A", "art4", "art5", "art6"))) } */
     
 }
