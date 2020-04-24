@@ -63,7 +63,7 @@ object Urn2NomeCompacto {
             .map(m => m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_)))
             .last
 
-          (e._1, e._2, aux(0).n)
+          (e._1, e._2, if (aux.size > 0) aux(0).n else 0)
         })
 
       var outChilds = childs
