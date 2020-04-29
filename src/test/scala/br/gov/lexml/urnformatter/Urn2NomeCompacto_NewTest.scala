@@ -261,14 +261,16 @@ class Urn2NomeCompacto_NewTest  extends TestCase {
   def testAgrupadores() {
     assertEquals("Título I", Urn2NomeCompacto_New.format("tit1"))
     assertEquals("Capítulo I do Título I", Urn2NomeCompacto_New.format("tit1_cap1"))
-    assertEquals("Capítulo I do Título I, art. 2º", Urn2NomeCompacto_New.format("tit1_cap1_art2"))
+    assertEquals("art. 2º", Urn2NomeCompacto_New.format("tit1_cap1_art2"))
+    assertEquals("art. 19, caput", Urn2NomeCompacto_New.format("tit1_cap1_art19_cpt"))
     assertEquals("Seção II do Capítulo I do Título I", Urn2NomeCompacto_New.format("tit1_cap1_sec2"))
     assertEquals("Subseção IV da Seção II do Capítulo I do Título I", Urn2NomeCompacto_New.format("tit1_cap1_sec2_sub4"))
     assertEquals("Subseção IV da Seção II do Capítulo I do Título I do Livro III", Urn2NomeCompacto_New.format("liv3_tit1_cap1_sec2_sub4"))
     assertEquals("Livro III do Anexo I", Urn2NomeCompacto_New.format("anx1_liv3"))
-//
-//    assertEquals("raiz, componente principal, art. 1º", Urn2NomeCompacto_New.format("lex_cpp_art1"))
-//    assertEquals("raiz, componente principal do Anexo I, art. 1º", Urn2NomeCompacto_New.format("lex_cpp_anx1_art1"))
-//    assertEquals("raiz, componente principal do Anexo I, art. 2º", Urn2NomeCompacto_New.format("lex_cpp_anx1_art2"))
+
+    //TODO: Porque artigo as vezes tem º e as vezes não? e pq não falha?
+    assertEquals("art. 1º", Urn2NomeCompacto_New.format("lex_cpp_art1"))
+    assertEquals("art. 1º", Urn2NomeCompacto_New.format("lex_cpp_anx1_art1"))
+    assertEquals("raiz, componente principal do Anexo I", Urn2NomeCompacto_New.format("lex_cpp_anx1"))
   }
 }

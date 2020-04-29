@@ -2,6 +2,8 @@ package br.gov.lexml.urnformatter
 
 import br.gov.lexml.urnformatter.Urn2NomeCompacto_New.Dispositivo
 
+import scala.annotation.tailrec
+
 object Urn2NomeCompacto_New {
 
   import ParteDispositivo._
@@ -36,84 +38,92 @@ object Urn2NomeCompacto_New {
     case SubSecao(numero) => s"Subseção ${formatRomano(numero)}"
     case Livro(numero) => s"Livro ${formatRomano(numero)}"
     case Anexo(numero) => s"Anexo ${formatRomano(numero)}"
+    case Raiz => "raiz"
+    case ComponentPrincipal => "componente principal"
   }
 
   private def nomear(dispositivo: Dispositivo): String = {
 
-    def nomearSimples(dispositivo: Dispositivo): String = {
-      def go(acc: List[String], partes: List[ParteDispositivo]): List[String] = {
-        if (partes.isEmpty) {
-          acc
-        } else {
-          go(acc :+ nomear(partes.head), partes.tail)
-        }
+    def trataArtigo: List[ParteDispositivo] => List[ParteDispositivo] = { partes =>
+      val contemArtigo = partes.exists {
+        case _: Artigo => true
+        case _ => false
       }
 
-      // se tem caput no meio do artigo, remove ele
-      val partes = dispositivo.partes.head match {
-        case _: Artigo =>
-          val contemCaput = dispositivo.partes.dropRight(1).exists {
-            case Caput => true
-            case _ => false
-          }
-          if (contemCaput) {
-            dispositivo.partes.filter {
-              case Caput => false
-              case _ => true
-            }
-          } else {
-            dispositivo.partes
-          }
-        case _ => dispositivo.partes
-      }
-
-      go(Nil, partes).mkString(", ")
-    }
-
-    def nomearAgrupador(dispositivo: Dispositivo): String = {
-
-      def go(acc: String, partes: List[ParteDispositivo]): String = {
-        if (partes.isEmpty) {
-          acc
-        } else {
-          if (acc.isEmpty) {
-            go(nomear(partes.head), partes.tail)
-          } else {
-            partes.head match {
-              case _: Capitulo | _: Titulo | _: Livro | _: Anexo => go(acc + " do " + nomear(partes.head), partes.tail)
-              case _: Secao | _: SubSecao =>go(acc + " da " + nomear(partes.head), partes.tail)
-              case _ => throw new IllegalArgumentException(s"ParteDispositivo ${partes.head} nao tratada")
-            }
-
-          }
-        }
-      }
-
-      val partes = dispositivo.partes.filter {
-          case _:Artigo => false
+      if (contemArtigo) {
+        partes.dropWhile {
+          case _: Artigo => false
           case _ => true
-      }.reverse
-      val res = go("", partes)
-
-      val maybeArtigo = dispositivo.partes.find {
-        case _:Artigo => true
-        case _ => false
-      }
-
-      maybeArtigo match {
-        case Some(a) => res + s", ${nomear(a)}"
-        case None => res
+        }
+      } else {
+        partes
       }
     }
 
-    val ehAgrupador = dispositivo.partes.exists {
-        case _:Capitulo | _:Livro => true
+    // se tem caput antes do final, remove ele
+    def trataCaputNoMeio: List[ParteDispositivo] => List[ParteDispositivo] = { partes =>
+      val contemCaputAntesDoFim = partes.dropRight(1).exists {
+        case Caput => true
         case _ => false
+      }
+      if (contemCaputAntesDoFim) {
+        partes.filter {
+          case Caput => false
+          case _ => true
+        }
+      } else {
+        partes
+      }
     }
-    if (ehAgrupador) nomearAgrupador(dispositivo) else nomearSimples(dispositivo)
+
+    def inverteFragmentosAgrupadores: List[ParteDispositivo] => List[ParteDispositivo] = { partes =>
+      var posInicio = Option.empty[Int]
+      var posFim = Option.empty[Int]
+      partes.zipWithIndex.foreach { case (parte, idx) =>
+          if (parte.isInstanceOf[DispositivoAgrupador]) {
+            if (posInicio.isEmpty && posFim.isEmpty) {
+              posInicio = Option(idx)
+            }
+          } else {
+            if (posInicio.isDefined && posFim.isEmpty) {
+              posFim = Option(idx)
+            }
+          }
+      }
+      if (posInicio.isDefined && posFim.isEmpty) {
+        posFim = Option(partes.length - 1)
+      }
+      (posInicio, posFim) match {
+        case (Some(ini), Some(fim)) =>
+          partes.take(ini) ++ partes.slice(ini, fim + 1).reverse ++ partes.slice(fim + 1, partes.length)
+        case _ => partes
+      }
+    }
+
+    @tailrec
+    def criarString(acc: String, partes: List[ParteDispositivo]): String = {
+      if (partes.isEmpty) {
+        acc
+      } else {
+        partes.head match {
+          case h: DispositivoAgrupador if acc.isEmpty => criarString(nomear(h), partes.tail)
+          case h: DispositivoAgrupador => criarString(s"${acc} ${h.conector} ${nomear(h)}", partes.tail)
+          case h if acc.isEmpty => criarString(nomear(h), partes.tail)
+          case h => criarString(s"${acc}, ${nomear(h)}", partes.tail)
+        }
+      }
+    }
+
+    val partes = (trataArtigo andThen trataCaputNoMeio andThen inverteFragmentosAgrupadores)(dispositivo.partes)
+    println(s"==>Partes: ${partes}")
+    criarString("", partes)
   }
 
   object ParteDispositivo {
+
+    trait DispositivoAgrupador {
+      val conector: String
+    }
 
     sealed abstract class ParteDispositivo
 
@@ -131,17 +141,36 @@ object Urn2NomeCompacto_New {
 
     case class Item(numero: Int) extends ParteDispositivo
 
-    case class Titulo(numero: Int) extends ParteDispositivo
+    //TODO: Parte
+    //TODO: Alt
 
-    case class Capitulo(numero: Int) extends ParteDispositivo
+    case class Titulo(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
+      override val conector: String = "do"
+    }
 
-    case class Secao(numero: Int) extends ParteDispositivo
+    case class Capitulo(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
+      override val conector: String = "do"
+    }
 
-    case class SubSecao(numero: Int) extends ParteDispositivo
+    case class Secao(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
+      override val conector: String = "da"
+    }
 
-    case class Livro(numero: Int) extends ParteDispositivo
+    case class SubSecao(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
+      override val conector: String = "da"
+    }
 
-    case class Anexo(numero: Int) extends ParteDispositivo
+    case class Livro(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
+      override val conector: String = "do"
+    }
+
+    case class Anexo(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
+      override val conector: String = "do"
+    }
+
+    case object Raiz extends ParteDispositivo
+
+    case object ComponentPrincipal extends ParteDispositivo
 
     //TODO: Option/Either/Try
     def parse(parteUrn: String): ParteDispositivo = parteUrn.take(3) match {
@@ -158,6 +187,8 @@ object Urn2NomeCompacto_New {
       case "sub" => SubSecao(parteUrn.substring(3).toInt)
       case "liv" => Livro(parteUrn.substring(3).toInt)
       case "anx" => Anexo(parteUrn.substring(3).toInt)
+      case "lex" => Raiz
+      case "cpp" => ComponentPrincipal
       case _ => throw new IllegalArgumentException(s"Invalid urn: $parteUrn")
     }
 
