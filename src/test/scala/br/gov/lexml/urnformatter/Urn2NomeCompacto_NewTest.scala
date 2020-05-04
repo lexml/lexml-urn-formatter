@@ -270,7 +270,12 @@ class Urn2NomeCompacto_NewTest  extends TestCase {
 
     //TODO: Porque artigo as vezes tem º e as vezes não? e pq não falha?
     assertEquals("art. 1º", Urn2NomeCompacto_New.format("lex_cpp_art1"))
-    assertEquals("art. 1º", Urn2NomeCompacto_New.format("lex_cpp_anx1_art1"))
+    assertEquals("art. 1º do Anexo I", Urn2NomeCompacto_New.format("lex_anx1_art1"))
+    assertEquals("raiz do Título I do Anexo I", Urn2NomeCompacto_New.format("lex_anx1_tit1")) //TODO: Esta correto?
+    assertEquals("art. 1º do Anexo I", Urn2NomeCompacto_New.format("anx1_tit1_art1"))
     assertEquals("raiz, componente principal do Anexo I", Urn2NomeCompacto_New.format("lex_cpp_anx1"))
   }
+
+
+
 }

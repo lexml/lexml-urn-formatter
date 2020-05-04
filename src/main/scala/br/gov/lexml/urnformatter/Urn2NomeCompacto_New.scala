@@ -1,7 +1,5 @@
 package br.gov.lexml.urnformatter
 
-import br.gov.lexml.urnformatter.Urn2NomeCompacto_New.Dispositivo
-
 import scala.annotation.tailrec
 
 object Urn2NomeCompacto_New {
@@ -9,16 +7,11 @@ object Urn2NomeCompacto_New {
   import ParteDispositivo._
   import Urn2Format._
 
-
-  //  def format(urnsFrag: List[String]): String = {
-  //    ???
-  //  }
-
   //TODO: Urn
   //TODO: Fragmento ao inves de Parte
   //TODO: Precisa recursao nos nomear
-  def format(urnFrag: String): String = {
-    val partes = urnFrag.split("_").map(ParteDispositivo.parse).toList
+  def format(urn: String): String = {
+    val partes = urn.split("_").map(ParteDispositivo.parse).toList
     val dispositivo = Dispositivo(partes)
     println(s"==> $dispositivo")
     nomear(dispositivo)
@@ -45,16 +38,16 @@ object Urn2NomeCompacto_New {
   private def nomear(dispositivo: Dispositivo): String = {
 
     def trataArtigo: List[ParteDispositivo] => List[ParteDispositivo] = { partes =>
-      val contemArtigo = partes.exists {
+      val posArtigo = partes.indexWhere {
         case _: Artigo => true
         case _ => false
       }
 
-      if (contemArtigo) {
-        partes.dropWhile {
-          case _: Artigo => false
-          case _ => true
-        }
+      if (posArtigo != -1) {
+        partes.filter {
+          case _: Artigo | _:Anexo => true
+          case _ => false
+        } ++ partes.takeRight(partes.size - posArtigo - 1)
       } else {
         partes
       }

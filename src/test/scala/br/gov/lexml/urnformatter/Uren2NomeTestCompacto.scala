@@ -301,6 +301,8 @@ class Uren2NomeCompactoTest extends TestCase {
  
     def testLabel_sec10_11() { assertEquals("Seções X e XI", Urn2NomeCompacto.format(List("sec10", "sec11"))) }
 
+    def testLabel_sec9_12() { assertEquals("Seções IX e XII", Urn2NomeCompacto.format(List("sec9", "sec12"))) }
+
     def testLabel_sec10_12() { assertEquals("Seções X a XII", Urn2NomeCompacto.format(List("sec10", "sec11", "sec12"))) }
 
     def testLabel_ite1_2() { assertEquals("1 e 2", Urn2NomeCompacto.format(List("ite1", "ite2"))) }
