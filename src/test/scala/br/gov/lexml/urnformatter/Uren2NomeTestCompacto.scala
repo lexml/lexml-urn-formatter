@@ -301,6 +301,8 @@ class Uren2NomeCompactoTest extends TestCase {
  
     def testLabel_sec10_11() { assertEquals("Seções X e XI", Urn2NomeCompacto.format(List("sec10", "sec11"))) }
 
+    def testLabel_sec9_12_15() { assertEquals("Seções IX, XII e Seção XV", Urn2NomeCompacto.format(List("sec9", "sec12", "sec15"))) }
+
     def testLabel_sec9_12() { assertEquals("Seções IX e XII", Urn2NomeCompacto.format(List("sec9", "sec12"))) }
 
     def testLabel_sec10_12() { assertEquals("Seções X a XII", Urn2NomeCompacto.format(List("sec10", "sec11", "sec12"))) }
@@ -341,8 +343,6 @@ class Uren2NomeCompactoTest extends TestCase {
     def testLabel_anx10() { assertEquals("Anexo X", Urn2NomeCompacto.format(List("anx10"))) }
     
     def testLabel_art45() { assertEquals("arts. 4º e 5º", Urn2NomeCompacto.format(List("art4", "art5"))) }
-
-      
     
     def testLabel_art1_3I_5() { assertEquals("art. 1º, art. 3º, I e art. 5º", Urn2NomeCompacto.format(List("art1", "art3_cpt_inc1", "art5"))) }
 
