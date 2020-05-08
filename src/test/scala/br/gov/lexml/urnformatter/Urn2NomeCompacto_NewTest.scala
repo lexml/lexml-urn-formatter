@@ -312,11 +312,17 @@ class Urn2NomeCompacto_NewTest  extends TestCase {
     assertEquals("art. 9º, I a IV", Urn2NomeCompacto_New.format(List("art9_inc1", "art9_inc2", "art9_inc3", "art9_inc4")))
   }
 
-//  def testLabel_anx1_art25_27_anx1_art30() { assertEquals("arts. 25 a 27 do Anexo I e art. 30 do Anexo I", Urn2NomeCompacto_New.format(List("anx1_art25", "anx1_art26", "anx1_art27", "anx1_art30"))) }
-//
-//  def testLabel_anx2_tit1_sec1_anx1_art25_27_anx1_art30_anx3_tit5() { assertEquals("arts. 25 a 27 e art. 30, Seção I do Título I do Anexo II e Título V do Anexo III", Urn2NomeCompacto_New.format(List("anx2_tit1_sec1", "anx1_art25", "anx1_art26", "anx1_art27", "anx1_art30", "anx3_tit5"))) }
+  def testLabel_anx1_art25_27_anx1_art30() {
+    assertEquals("arts. 25 a 27 do Anexo I e art. 30 do Anexo I", Urn2NomeCompacto_New.format(List("anx1_art25", "anx1_art26", "anx1_art27", "anx1_art30")))
+  }
 
-  def testLabel_empty_list() { assertEquals("", Urn2NomeCompacto_New.format(List())) }
+  def testLabel_anx2_tit1_sec1_anx1_art25_27_anx1_art30_anx3_tit5() {
+    assertEquals("Seção I do Título I do Anexo II e arts. 25 a 27 do Anexo I e art. 30 do Anexo I e Título V do Anexo III", Urn2NomeCompacto_New.format(List("anx2_tit1_sec1", "anx1_art25", "anx1_art26", "anx1_art27", "anx1_art30", "anx3_tit5")))
+  }
+
+  def testLabel_empty_list() {
+    assertEquals("", Urn2NomeCompacto_New.format(List()))
+  }
 
   def testLabel_anx1_tit1_sec1_2() {
     assertEquals("Seções I e II do Título I do Anexo I", Urn2NomeCompacto_New.format(List("anx1_tit1_sec1", "anx1_tit1_sec2")))
@@ -338,71 +344,126 @@ class Urn2NomeCompacto_NewTest  extends TestCase {
     assertEquals("Seções IX e XII e Seção XV", Urn2NomeCompacto_New.format(List("sec9", "sec12", "sec15")))
   }
 
-//  def testLabel_ite1_2() { assertEquals("1 e 2", Urn2NomeCompacto_New.format(List("ite1", "ite2"))) }
-//
-//  def testLabel_ite1_3() { assertEquals("1 a 3", Urn2NomeCompacto_New.format(List("ite1", "ite2", "ite3"))) }
-//
-//  def testLabel_ali1_2() { assertEquals("a e b", Urn2NomeCompacto_New.format(List("ali1", "ali2"))) }
-//
-//  def testLabel_ali1_3() { assertEquals("a a c", Urn2NomeCompacto_New.format(List("ali1", "ali2", "ali3"))) }
-//
-//  def testLabel_inc1_2() { assertEquals("I e II", Urn2NomeCompacto_New.format(List("inc1", "inc2"))) }
-//
-//  def testLabel_inc1_3() { assertEquals("I a III", Urn2NomeCompacto_New.format(List("inc1", "inc2", "inc3"))) }
-//
-//  def testLabel_par1_2() { assertEquals("§ 1º e 2º", Urn2NomeCompacto_New.format(List("par1", "par2"))) }
-//
-//  def testLabel_par1_3() { assertEquals("§ 1º ao 3º", Urn2NomeCompacto_New.format(List("par1", "par2", "par3"))) }
-//
-//  def testLabel_art1_2() { assertEquals("arts. 1º e 2º", Urn2NomeCompacto_New.format(List("art1", "art2"))) }
-//
-//  def testLabel_art1_3() { assertEquals("arts. 1º a 3º", Urn2NomeCompacto_New.format(List("art1", "art2", "art3"))) }
-//
-//  def testLabel_anx25_anx3_anx1() { assertEquals("Anexo A do Anexo 3 do Anexo XXV", Urn2NomeCompacto_New.format(List("anx25_anx3_anx1"))) }
-//
-//
-//  def testLabel_art69_par1u() { assertEquals("art. 69, parágrafo único", Urn2NomeCompacto_New.format(List("art69_par1u"))) }
-//
-//  def testLabel_art69_cpt_inc3() { assertEquals("art. 69, III", Urn2NomeCompacto_New.format(List("art69_cpt_inc3"))) }
-//
-//  def testLabel_art69_cpt_inc3_par1u() { assertEquals("art. 69, III e art. 69, parágrafo único", Urn2NomeCompacto_New.format(List("art69_cpt_inc3", "art69_par1u"))) }
-//
-//  def testLabel_anx1011() { assertEquals("Anexos X e XI", Urn2NomeCompacto_New.format(List("anx10", "anx11"))) }
-//
-//  def testLabel_anx1012() { assertEquals("Anexos X a XII", Urn2NomeCompacto_New.format(List("anx10", "anx11", "anx12"))) }
-//
-//  def testLabel_anx10() { assertEquals("Anexo X", Urn2NomeCompacto_New.format(List("anx10"))) }
-//
-//  def testLabel_art45() { assertEquals("arts. 4º e 5º", Urn2NomeCompacto_New.format(List("art4", "art5"))) }
-//
-//  def testLabel_art1_3I_5() { assertEquals("art. 1º, art. 3º, I e art. 5º", Urn2NomeCompacto_New.format(List("art1", "art3_cpt_inc1", "art5"))) }
-//
-//  def testLabel_art1_3I_579_1() { assertEquals("art. 1º, art. 3º, I e arts. 5º, 7º e 9º", Urn2NomeCompacto_New.format(List("art1", "art3_cpt_inc1", "art5", "art7", "art9"))) }
-//
-//  def testLabel_art1_3I_579_2() { assertEquals("art. 1º, art. 3º, parágrafo único e arts. 5º, 7º e 9º", Urn2NomeCompacto_New.format(List("art1", "art3_par1u", "art5", "art7", "art9"))) }
-//
-//  def testLabel_art1_3I_579_3() { assertEquals("art. 1º, art. 3º, § 1º e arts. 5º, 7º e 9º", Urn2NomeCompacto_New.format(List("art1", "art3_par1", "art5", "art7", "art9"))) }
-//
-//  def testLabel_art1_3I_579_4() { assertEquals("art. 1º, art. 3º, §§ 1º, 3º e 5º e arts. 5º, 7º e 9º", Urn2NomeCompacto_New.format(List("art1", "art3_par1", "art3_par3", "art3_par5", "art5", "art7", "art9"))) }
-//
-//
-//  def testLabel_art1_43() { assertEquals("arts. 1º a 21, 28 a 38, 38-A, 39 a 43", Urn2NomeCompacto_New.format(List("art1", "art2", "art3", "art4", "art5", "art6", "art7", "art8", "art9", "art10", "art11", "art12", "art13", "art14", "art15", "art16", "art17", "art18", "art19", "art20", "art21", "art28", "art29", "art30", "art31", "art32", "art33", "art34", "art35", "art36", "art37", "art38", "art38-A", "art39", "art40", "art41", "art42", "art43"))) }
-//
-//
-//  def testLabel_art135() { assertEquals("arts. 1º, 3º e 5º", Urn2NomeCompacto_New.format(List("tit1_sec1_art1", "tit1_sec1_art3", "tit1_sec1_art5"))) }
-//
-//  def testLabel_art1357() { assertEquals("arts. 1º, 3º, 5º e 7º", Urn2NomeCompacto_New.format(List("tit1_sec1_art1", "tit1_sec1_art3", "tit1_sec1_art5", "art7"))) }
-//
-//  def testLabel_art135711() { assertEquals("arts. 1º, 3º, 5º, 7º e 11", Urn2NomeCompacto_New.format(List("tit1_sec1_art1", "tit1_sec1_art3", "tit1_sec1_art5", "art7", "tit50_sec1_art11"))) }
+  def testLabel_ite1_2() {
+    assertEquals("1 e 2", Urn2NomeCompacto_New.format(List("ite1", "ite2")))
+  }
+
+  def testLabel_ite1_3() {
+    assertEquals("1 a 3", Urn2NomeCompacto_New.format(List("ite1", "ite2", "ite3")))
+  }
+
+  def testLabel_ali1_2() {
+    assertEquals("a e b", Urn2NomeCompacto_New.format(List("ali1", "ali2")))
+  }
+
+  def testLabel_ali1_3() {
+    assertEquals("a a c", Urn2NomeCompacto_New.format(List("ali1", "ali2", "ali3")))
+  }
+
+  def testLabel_inc1_2() {
+    assertEquals("I e II", Urn2NomeCompacto_New.format(List("inc1", "inc2")))
+  }
+
+  def testLabel_inc1_3() {
+    assertEquals("I a III", Urn2NomeCompacto_New.format(List("inc1", "inc2", "inc3")))
+  }
+
+  def testLabel_par1_2() {
+    assertEquals("§ 1º e 2º", Urn2NomeCompacto_New.format(List("par1", "par2")))
+  }
+
+  def testLabel_par1_3() {
+    assertEquals("§ 1º ao 3º", Urn2NomeCompacto_New.format(List("par1", "par2", "par3")))
+  }
+
+  def testLabel_art1_2() {
+    assertEquals("arts. 1º e 2º", Urn2NomeCompacto_New.format(List("art1", "art2")))
+  }
+
+  def testLabel_art1_3() {
+    assertEquals("arts. 1º a 3º", Urn2NomeCompacto_New.format(List("art1", "art2", "art3")))
+  }
+
+  def testLabel_anx25_anx3_anx1() {
+    assertEquals("Anexo A do Anexo 3 do Anexo XXV", Urn2NomeCompacto_New.format(List("anx25_anx3_anx1")))
+  }
+
+  def testLabel_art69_par1u() {
+    assertEquals("art. 69, parágrafo único", Urn2NomeCompacto_New.format(List("art69_par1u")))
+  }
+
+  def testLabel_art69_cpt_inc3() {
+    assertEquals("art. 69, III", Urn2NomeCompacto_New.format(List("art69_cpt_inc3")))
+  }
+
+  def testLabel_art69_cpt_inc3_par1u() {
+    assertEquals("art. 69, III e art. 69, parágrafo único", Urn2NomeCompacto_New.format(List("art69_cpt_inc3", "art69_par1u")))
+  }
+
+  def testLabel_anx1011() {
+    assertEquals("Anexos X e XI", Urn2NomeCompacto_New.format(List("anx10", "anx11")))
+  }
+
+  def testLabel_anx1012() {
+    assertEquals("Anexos X a XII", Urn2NomeCompacto_New.format(List("anx10", "anx11", "anx12")))
+  }
+
+  def testLabel_anx10() {
+    assertEquals("Anexo X", Urn2NomeCompacto_New.format(List("anx10")))
+  }
+
+  def testLabel_art45() {
+    assertEquals("arts. 4º e 5º", Urn2NomeCompacto_New.format(List("art4", "art5")))
+  }
+
+  def testLabel_art1_3I_5() {
+    assertEquals("art. 1º e art. 3º, I e art. 5º", Urn2NomeCompacto_New.format(List("art1", "art3_cpt_inc1", "art5")))
+  }
+
+  def testLabel_art1_3I_579_1() {
+    assertEquals("art. 1º e art. 3º, I e arts. 5º e 7º e art. 9º", Urn2NomeCompacto_New.format(List("art1", "art3_cpt_inc1", "art5", "art7", "art9")))
+  }
+
+  def testLabel_art1_3I_579_2() {
+    assertEquals("art. 1º e art. 3º, parágrafo único e arts. 5º e 7º e art. 9º", Urn2NomeCompacto_New.format(List("art1", "art3_par1u", "art5", "art7", "art9")))
+  }
+
+  def testLabel_art1_3I_579_3() {
+    assertEquals("art. 1º e art. 3º, § 1º e arts. 5º e 7º e art. 9º", Urn2NomeCompacto_New.format(List("art1", "art3_par1", "art5", "art7", "art9")))
+  }
+
+  def testLabel_art1_3I_579_4() {
+    assertEquals("art. 1º e art. 3º, §§ 1º e 3º e art. 3º, § 5º e arts. 5º e 7º e art. 9º", Urn2NomeCompacto_New.format(List("art1", "art3_par1", "art3_par3", "art3_par5", "art5", "art7", "art9")))
+  }
+
+  def testLabel_art1_43() {
+    assertEquals("arts. 1º a 21, 28 a 38, 38-A, 39 a 43", Urn2NomeCompacto_New.format(List("art1", "art2", "art3", "art4", "art5", "art6", "art7", "art8", "art9", "art10", "art11", "art12", "art13", "art14", "art15", "art16", "art17", "art18", "art19", "art20", "art21", "art28", "art29", "art30", "art31", "art32", "art33", "art34", "art35", "art36", "art37", "art38", "art38-A", "art39", "art40", "art41", "art42", "art43")))
+  }
+
+  def testLabel_art135() {
+    assertEquals("arts. 1º e 3º e art. 5º", Urn2NomeCompacto_New.format(List("tit1_sec1_art1", "tit1_sec1_art3", "tit1_sec1_art5")))
+  }
+
+  def testLabel_art1357() {
+    assertEquals("arts. 1º e 3º e arts. 5º e 7º", Urn2NomeCompacto_New.format(List("tit1_sec1_art1", "tit1_sec1_art3", "tit1_sec1_art5", "art7")))
+  }
+
+//  def testLabel_art135711() {
+//    assertEquals("arts. 1º e 3º e arts. 5º e 7º e art. 11", Urn2NomeCompacto_New.format(List("tit1_sec1_art1", "tit1_sec1_art3", "tit1_sec1_art5", "art7", "tit50_sec1_art11")))
+//  }
 //
 //  def testLabel_art135711anx1() { assertEquals("arts. 1º, 3º, 5º, 7º e 11 e art. 11 do Anexo I", Urn2NomeCompacto_New.format(List("tit1_sec1_art1", "tit1_sec1_art3", "tit1_sec1_art5", "art7", "tit50_sec1_art11", "anx1_art11"))) }
 //
 //
-//  def testLabel_anx912() { assertEquals("Anexos IX e XII", Urn2NomeCompacto_New.format(List("anx9", "anx12"))) }
+  def testLabel_anx912() {
+  assertEquals("Anexos IX e XII", Urn2NomeCompacto_New.format(List("anx9", "anx12")))
+}
 //
 //  def testLabel_art135711anx1tit() { assertEquals("arts. 1º, 3º, 5º, 7º e 11, art. 11 a 15, art. 17, Título 10 e art. 25 do Anexo I", Urn2NomeCompacto_New.format(List("tit1_sec1_art1", "tit1_sec1_art3", "tit1_sec1_art5", "art7", "tit50_sec1_art11", "anx1_art11", "anx1_art15", "anx1_art17",  "anx1_tit10", "anx1_art25"))) }
 //
-//  def testLabel_tit1013() { assertEquals("Títulos X e XIII", Urn2NomeCompacto_New.format(List("tit10", "tit13"))) }
-//
+  def testLabel_tit1013() {
+  assertEquals("Títulos X e XIII", Urn2NomeCompacto_New.format(List("tit10", "tit13")))
+}
+
 //  def testLabel_art1_3A_6() { assertEquals("arts. 1º a 3º, 3º-A, 4º a 6º", Urn2NomeCompacto_New.format(List("art1", "art2", "art3", "art3-A", "art4", "art5", "art6"))) }
 }

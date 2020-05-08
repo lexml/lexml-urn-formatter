@@ -38,8 +38,8 @@ object Urn2NomeComposto {
 //
     case object Caput extends ParteDispositivoGrupo
 
-//    case object ParagrafoUnico extends ParteDispositivoGrupo
-//
+    case object ParagrafoUnico extends ParteDispositivoGrupo
+
     case class Inciso(numeracao: Numeracao) extends ParteDispositivoGrupo
 
     case class Alinea(numeracao: Numeracao) extends ParteDispositivoGrupo
@@ -88,22 +88,12 @@ object Urn2NomeComposto {
     }
   }
 
-  private def nomearRomano(ns: Numeros): String = {
+  private def nomearNumeros(ns: Numeros, fmt: Int => String): String = {
     def go(acc: String, ns: List[Int]): String = ns match {
       case Nil => acc
-      case e1 :: e2 :: e3 :: _ => go(acc ++ s"${formatRomano(e1)}, ", ns.tail)
-      case e1 :: e2 ::  _ => go(acc ++ s"${formatRomano(e1)} e ", ns.tail)
-      case e1 :: _ => go(acc ++ s"${formatRomano(e1)}", ns.tail)
-    }
-    go("", ns.list)
-  }
-
-  private def nomearOrdinal(ns: Numeros): String = {
-    def go(acc: String, ns: List[Int]): String = ns match {
-      case Nil => acc
-      case e1 :: e2 :: e3 :: _ => go(acc ++ s"${formatOrdinal(e1)}, ", ns.tail)
-      case e1 :: e2 ::  _ => go(acc ++ s"${formatOrdinal(e1)} e ", ns.tail)
-      case e1 :: _ => go(acc ++ s"${formatOrdinal(e1)}", ns.tail)
+      case e1 :: e2 :: e3 :: _ => go(acc ++ s"${fmt(e1)}, ", ns.tail)
+      case e1 :: e2 ::  _ => go(acc ++ s"${fmt(e1)} e ", ns.tail)
+      case e1 :: _ => go(acc ++ s"${fmt(e1)}", ns.tail)
     }
     go("", ns.list)
   }
@@ -111,13 +101,43 @@ object Urn2NomeComposto {
   private def nomearSecao(n: Numeracao): String = n match {
     case NumUnico(i) => s"Seção ${formatRomano(i)}"
     case IntervaloContinuo(i, f) => s"Seções ${formatRomano(i)} ${conectorIntervalo(i, f)} ${formatRomano(f)}"
-    case ns: Numeros => s"Seções ${nomearRomano(ns)}"
+    case ns: Numeros => s"Seções ${nomearNumeros(ns, formatRomano)}"
   }
 
   private def nomearArtigo(n: Numeracao): String = n match {
     case NumUnico(n) => s"art. ${formatOrdinal(n)}"
     case IntervaloContinuo(i, f) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
-    case ns: Numeros => s"arts. ${nomearOrdinal(ns)}"
+    case ns: Numeros => s"arts. ${nomearNumeros(ns, formatOrdinal)}"
+  }
+
+  private def nomearAlinea(n: Numeracao): String = n match {
+    case NumUnico(n) => formatAlfa(n)
+    case IntervaloContinuo(i, f) => s"${formatAlfa(i)} ${conectorIntervalo(i, f)} ${formatAlfa(f)}"
+    case ns: Numeros => nomearNumeros(ns, formatAlfa)
+  }
+
+  private def nomearInciso(n: Numeracao): String = n match {
+    case NumUnico(n) => formatRomano(n)
+    case IntervaloContinuo(i, f) => s"${formatRomano(i)} ${conectorIntervalo(i, f)} ${formatRomano(f)}"
+    case ns: Numeros => nomearNumeros(ns, formatRomano)
+  }
+
+  private def nomearParagrafo(n: Numeracao): String = n match {
+    case NumUnico(n) => s"§ ${formatOrdinal(n)}"
+    case IntervaloContinuo(i, f) => s"§§ ${formatOrdinal(i)} ao ${formatOrdinal(f)}"
+    case ns: Numeros => s"§§ ${nomearNumeros(ns, formatOrdinal)}"
+  }
+
+  private def nomearAnexo(n: Numeracao): String = n match {
+    case NumUnico(n) => s"Anexo ${formatRomano(n)}"
+    case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
+    case ns: Numeros => s"Anexos ${nomearNumeros(ns, formatRomano)}"
+  }
+
+  private def nomearTitulo(n: Numeracao): String = n match {
+    // case NumUnico(n) => s"Título ${formatRomano(n)}"
+    // case IntervaloContinuo(i, f) => s"Título ${formatRomano(i)} a ${formatRomano(f)}"
+    case ns: Numeros => s"Títulos ${nomearNumeros(ns, formatRomano)}"
   }
 
   private def nomear(parteDispositivo: ParteDispositivoGrupo): String = parteDispositivo match {
@@ -125,14 +145,16 @@ object Urn2NomeComposto {
 //    case Artigo(IntervaloContinuo(i, f)) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
 //    case Artigo(IntervaloContinuo(i, f)) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
     case a: Artigo => nomearArtigo(a.numeracao)
+    case a: Anexo => nomearAnexo(a.numeracao)
 //    case Caput => "caput"
-//    case ParagrafoUnico => "parágrafo único"
-    case Inciso(NumUnico(n)) => formatRomano(n)
-    case Inciso(IntervaloContinuo(i, f)) => s"${formatRomano(i)} ${conectorIntervalo(i, f)} ${formatRomano(f)}"
-    case Alinea(NumUnico(n)) => formatAlfa(n)
-    case Paragrafo(IntervaloContinuo(i, f)) => s"§ ${formatOrdinal(i)} ao ${formatOrdinal(f)}" //TODO:
-    case Paragrafo(NumUnico(n)) => s"§ ${formatOrdinal(n)}"
+    case ParagrafoUnico => "parágrafo único"
+    case i: Inciso => nomearInciso(i.numeracao)
+    case a: Alinea => nomearAlinea(a.numeracao)
+//    case Paragrafo(IntervaloContinuo(i, f)) => s"§ ${formatOrdinal(i)} ao ${formatOrdinal(f)}" //TODO:
+//    case Paragrafo(NumUnico(n)) => s"§ ${formatOrdinal(n)}"
+    case p: Paragrafo => nomearParagrafo(p.numeracao)
     case Item(IntervaloContinuo(i, f)) => s"$i ${conectorIntervalo(i, f)} $f"
+    case Item(n: Numeros) => nomearNumeros(n, _.toString)
     //case Titulo(IntervaloContinuo(i, f)) => s"Título ${formatRomano(numero)}"
     case Titulo(NumUnico(n)) => s"Título ${formatRomano(n)}"
     //case Capitulo(numero) => s"Capítulo ${formatRomano(numero)}"
@@ -140,6 +162,7 @@ object Urn2NomeComposto {
 //    case SubSecao(numero) => s"Subseção ${formatRomano(numero)}"
 //    case Livro(numero) => s"Livro ${formatRomano(numero)}"
     case Anexo(NumUnico(n)) => s"Anexo ${formatRomano(n)}"
+    case t: Titulo => nomearTitulo(t.numeracao)
 //    case Raiz => "raiz"
 //    case ComponentPrincipal => "componente principal"
   }
@@ -168,17 +191,22 @@ object Urn2NomeComposto {
       val urnsGrupo = urns.map { urn =>
         val partesStr = urn.split("_")
         val ultimaParte = partesStr.last
-        val dispPrincipal = ultimaParte.take(3)
+        val dispPrincipal = if (!ultimaParte.contains("par1u")) ultimaParte.take(3) else "par1u"
         val inicioComum = partesStr.dropRight(1) :+ dispPrincipal
-        val numero = (if (ultimaParte.size == 3) Option.empty else Option(ultimaParte.drop(3).toInt))
-            .getOrElse(throw new IllegalArgumentException("Disp sem numero nao suportado ainda"))
+        val numero = (if (ultimaParte.size == 3) {
+          Option.empty
+        } else if (!ultimaParte.contains("par1u")) {
+          Option(ultimaParte.drop(3).toInt)
+        } else {
+          Option(1)
+          }).getOrElse(throw new IllegalArgumentException("Disp sem numero nao suportado ainda"))
         UrnGrupo(inicioComum.mkString("_"), dispPrincipal, numero)
       }
 
       def parse(parteUrn: String): ParteDispositivoGrupo = parteUrn.take(3) match {
         case "art" => Artigo(NumUnico(parteUrn.substring(3).toInt))
-        // case "cpt" => Caput
-        // case "par" if parteUrn.endsWith("u") => ParagrafoUnico
+        case "cpt" => Caput
+        case "par" if parteUrn.contains("par1u") => ParagrafoUnico
         case "par" => Paragrafo(NumUnico(parteUrn.substring(3).toInt))
         case "inc" => Inciso(NumUnico(parteUrn.substring(3).toInt))
         case "ali" => Alinea(NumUnico(parteUrn.substring(3).toInt))
@@ -333,58 +361,6 @@ object Urn2NomeComposto {
       println("==> grupos")
       println(acc.foreach(println))
 
-//      val grupos: List[Grupo] = if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3")) {
-//        assert(acc == List(Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 3))))
-//        List(Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 3)))
-//      } else if (urns == List("tit1_sec1_art1_par1", "tit1_sec1_art1_par2", "tit1_sec1_art1_par3")) {
-//        List(Grupo("par", List(Artigo(NumUnico(1))), IntervaloContinuo(1, 3)))
-//      } else if (urns == List("tit1_sec1_art1_par1_inc1", "tit1_sec1_art1_par1_inc2", "tit1_sec1_art1_par1_inc3")) {
-//        List(Grupo("inc", List(Artigo(NumUnico(1)), Paragrafo(NumUnico(1))), IntervaloContinuo(1, 3)))
-//      } else if (urns == List("tit1_sec1_art1_par1_inc1_ali1_ite1", "tit1_sec1_art1_par1_inc1_ali1_ite2", "tit1_sec1_art1_par1_inc1_ali1_ite3")) {
-//        List(Grupo("ite", List(Artigo(NumUnico(1)), Paragrafo(NumUnico(1)), Inciso(NumUnico(1)), Alinea(NumUnico(1))), IntervaloContinuo(1, 3)))
-//      } else if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4")) {
-//        List(
-//          Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 3)),
-//          Grupo("art", List(), IntervaloContinuo(1, 2)),
-//          Grupo("art", List(), NumUnico(4))
-//        )
-//      } else if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec2_art1")) {
-//        List(
-//          Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 2)),
-//          Grupo("art", List(), NumUnico(1))
-//        )
-//      } else if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4", "tit1_sec3_art6", "tit1_sec3_art7", "tit1_sec3_art8", "tit1_sec3_art9", "tit1_sec3_art10")) {
-//        List(
-//          Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 2)),
-//          Grupo("art", List(), IntervaloContinuo(1, 2)),
-//          Grupo("art", List(), NumUnico(4)),
-//          Grupo("art", List(), IntervaloContinuo(6, 10))
-//        )
-//      } else if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4", "tit1_sec3_art6", "tit1_sec3_art7", "tit1_sec3_art8", "tit1_sec3_art9", "tit1_sec3_art10", "tit2_sec1", "tit2_sec2", "tit2_sec3", "tit2_sec4", "tit2_sec5")) {
-//        List(
-//          Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 2)),
-//          Grupo("art", List(), IntervaloContinuo(1, 2)),
-//          Grupo("art", List(), NumUnico(4)),
-//          Grupo("art", List(), IntervaloContinuo(6, 10)),
-//          Grupo("sec", List(Titulo(NumUnico(2))), IntervaloContinuo(1, 5))
-//        )
-//      } else if (urns == List("art9_inc1", "art9_inc2", "art9_inc3", "art9_inc4")) {
-//        List(Grupo("inc", List(Artigo(NumUnico(9))), IntervaloContinuo(1, 4)))
-//      } else if (urns == List("anx1_tit1_sec1", "anx1_tit1_sec2")) {
-//        List(Grupo("sec", List(Titulo(NumUnico(1)), Anexo(NumUnico(1))), IntervaloContinuo(1, 2)))
-//      } else if (urns == List("sec10", "sec11")) {
-//        List(Grupo("sec", List(), IntervaloContinuo(10, 11)))
-//      } else if (urns == List("sec9", "sec12")) {
-//        List(Grupo("sec", List(), Numeros(List(9, 12))))
-//      } else if (urns == List("sec10", "sec11", "sec12")) {
-//        List(Grupo("sec", List(), IntervaloContinuo(10, 12)))
-//      } else if (urns == List("sec9", "sec12", "sec15")) {
-//        List(Grupo("sec", List(), Numeros(List(9, 12, 15))))
-//      } else {
-//        ???
-//      }
-
-
       nomearGrupos(acc.toList)
     }
   }
@@ -413,7 +389,23 @@ object Urn2NomeComposto {
     } else if (grupo.dispPrincipal == "ite") {
         nomear(grupo.partesComum :+ Item(grupo.numeracao))
     } else if (grupo.dispPrincipal == "art") {
-      nomear(grupo.partesComum :+ Artigo(grupo.numeracao))
+      val contemAnexo = grupo.partesComum.exists {
+        case _: Anexo => true
+        case _ => false
+      }
+      if (contemAnexo) {
+        nomear(Artigo(grupo.numeracao) :: grupo.partesComum)
+      } else {
+        nomear(grupo.partesComum :+ Artigo(grupo.numeracao))
+      }
+    } else if (grupo.dispPrincipal == "tit") {
+      nomear(Titulo(grupo.numeracao) :: grupo.partesComum)
+    } else if (grupo.dispPrincipal == "ali") {
+      nomear(grupo.partesComum :+ Alinea(grupo.numeracao))
+    } else if (grupo.dispPrincipal == "par1u") {
+      nomear(grupo.partesComum :+ ParagrafoUnico)
+    } else if (grupo.dispPrincipal == "anx") {
+      nomear(Anexo(grupo.numeracao) :: grupo.partesComum)
     } else {
       ???
     }
@@ -436,7 +428,11 @@ object Urn2NomeCompacto_New {
   }
 
   def format(urns: List[String]): String = {
-    Urn2NomeComposto.format(urns)
+    if (urns.size == 1) {
+      Urn2NomeCompacto_New.format(urns.head)
+    } else {
+      Urn2NomeComposto.format(urns)
+    }
   }
 
   private def nomearParaUrn(parteDispositivo: ParteDispositivo): String = parteDispositivo match {
