@@ -1,7 +1,10 @@
 package br.gov.lexml.urnformatter
 
 import scala.annotation.tailrec
+import scala.collection.mutable.ListBuffer
 
+//TODO: Teste/verificar se algo quebra com dispositivo com numero grande (1000 e pk por exemplo)
+//TODO: teste com multiplo que tem caput
 object Urn2NomeComposto {
 
   import Urn2Format._
@@ -19,6 +22,8 @@ object Urn2NomeComposto {
 
   }
 
+  case class UrnGrupo(inicioComum: String, disPrincipal: String, numero: Int)
+
   case class Grupo(dispPrincipal: String, partesComum: List[ParteDispositivoGrupo], numeracao: Numeracao)
 
   object ParteDispositivoGrupo {
@@ -31,7 +36,7 @@ object Urn2NomeComposto {
 
     case class Artigo(numeracao: Numeracao) extends ParteDispositivoGrupo
 //
-//    case object Caput extends ParteDispositivoGrupo
+    case object Caput extends ParteDispositivoGrupo
 
 //    case object ParagrafoUnico extends ParteDispositivoGrupo
 //
@@ -83,7 +88,7 @@ object Urn2NomeComposto {
     }
   }
 
-  private def nomear(ns: Numeros): String = {
+  private def nomearRomano(ns: Numeros): String = {
     def go(acc: String, ns: List[Int]): String = ns match {
       case Nil => acc
       case e1 :: e2 :: e3 :: _ => go(acc ++ s"${formatRomano(e1)}, ", ns.tail)
@@ -93,15 +98,33 @@ object Urn2NomeComposto {
     go("", ns.list)
   }
 
+  private def nomearOrdinal(ns: Numeros): String = {
+    def go(acc: String, ns: List[Int]): String = ns match {
+      case Nil => acc
+      case e1 :: e2 :: e3 :: _ => go(acc ++ s"${formatOrdinal(e1)}, ", ns.tail)
+      case e1 :: e2 ::  _ => go(acc ++ s"${formatOrdinal(e1)} e ", ns.tail)
+      case e1 :: _ => go(acc ++ s"${formatOrdinal(e1)}", ns.tail)
+    }
+    go("", ns.list)
+  }
+
   private def nomearSecao(n: Numeracao): String = n match {
-    case NumUnico(u) => ???
+    case NumUnico(i) => s"Seção ${formatRomano(i)}"
     case IntervaloContinuo(i, f) => s"Seções ${formatRomano(i)} ${conectorIntervalo(i, f)} ${formatRomano(f)}"
-    case ns: Numeros => s"Seções ${nomear(ns)}"
+    case ns: Numeros => s"Seções ${nomearRomano(ns)}"
+  }
+
+  private def nomearArtigo(n: Numeracao): String = n match {
+    case NumUnico(n) => s"art. ${formatOrdinal(n)}"
+    case IntervaloContinuo(i, f) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
+    case ns: Numeros => s"arts. ${nomearOrdinal(ns)}"
   }
 
   private def nomear(parteDispositivo: ParteDispositivoGrupo): String = parteDispositivo match {
-    case Artigo(NumUnico(n)) => s"art. ${formatOrdinal(n)}"
-    case Artigo(IntervaloContinuo(i, f)) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
+//    case Artigo(NumUnico(n)) => s"art. ${formatOrdinal(n)}"
+//    case Artigo(IntervaloContinuo(i, f)) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
+//    case Artigo(IntervaloContinuo(i, f)) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
+    case a: Artigo => nomearArtigo(a.numeracao)
 //    case Caput => "caput"
 //    case ParagrafoUnico => "parágrafo único"
     case Inciso(NumUnico(n)) => formatRomano(n)
@@ -142,76 +165,231 @@ object Urn2NomeComposto {
     if (urns.isEmpty) {
       ""
     } else {
-      //    val urnsGrupo = urns.map { urn =>
-      //      val dispositivo = Dispositivo(urn)
-      //      val partes = (trataArtigo andThen trataCaputNoMeio)(dispositivo.partes)
-      //      val urnTratada = partes.map(nomearParaUrn).mkString("_")
-      //      val inicioComum = urnTratada.dropRight(2) //TODO: Look for substrings in the code. Can we use drop/take instead?
-      //      val numero = urnTratada.takeRight(1)
-      //      UrnGrupo(inicioComum, numero.toInt)
-      //    }
-      //    println(urnsGrupo)
-
-      val grupos: List[Grupo] = if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3")) {
-        List(Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 3)))
-      } else if (urns == List("tit1_sec1_art1_par1", "tit1_sec1_art1_par2", "tit1_sec1_art1_par3")) {
-        List(Grupo("par", List(Artigo(NumUnico(1))), IntervaloContinuo(1, 3)))
-      } else if (urns == List("tit1_sec1_art1_par1_inc1", "tit1_sec1_art1_par1_inc2", "tit1_sec1_art1_par1_inc3")) {
-        List(Grupo("inc", List(Artigo(NumUnico(1)), Paragrafo(NumUnico(1))), IntervaloContinuo(1, 3)))
-      } else if (urns == List("tit1_sec1_art1_par1_inc1_ali1_ite1", "tit1_sec1_art1_par1_inc1_ali1_ite2", "tit1_sec1_art1_par1_inc1_ali1_ite3")) {
-        List(Grupo("ite", List(Artigo(NumUnico(1)), Paragrafo(NumUnico(1)), Inciso(NumUnico(1)), Alinea(NumUnico(1))), IntervaloContinuo(1, 3)))
-      } else if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4")) {
-        List(
-          Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 3)),
-          Grupo("art", List(), IntervaloContinuo(1, 2)),
-          Grupo("art", List(), NumUnico(4))
-        )
-      } else if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4", "tit1_sec3_art6", "tit1_sec3_art7", "tit1_sec3_art8", "tit1_sec3_art9", "tit1_sec3_art10")) {
-        List(
-          Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 2)),
-          Grupo("art", List(), IntervaloContinuo(1, 2)),
-          Grupo("art", List(), NumUnico(4)),
-          Grupo("art", List(), IntervaloContinuo(6, 10))
-        )
-      } else if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4", "tit1_sec3_art6", "tit1_sec3_art7", "tit1_sec3_art8", "tit1_sec3_art9", "tit1_sec3_art10", "tit2_sec1", "tit2_sec2", "tit2_sec3", "tit2_sec4", "tit2_sec5")) {
-        List(
-          Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 2)),
-          Grupo("art", List(), IntervaloContinuo(1, 2)),
-          Grupo("art", List(), NumUnico(4)),
-          Grupo("art", List(), IntervaloContinuo(6, 10)),
-          Grupo("sec", List(Titulo(NumUnico(2))), IntervaloContinuo(1, 5))
-        )
-      } else if (urns == List("art9_inc1", "art9_inc2", "art9_inc3", "art9_inc4")) {
-        List(Grupo("inc", List(Artigo(NumUnico(9))), IntervaloContinuo(1, 4)))
-      } else if (urns == List("anx1_tit1_sec1", "anx1_tit1_sec2")) {
-        List(Grupo("sec", List(Titulo(NumUnico(1)), Anexo(NumUnico(1))), IntervaloContinuo(1, 2)))
-      } else if (urns == List("sec10", "sec11")) {
-        List(Grupo("sec", List(), IntervaloContinuo(10, 11)))
-      } else if (urns == List("sec9", "sec12")) {
-        List(Grupo("sec", List(), Numeros(List(9, 12))))
-      } else if (urns == List("sec10", "sec11", "sec12")) {
-        List(Grupo("sec", List(), IntervaloContinuo(10, 12)))
-      } else if (urns == List("sec9", "sec12", "sec15")) {
-        List(Grupo("sec", List(), Numeros(List(9, 12, 15))))
-      } else {
-        ???
+      val urnsGrupo = urns.map { urn =>
+        val partesStr = urn.split("_")
+        val ultimaParte = partesStr.last
+        val dispPrincipal = ultimaParte.take(3)
+        val inicioComum = partesStr.dropRight(1) :+ dispPrincipal
+        val numero = (if (ultimaParte.size == 3) Option.empty else Option(ultimaParte.drop(3).toInt))
+            .getOrElse(throw new IllegalArgumentException("Disp sem numero nao suportado ainda"))
+        UrnGrupo(inicioComum.mkString("_"), dispPrincipal, numero)
       }
 
+      def parse(parteUrn: String): ParteDispositivoGrupo = parteUrn.take(3) match {
+        case "art" => Artigo(NumUnico(parteUrn.substring(3).toInt))
+        // case "cpt" => Caput
+        // case "par" if parteUrn.endsWith("u") => ParagrafoUnico
+        case "par" => Paragrafo(NumUnico(parteUrn.substring(3).toInt))
+        case "inc" => Inciso(NumUnico(parteUrn.substring(3).toInt))
+        case "ali" => Alinea(NumUnico(parteUrn.substring(3).toInt))
+        case "ite" => Item(NumUnico(parteUrn.substring(3).toInt))
+        case "tit" => Titulo(NumUnico(parteUrn.substring(3).toInt))
+        // case "cap" => Capitulo(parteUrn.substring(3).toInt)
+        case "sec" => Secao(NumUnico(parteUrn.substring(3).toInt))
+        // case "sub" => SubSecao(parteUrn.substring(3).toInt)
+        // case "liv" => Livro(parteUrn.substring(3).toInt)
+        case "anx" => Anexo(NumUnico(parteUrn.substring(3).toInt))
+//        case "lex" => Raiz
+//        case "cpp" => ComponentPrincipal
+        case _ => throw new IllegalArgumentException(s"Invalid urn: $parteUrn")
+      }
 
-      nomearGrupos(grupos)
+      def trataArtigo: List[ParteDispositivoGrupo] => List[ParteDispositivoGrupo] = { partes =>
+        val posArtigo = partes.indexWhere {
+          case _: Artigo => true
+          case _ => false
+        }
+
+        if (posArtigo != -1) {
+          partes.filter {
+            case _: Artigo | _:Anexo => true
+            case _ => false
+          } ++ partes.takeRight(partes.size - posArtigo - 1)
+        } else {
+          partes
+        }
+      }
+
+      // se tem caput antes do final, remove ele
+      def trataCaputNoMeio: List[ParteDispositivoGrupo] => List[ParteDispositivoGrupo] = { partes =>
+        val contemCaputAntesDoFim = partes.dropRight(1).exists {
+          case Caput => true
+          case _ => false
+        }
+        if (contemCaputAntesDoFim) {
+          partes.filter {
+            case Caput => false
+            case _ => true
+          }
+        } else {
+          partes
+        }
+      }
+
+      def removeUltimo: List[ParteDispositivoGrupo] => List[ParteDispositivoGrupo] = { partes =>
+        partes.dropRight(1)
+      }
+
+      def inverteFragmentosAgrupadores: List[ParteDispositivoGrupo] => List[ParteDispositivoGrupo] = { partes =>
+        var posInicio = Option.empty[Int]
+        var posFim = Option.empty[Int]
+        partes.zipWithIndex.foreach { case (parte, idx) =>
+          if (parte.isInstanceOf[DispositivoAgrupador]) {
+            if (posInicio.isEmpty && posFim.isEmpty) {
+              posInicio = Option(idx)
+            }
+          } else {
+            if (posInicio.isDefined && posFim.isEmpty) {
+              posFim = Option(idx)
+            }
+          }
+        }
+        if (posInicio.isDefined && posFim.isEmpty) {
+          posFim = Option(partes.length - 1)
+        }
+        (posInicio, posFim) match {
+          case (Some(ini), Some(fim)) =>
+            partes.take(ini) ++ partes.slice(ini, fim + 1).reverse ++ partes.slice(fim + 1, partes.length)
+          case _ => partes
+        }
+      }
+
+      def criaGrupos(iniComum: String, dispPrincipal: String, numeros: List[Int]): List[Grupo] = {
+        println(s"==> iniComum: $iniComum")
+        println(s"==> dispPrincipal: $dispPrincipal")
+        println(s"==> numeros: $numeros")
+        var currNumeros = new ListBuffer[Int]()
+        var numeracoes = new ListBuffer[Numeracao]()
+        numeros.zipWithIndex.foreach { case (n, idx) =>
+          if (currNumeros.isEmpty) {
+            currNumeros += n
+          } else {
+            if (currNumeros.last + 1 == n) {
+              currNumeros += n
+            } else {
+              if (currNumeros.size == 1) {
+                  if (idx + 1 < numeros.size) {
+                    if (n + 1 == numeros(idx + 1)) {
+                      numeracoes += NumUnico(currNumeros.head)
+                      currNumeros = new ListBuffer[Int]()
+                      currNumeros += n
+                    } else {
+                      currNumeros += n
+                    }
+                } else {
+                  currNumeros += n
+                }
+              } else if (currNumeros.size == 2) {
+                numeracoes += Numeros(currNumeros.toList)
+                currNumeros = new ListBuffer[Int]()
+                currNumeros += n
+              } else {
+                numeracoes += IntervaloContinuo(currNumeros.head, currNumeros.last)
+                currNumeros = new ListBuffer[Int]()
+                currNumeros += n
+              }
+            }
+          }
+        }
+        if (currNumeros.nonEmpty) {
+          if (currNumeros.size == 1) {
+            numeracoes += NumUnico(currNumeros.head)
+          } else if (currNumeros.size == 2) {
+            numeracoes += Numeros(currNumeros.toList)
+          } else {
+            numeracoes += IntervaloContinuo(currNumeros.head, currNumeros.last)
+          }
+        }
+
+        val partesComum = (iniComum.concat("1")).split("_").map(parse)
+        val partes = (trataArtigo andThen trataCaputNoMeio andThen removeUltimo andThen inverteFragmentosAgrupadores)(partesComum.toList)
+
+        numeracoes.map { num =>
+          Grupo(dispPrincipal, partes, num)
+        }.toList
+      }
+
+      var iniComum = urnsGrupo.head.inicioComum
+      var dispPrincipal = urnsGrupo.head.disPrincipal
+      var numeros = new ListBuffer[Int]()
+      numeros += urnsGrupo.head.numero
+      val acc = new ListBuffer[Grupo]()
+
+      urnsGrupo.tail.foreach { ug =>
+        if (ug.inicioComum.equals(iniComum)) {
+          numeros += ug.numero
+        } else {
+          acc ++= criaGrupos(iniComum, dispPrincipal, numeros.toList)
+          numeros = new ListBuffer[Int]()
+          numeros += ug.numero
+          iniComum = ug.inicioComum
+          dispPrincipal = ug.disPrincipal
+        }
+      }
+      acc ++= criaGrupos(iniComum, dispPrincipal, numeros.toList)
+
+      println("==> urnsGrupo")
+      println(urnsGrupo)
+      println("==> grupos")
+      println(acc.foreach(println))
+
+//      val grupos: List[Grupo] = if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3")) {
+//        assert(acc == List(Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 3))))
+//        List(Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 3)))
+//      } else if (urns == List("tit1_sec1_art1_par1", "tit1_sec1_art1_par2", "tit1_sec1_art1_par3")) {
+//        List(Grupo("par", List(Artigo(NumUnico(1))), IntervaloContinuo(1, 3)))
+//      } else if (urns == List("tit1_sec1_art1_par1_inc1", "tit1_sec1_art1_par1_inc2", "tit1_sec1_art1_par1_inc3")) {
+//        List(Grupo("inc", List(Artigo(NumUnico(1)), Paragrafo(NumUnico(1))), IntervaloContinuo(1, 3)))
+//      } else if (urns == List("tit1_sec1_art1_par1_inc1_ali1_ite1", "tit1_sec1_art1_par1_inc1_ali1_ite2", "tit1_sec1_art1_par1_inc1_ali1_ite3")) {
+//        List(Grupo("ite", List(Artigo(NumUnico(1)), Paragrafo(NumUnico(1)), Inciso(NumUnico(1)), Alinea(NumUnico(1))), IntervaloContinuo(1, 3)))
+//      } else if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4")) {
+//        List(
+//          Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 3)),
+//          Grupo("art", List(), IntervaloContinuo(1, 2)),
+//          Grupo("art", List(), NumUnico(4))
+//        )
+//      } else if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec2_art1")) {
+//        List(
+//          Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 2)),
+//          Grupo("art", List(), NumUnico(1))
+//        )
+//      } else if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4", "tit1_sec3_art6", "tit1_sec3_art7", "tit1_sec3_art8", "tit1_sec3_art9", "tit1_sec3_art10")) {
+//        List(
+//          Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 2)),
+//          Grupo("art", List(), IntervaloContinuo(1, 2)),
+//          Grupo("art", List(), NumUnico(4)),
+//          Grupo("art", List(), IntervaloContinuo(6, 10))
+//        )
+//      } else if (urns == List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4", "tit1_sec3_art6", "tit1_sec3_art7", "tit1_sec3_art8", "tit1_sec3_art9", "tit1_sec3_art10", "tit2_sec1", "tit2_sec2", "tit2_sec3", "tit2_sec4", "tit2_sec5")) {
+//        List(
+//          Grupo("sec", List(Titulo(NumUnico(1))), IntervaloContinuo(1, 2)),
+//          Grupo("art", List(), IntervaloContinuo(1, 2)),
+//          Grupo("art", List(), NumUnico(4)),
+//          Grupo("art", List(), IntervaloContinuo(6, 10)),
+//          Grupo("sec", List(Titulo(NumUnico(2))), IntervaloContinuo(1, 5))
+//        )
+//      } else if (urns == List("art9_inc1", "art9_inc2", "art9_inc3", "art9_inc4")) {
+//        List(Grupo("inc", List(Artigo(NumUnico(9))), IntervaloContinuo(1, 4)))
+//      } else if (urns == List("anx1_tit1_sec1", "anx1_tit1_sec2")) {
+//        List(Grupo("sec", List(Titulo(NumUnico(1)), Anexo(NumUnico(1))), IntervaloContinuo(1, 2)))
+//      } else if (urns == List("sec10", "sec11")) {
+//        List(Grupo("sec", List(), IntervaloContinuo(10, 11)))
+//      } else if (urns == List("sec9", "sec12")) {
+//        List(Grupo("sec", List(), Numeros(List(9, 12))))
+//      } else if (urns == List("sec10", "sec11", "sec12")) {
+//        List(Grupo("sec", List(), IntervaloContinuo(10, 12)))
+//      } else if (urns == List("sec9", "sec12", "sec15")) {
+//        List(Grupo("sec", List(), Numeros(List(9, 12, 15))))
+//      } else {
+//        ???
+//      }
+
+
+      nomearGrupos(acc.toList)
     }
   }
 
   private def nomearGrupos(grupos: List[Grupo]): String = {
-//    @tailrec
-//    def go(acc: String, grupos: List[Grupo]): String = grupos match {
-//      case Nil => acc
-//      case g1 :: g2 :: g3 :: _ if (g1.dispPrincipal == g2.dispPrincipal && g2.dispPrincipal == g3.dispPrincipal) =>
-//        go(acc ++ s", ${nomear(g1)}", grupos.tail)
-//      case g1 :: _ => go(acc ++ s" e ${nomear(g1)}", grupos.tail)
-//
-//    }
-    // go(nomear(grupos.head), grupos.tail)
       @tailrec
       def go(acc: String, grupos: List[Grupo]): String = grupos match {
         case Nil => acc
