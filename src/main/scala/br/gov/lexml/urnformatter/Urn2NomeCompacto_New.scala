@@ -75,29 +75,28 @@ object Urn2NomeComposto {
       override val conector: String = "do"
     }
 
-    //    case class Capitulo(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
-    //      override val conector: String = "do"
-    //    }
+    case class Capitulo(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
+      override val conector: String = "do"
+    }
 
     case class Secao(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
       override val conector: String = "da"
     }
 
-    //    case class SubSecao(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
-    //      override val conector: String = "da"
-    //    }
-    //
-    //    case class Livro(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
-    //      override val conector: String = "do"
-    //    }
-    //
+        case class SubSecao(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
+          override val conector: String = "da"
+        }
+
+        case class Livro(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
+          override val conector: String = "do"
+        }
     case class Anexo(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
       override val conector: String = "do"
     }
 
-    //    case object Raiz extends ParteDispositivoGrupo
-    //
-    //    case object ComponentPrincipal extends ParteDispositivoGrupo
+        case object Raiz extends ParteDispositivoGrupo
+
+        case object ComponentPrincipal extends ParteDispositivoGrupo
   }
 
   private def conectorIntervalo(ini: Int, fim: Int): String = {
@@ -165,31 +164,38 @@ object Urn2NomeComposto {
     case ns: Numeros => s"Títulos ${nomearNumeros(ns, formatRomano)}"
   }
 
+  private def nomearItem(n: Numeracao): String = n match {
+    case NumUnico(Numero.IntNumero(n)) => n.toString
+    case IntervaloContinuo(i, f) => s"$i ${conectorIntervalo(i, f)} $f"
+    case ns: Numeros => nomearNumeros(ns, _.toString)
+  }
+
   private def nomear(parteDispositivo: ParteDispositivoGrupo): String = parteDispositivo match {
     //    case Artigo(NumUnico(n)) => s"art. ${formatOrdinal(n)}"
     //    case Artigo(IntervaloContinuo(i, f)) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
     //    case Artigo(IntervaloContinuo(i, f)) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
     case a: Artigo => nomearArtigo(a.numeracao)
     case a: Anexo => nomearAnexo(a.numeracao)
-    //    case Caput => "caput"
+    case Caput => "caput"
     case ParagrafoUnico => "parágrafo único"
     case i: Inciso => nomearInciso(i.numeracao)
     case a: Alinea => nomearAlinea(a.numeracao)
     //    case Paragrafo(IntervaloContinuo(i, f)) => s"§ ${formatOrdinal(i)} ao ${formatOrdinal(f)}" //TODO:
     //    case Paragrafo(NumUnico(n)) => s"§ ${formatOrdinal(n)}"
     case p: Paragrafo => nomearParagrafo(p.numeracao)
-    case Item(IntervaloContinuo(i, f)) => s"$i ${conectorIntervalo(i, f)} $f"
-    case Item(n: Numeros) => nomearNumeros(n, _.toString)
+    case i: Item => nomearItem(i.numeracao)
+//    case Item(IntervaloContinuo(i, f)) => s"$i ${conectorIntervalo(i, f)} $f"
+//    case Item(n: Numeros) => nomearNumeros(n, _.toString)
     //case Titulo(IntervaloContinuo(i, f)) => s"Título ${formatRomano(numero)}"
     case Titulo(NumUnico(Numero.IntNumero(n))) => s"Título ${formatRomano(n)}"
-    //case Capitulo(numero) => s"Capítulo ${formatRomano(numero)}"
+    case Capitulo(NumUnico(Numero.IntNumero(n))) => s"Capítulo ${formatRomano(n)}"
     case s: Secao => nomearSecao(s.numeracao)
-    //    case SubSecao(numero) => s"Subseção ${formatRomano(numero)}"
-    //    case Livro(numero) => s"Livro ${formatRomano(numero)}"
+    case SubSecao(NumUnico(Numero.IntNumero(n))) => s"Subseção ${formatRomano(n)}"
+    case Livro(NumUnico(Numero.IntNumero(n))) => s"Livro ${formatRomano(n)}"
     case Anexo(NumUnico(Numero.IntNumero(n))) => s"Anexo ${formatRomano(n)}"
     case t: Titulo => nomearTitulo(t.numeracao)
-    //    case Raiz => "raiz"
-    //    case ComponentPrincipal => "componente principal"
+        case Raiz => "raiz"
+        case ComponentPrincipal => "componente principal"
   }
 
   private def nomear(partes: List[ParteDispositivoGrupo]): String = {
@@ -242,13 +248,13 @@ object Urn2NomeComposto {
         case "ali" => Alinea(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
         case "ite" => Item(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
         case "tit" => Titulo(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
-        // case "cap" => Capitulo(parteUrn.substring(3).toInt)
+        case "cap" => Capitulo(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
         case "sec" => Secao(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
-        // case "sub" => SubSecao(parteUrn.substring(3).toInt)
-        // case "liv" => Livro(parteUrn.substring(3).toInt)
+        case "sub" => SubSecao(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
+        case "liv" => Livro(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
         case "anx" => Anexo(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
-        //        case "lex" => Raiz
-        //        case "cpp" => ComponentPrincipal
+                case "lex" => Raiz
+                case "cpp" => ComponentPrincipal
         case _ => throw new IllegalArgumentException(s"Invalid urn: $parteUrn")
       }
 
@@ -457,6 +463,14 @@ object Urn2NomeComposto {
       nomear(grupo.partesComum :+ ParagrafoUnico)
     } else if (grupo.dispPrincipal == "anx") {
       nomear(Anexo(grupo.numeracao) :: grupo.partesComum)
+    } else if (grupo.dispPrincipal == "cpt") {
+      nomear(grupo.partesComum :+ Caput)
+    } else if (grupo.dispPrincipal == "cap") {
+      nomear(Capitulo(grupo.numeracao) :: grupo.partesComum)
+    } else if (grupo.dispPrincipal == "sub") {
+      nomear(SubSecao(grupo.numeracao) :: grupo.partesComum)
+    } else if (grupo.dispPrincipal == "liv") {
+      nomear(Livro(grupo.numeracao) :: grupo.partesComum)
     } else {
       ???
     }
@@ -473,17 +487,18 @@ object Urn2NomeCompacto_New {
   //TODO: Fragmento ao inves de Parte
   //TODO: Precisa recursao nos nomear
   def format(urn: String): String = {
-    val dispositivo = Dispositivo(urn)
-    println(s"==> $dispositivo")
-    nomear(dispositivo)
+//    val dispositivo = Dispositivo(urn)
+//    println(s"==> $dispositivo")
+//    nomear(dispositivo)
+    Urn2NomeComposto.format(List(urn))
   }
 
   def format(urns: List[String]): String = {
-    if (urns.size == 1) {
-      Urn2NomeCompacto_New.format(urns.head)
-    } else {
+//    if (urns.size == 1) {
+//      Urn2NomeCompacto_New.format(urns.head)
+//    } else {
       Urn2NomeComposto.format(urns)
-    }
+//    }
   }
 
   private def nomearParaUrn(parteDispositivo: ParteDispositivo): String = parteDispositivo match {
