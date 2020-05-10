@@ -1113,4 +1113,23 @@ class Urn2NomeCompacto_NewTest extends TestCase {
     assertEquals("arts. 1º a 3º, art. 3º-A e arts. 4º a 6º", Urn2NomeCompacto_New.format(List("art1", "art2", "art3", "art3-A", "art4", "art5", "art6")))
   }
 
+  def testLabel_partes() {
+    assertEquals("Partes 1 a 3, Partes 5 e 6 e Parte 8", Urn2NomeCompacto_New.format(List("prt1", "prt2", "prt3", "prt5", "prt6", "prt8")))
+  }
+
+  def testLabel_titulos() {
+    assertEquals("Títulos I a III, Títulos V e VI e Título VIII", Urn2NomeCompacto_New.format(List("tit1", "tit2", "tit3", "tit5", "tit6", "tit8")))
+  }
+
+  def testLabel_capitulos() {
+    assertEquals("Capítulos I a III, Capítulos V e VI e Capítulo VIII", Urn2NomeCompacto_New.format(List("cap1", "cap2", "cap3", "cap5", "cap6", "cap8")))
+  }
+
+  def testLabel_subsecoes() {
+    assertEquals("Subseções I a III, Subseções V e VI e Subseção VIII", Urn2NomeCompacto_New.format(List("sub1", "sub2", "sub3", "sub5", "sub6", "sub8")))
+  }
+
+  def testLabel_livros() {
+    assertEquals("Livros I a III, Livros V e VI e Livro VIII", Urn2NomeCompacto_New.format(List("liv1", "liv2", "liv3", "liv5", "liv6", "liv8")))
+  }
 }

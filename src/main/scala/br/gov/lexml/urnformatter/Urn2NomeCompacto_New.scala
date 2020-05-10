@@ -9,9 +9,9 @@ import scala.util.{Success, Try}
 //TODO: teste com multiplo que tem caput
 object Urn2NomeComposto {
 
-  import Urn2Format._
   import Numeracao._
   import ParteDispositivoGrupo._
+  import Urn2Format._
 
   sealed abstract class Numero
 
@@ -54,7 +54,6 @@ object Urn2NomeComposto {
 
     case class Artigo(numeracao: Numeracao) extends ParteDispositivoGrupo
 
-    //
     case object Caput extends ParteDispositivoGrupo
 
     case object ParagrafoUnico extends ParteDispositivoGrupo
@@ -67,8 +66,9 @@ object Urn2NomeComposto {
 
     case class Item(numeracao: Numeracao) extends ParteDispositivoGrupo
 
-    //TODO: Parte
-    //TODO: Alt
+    case class Parte(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
+      override val conector: String = "da"
+    }
 
     case class Titulo(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
       override val conector: String = "do"
@@ -150,8 +150,8 @@ object Urn2NomeComposto {
   }
 
   private def nomearTitulo(n: Numeracao): String = n match {
-    // case NumUnico(n) => s"Título ${formatRomano(n)}"
-    // case IntervaloContinuo(i, f) => s"Título ${formatRomano(i)} a ${formatRomano(f)}"
+    case NumUnico(Numero.IntNumero(n)) => s"Título ${formatRomano(n)}"
+    case IntervaloContinuo(i, f) => s"Títulos ${formatRomano(i)} a ${formatRomano(f)}"
     case ns: Numeros => s"Títulos ${nomearNumeros(ns, formatRomano)}"
   }
 
@@ -159,6 +159,30 @@ object Urn2NomeComposto {
     case NumUnico(Numero.IntNumero(n)) => n.toString
     case IntervaloContinuo(i, f) => s"$i ${conectorIntervalo(i, f)} $f"
     case ns: Numeros => nomearNumeros(ns, _.toString)
+  }
+
+  private def nomearParte(n: Numeracao): String = n match {
+    case NumUnico(Numero.IntNumero(n)) => s"Parte $n"
+    case IntervaloContinuo(i, f) => s"Partes $i ${conectorIntervalo(i, f)} $f"
+    case ns: Numeros => s"Partes ${nomearNumeros(ns, _.toString)}"
+  }
+
+  private def nomearCapitulo(n: Numeracao): String = n match {
+    case NumUnico(Numero.IntNumero(n)) => s"Capítulo ${formatRomano(n)}"
+    case IntervaloContinuo(i, f) => s"Capítulos ${formatRomano(i)} a ${formatRomano(f)}"
+    case ns: Numeros => s"Capítulos ${nomearNumeros(ns, formatRomano)}"
+  }
+
+  private def nomearSubSecao(n: Numeracao): String = n match {
+    case NumUnico(Numero.IntNumero(n)) => s"Subseção ${formatRomano(n)}"
+    case IntervaloContinuo(i, f) => s"Subseções ${formatRomano(i)} a ${formatRomano(f)}"
+    case ns: Numeros => s"Subseções ${nomearNumeros(ns, formatRomano)}"
+  }
+
+  private def nomearLivro(n: Numeracao): String = n match {
+    case NumUnico(Numero.IntNumero(n)) => s"Livro ${formatRomano(n)}"
+    case IntervaloContinuo(i, f) => s"Livros ${formatRomano(i)} a ${formatRomano(f)}"
+    case ns: Numeros => s"Livros ${nomearNumeros(ns, formatRomano)}"
   }
 
   private def nomearAnexo(a: Anexo): String = a.numeracao match {
@@ -182,13 +206,13 @@ object Urn2NomeComposto {
     case a: Alinea => nomearAlinea(a.numeracao)
     case p: Paragrafo => nomearParagrafo(p.numeracao)
     case i: Item => nomearItem(i.numeracao)
-    case Titulo(NumUnico(Numero.IntNumero(n))) => s"Título ${formatRomano(n)}"
-    case Capitulo(NumUnico(Numero.IntNumero(n))) => s"Capítulo ${formatRomano(n)}"
+    case c: Capitulo => nomearCapitulo(c.numeracao)
     case s: Secao => nomearSecao(s.numeracao)
-    case SubSecao(NumUnico(Numero.IntNumero(n))) => s"Subseção ${formatRomano(n)}"
-    case Livro(NumUnico(Numero.IntNumero(n))) => s"Livro ${formatRomano(n)}"
+    case sb: SubSecao => nomearSubSecao(sb.numeracao)
+    case l: Livro => nomearLivro(l.numeracao)
     case a: Anexo => nomearAnexo(a)
     case t: Titulo => nomearTitulo(t.numeracao)
+    case p: Parte => nomearParte(p.numeracao)
   }
 
   private def nomear(partes: List[ParteDispositivoGrupo]): String = {
@@ -276,6 +300,7 @@ object Urn2NomeComposto {
         case "sub" => SubSecao(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
         case "liv" => Livro(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
         case "anx" => Anexo(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)), getEAlteraNivel("anx"))
+        case "prt" => Parte(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
         case _ => throw new IllegalArgumentException(s"Invalid urn: $parteUrn")
       }
 
@@ -479,6 +504,8 @@ object Urn2NomeComposto {
       nomear(SubSecao(grupo.numeracao) :: grupo.partesComum)
     } else if (grupo.dispPrincipal == "liv") {
       nomear(Livro(grupo.numeracao) :: grupo.partesComum)
+    } else if (grupo.dispPrincipal == "prt") {
+      nomear(Parte(grupo.numeracao) :: grupo.partesComum)
     } else {
       ???
     }
