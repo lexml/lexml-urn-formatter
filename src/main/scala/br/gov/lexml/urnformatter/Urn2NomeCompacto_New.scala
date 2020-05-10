@@ -83,20 +83,22 @@ object Urn2NomeComposto {
       override val conector: String = "da"
     }
 
-        case class SubSecao(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
-          override val conector: String = "da"
-        }
+    case class SubSecao(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
+      override val conector: String = "da"
+    }
 
-        case class Livro(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
-          override val conector: String = "do"
-        }
+    case class Livro(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
+      override val conector: String = "do"
+    }
+
     case class Anexo(numeracao: Numeracao) extends ParteDispositivoGrupo with DispositivoAgrupador {
       override val conector: String = "do"
     }
 
-        case object Raiz extends ParteDispositivoGrupo
+    case object Raiz extends ParteDispositivoGrupo
 
-        case object ComponentPrincipal extends ParteDispositivoGrupo
+    case object ComponentPrincipal extends ParteDispositivoGrupo
+
   }
 
   private def conectorIntervalo(ini: Int, fim: Int): String = {
@@ -171,22 +173,14 @@ object Urn2NomeComposto {
   }
 
   private def nomear(parteDispositivo: ParteDispositivoGrupo): String = parteDispositivo match {
-    //    case Artigo(NumUnico(n)) => s"art. ${formatOrdinal(n)}"
-    //    case Artigo(IntervaloContinuo(i, f)) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
-    //    case Artigo(IntervaloContinuo(i, f)) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
     case a: Artigo => nomearArtigo(a.numeracao)
     case a: Anexo => nomearAnexo(a.numeracao)
     case Caput => "caput"
     case ParagrafoUnico => "parágrafo único"
     case i: Inciso => nomearInciso(i.numeracao)
     case a: Alinea => nomearAlinea(a.numeracao)
-    //    case Paragrafo(IntervaloContinuo(i, f)) => s"§ ${formatOrdinal(i)} ao ${formatOrdinal(f)}" //TODO:
-    //    case Paragrafo(NumUnico(n)) => s"§ ${formatOrdinal(n)}"
     case p: Paragrafo => nomearParagrafo(p.numeracao)
     case i: Item => nomearItem(i.numeracao)
-//    case Item(IntervaloContinuo(i, f)) => s"$i ${conectorIntervalo(i, f)} $f"
-//    case Item(n: Numeros) => nomearNumeros(n, _.toString)
-    //case Titulo(IntervaloContinuo(i, f)) => s"Título ${formatRomano(numero)}"
     case Titulo(NumUnico(Numero.IntNumero(n))) => s"Título ${formatRomano(n)}"
     case Capitulo(NumUnico(Numero.IntNumero(n))) => s"Capítulo ${formatRomano(n)}"
     case s: Secao => nomearSecao(s.numeracao)
@@ -194,8 +188,8 @@ object Urn2NomeComposto {
     case Livro(NumUnico(Numero.IntNumero(n))) => s"Livro ${formatRomano(n)}"
     case Anexo(NumUnico(Numero.IntNumero(n))) => s"Anexo ${formatRomano(n)}"
     case t: Titulo => nomearTitulo(t.numeracao)
-        case Raiz => "raiz"
-        case ComponentPrincipal => "componente principal"
+    case Raiz => "raiz"
+    case ComponentPrincipal => "componente principal"
   }
 
   private def nomear(partes: List[ParteDispositivoGrupo]): String = {
@@ -220,8 +214,63 @@ object Urn2NomeComposto {
     if (urns.isEmpty) {
       ""
     } else {
+
+
+      def trataArtigoStr: List[String] => List[String] = { partes =>
+        val posArtigo = partes.indexWhere(_.startsWith("art"))
+
+        if (posArtigo != -1) {
+          partes.filter(p => p.startsWith("art") || p.startsWith("anx")) ++ partes.takeRight(partes.size - posArtigo - 1)
+        } else {
+          partes
+        }
+      }
+
+      def trataArtigo: List[ParteDispositivoGrupo] => List[ParteDispositivoGrupo] = { partes =>
+        val posArtigo = partes.indexWhere {
+          case _: Artigo => true
+          case _ => false
+        }
+
+        if (posArtigo != -1) {
+          partes.filter {
+            case _: Artigo | _: Anexo => true
+            case _ => false
+          } ++ partes.takeRight(partes.size - posArtigo - 1)
+        } else {
+          partes
+        }
+      }
+
+      // se tem caput antes do final, remove ele
+      def trataCaputNoMeioStr: List[String] => List[String] = { partes =>
+        val contemCaputAntesDoFim = partes.dropRight(1).exists(_.startsWith("cpt"))
+
+        if (contemCaputAntesDoFim) {
+          partes.filter(!_.startsWith("cpt"))
+        } else {
+          partes
+        }
+      }
+
+      // se tem caput antes do final, remove ele
+      def trataCaputNoMeio: List[ParteDispositivoGrupo] => List[ParteDispositivoGrupo] = { partes =>
+        val contemCaputAntesDoFim = partes.dropRight(1).exists {
+          case Caput => true
+          case _ => false
+        }
+        if (contemCaputAntesDoFim) {
+          partes.filter {
+            case Caput => false
+            case _ => true
+          }
+        } else {
+          partes
+        }
+      }
+
       val urnsGrupo = urns.map { urn =>
-        val partesStr = urn.split("_")
+        val partesStr = (trataArtigoStr andThen trataCaputNoMeioStr)(urn.split("_").toList)
         val ultimaParte = partesStr.last
         val dispPrincipal = if (!ultimaParte.contains("par1u")) ultimaParte.take(3) else "par1u"
         val inicioComum = partesStr.dropRight(1) :+ dispPrincipal
@@ -253,41 +302,9 @@ object Urn2NomeComposto {
         case "sub" => SubSecao(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
         case "liv" => Livro(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
         case "anx" => Anexo(NumUnico(Numero.IntNumero(parteUrn.substring(3).toInt)))
-                case "lex" => Raiz
-                case "cpp" => ComponentPrincipal
+        case "lex" => Raiz
+        case "cpp" => ComponentPrincipal
         case _ => throw new IllegalArgumentException(s"Invalid urn: $parteUrn")
-      }
-
-      def trataArtigo: List[ParteDispositivoGrupo] => List[ParteDispositivoGrupo] = { partes =>
-        val posArtigo = partes.indexWhere {
-          case _: Artigo => true
-          case _ => false
-        }
-
-        if (posArtigo != -1) {
-          partes.filter {
-            case _: Artigo | _: Anexo => true
-            case _ => false
-          } ++ partes.takeRight(partes.size - posArtigo - 1)
-        } else {
-          partes
-        }
-      }
-
-      // se tem caput antes do final, remove ele
-      def trataCaputNoMeio: List[ParteDispositivoGrupo] => List[ParteDispositivoGrupo] = { partes =>
-        val contemCaputAntesDoFim = partes.dropRight(1).exists {
-          case Caput => true
-          case _ => false
-        }
-        if (contemCaputAntesDoFim) {
-          partes.filter {
-            case Caput => false
-            case _ => true
-          }
-        } else {
-          partes
-        }
       }
 
       def removeUltimo: List[ParteDispositivoGrupo] => List[ParteDispositivoGrupo] = { partes =>
@@ -326,7 +343,7 @@ object Urn2NomeComposto {
         var numeracoes = new ListBuffer[Numeracao]()
         numeros.zipWithIndex.foreach { case (n, idx) =>
           n match {
-            case u@ Numero.Unico => numeracoes += Numeracao.NumUnico(u)
+            case u@Numero.Unico => numeracoes += Numeracao.NumUnico(u)
             case s: Numero.StrNumero =>
               if (currNumeros.nonEmpty) {
                 if (currNumeros.size == 1) {
@@ -341,7 +358,7 @@ object Urn2NomeComposto {
                 }
               }
               numeracoes += Numeracao.NumUnico(s)
-            case sn@ Numero.SemNumero => numeracoes += Numeracao.NumUnico(sn)
+            case sn@Numero.SemNumero => numeracoes += Numeracao.NumUnico(sn)
             case Numero.IntNumero(nInt) =>
               if (currNumeros.isEmpty) {
                 currNumeros += nInt
@@ -352,7 +369,7 @@ object Urn2NomeComposto {
                   if (currNumeros.size == 1) {
                     if (idx + 1 < numeros.size) {
                       if (numeros(idx + 1).isInstanceOf[Numero.IntNumero] &&
-                          nInt + 1 == numeros(idx + 1).asInstanceOf[Numero.IntNumero].n) {
+                        nInt + 1 == numeros(idx + 1).asInstanceOf[Numero.IntNumero].n) {
                         numeracoes += NumUnico(Numero.IntNumero(currNumeros.head))
                         currNumeros = new ListBuffer[Int]()
                         currNumeros += nInt
@@ -385,8 +402,9 @@ object Urn2NomeComposto {
           }
         }
 
+        // trataArtigo andThen trataCaputNoMeio andThen
         val partesComum = (iniComum.concat("1")).split("_").map(parse)
-        val partes = (trataArtigo andThen trataCaputNoMeio andThen removeUltimo andThen inverteFragmentosAgrupadores) (partesComum.toList)
+        val partes = (removeUltimo andThen inverteFragmentosAgrupadores) (partesComum.toList)
 
         numeracoes.map { num =>
           Grupo(dispPrincipal, partes, num)
@@ -480,224 +498,15 @@ object Urn2NomeComposto {
 
 object Urn2NomeCompacto_New {
 
-  import ParteDispositivo._
-  import Urn2Format._
-
   //TODO: Urn
   //TODO: Fragmento ao inves de Parte
   //TODO: Precisa recursao nos nomear
   def format(urn: String): String = {
-//    val dispositivo = Dispositivo(urn)
-//    println(s"==> $dispositivo")
-//    nomear(dispositivo)
-    Urn2NomeComposto.format(List(urn))
+    format(List(urn))
   }
 
   def format(urns: List[String]): String = {
-//    if (urns.size == 1) {
-//      Urn2NomeCompacto_New.format(urns.head)
-//    } else {
-      Urn2NomeComposto.format(urns)
-//    }
+    Urn2NomeComposto.format(urns)
   }
-
-  private def nomearParaUrn(parteDispositivo: ParteDispositivo): String = parteDispositivo match {
-    case Artigo(numero) => s"art_${numero}"
-    case Caput => "cpt"
-    case ParagrafoUnico => "par1u"
-    case Inciso(numero) => s"inc_${numero}"
-    case Alinea(numero) => ???
-    case Paragrafo(numero) => s"par_${numero}"
-    case Item(numero) => ???
-    case Titulo(numero) => s"tit_${numero}"
-    case Capitulo(numero) => s"cap_${numero}"
-    case Secao(numero) => s"sec_${numero}"
-    case SubSecao(numero) => ???
-    case Livro(numero) => ???
-    case Anexo(numero) => ???
-    case Raiz => ???
-    case ComponentPrincipal => ???
-  }
-
-  private def nomear(parteDispositivo: ParteDispositivo): String = parteDispositivo match {
-    case Artigo(numero) => s"art. ${formatOrdinal(numero)}"
-    case Caput => "caput"
-    case ParagrafoUnico => "parágrafo único"
-    case Inciso(numero) => formatRomano(numero)
-    case Alinea(numero) => formatAlfa(numero)
-    case Paragrafo(numero) => s"§ ${formatOrdinal(numero)}"
-    case Item(numero) => numero.toString
-    case Titulo(numero) => s"Título ${formatRomano(numero)}"
-    case Capitulo(numero) => s"Capítulo ${formatRomano(numero)}"
-    case Secao(numero) => s"Seção ${formatRomano(numero)}"
-    case SubSecao(numero) => s"Subseção ${formatRomano(numero)}"
-    case Livro(numero) => s"Livro ${formatRomano(numero)}"
-    case Anexo(numero) => s"Anexo ${formatRomano(numero)}"
-    case Raiz => "raiz"
-    case ComponentPrincipal => "componente principal"
-  }
-
-  private def nomear(dispositivo: Dispositivo): String = {
-    @tailrec
-    def criarString(acc: String, partes: List[ParteDispositivo]): String = {
-      if (partes.isEmpty) {
-        acc
-      } else {
-        partes.head match {
-          case h: DispositivoAgrupador if acc.isEmpty => criarString(nomear(h), partes.tail)
-          case h: DispositivoAgrupador => criarString(s"${acc} ${h.conector} ${nomear(h)}", partes.tail)
-          case h if acc.isEmpty => criarString(nomear(h), partes.tail)
-          case h => criarString(s"${acc}, ${nomear(h)}", partes.tail)
-        }
-      }
-    }
-
-    val partes = (trataArtigo andThen trataCaputNoMeio andThen inverteFragmentosAgrupadores) (dispositivo.partes)
-    println(s"==>Partes: ${partes}")
-    criarString("", partes)
-  }
-
-  private def trataArtigo: List[ParteDispositivo] => List[ParteDispositivo] = { partes =>
-    val posArtigo = partes.indexWhere {
-      case _: Artigo => true
-      case _ => false
-    }
-
-    if (posArtigo != -1) {
-      partes.filter {
-        case _: Artigo | _: Anexo => true
-        case _ => false
-      } ++ partes.takeRight(partes.size - posArtigo - 1)
-    } else {
-      partes
-    }
-  }
-
-  // se tem caput antes do final, remove ele
-  private def trataCaputNoMeio: List[ParteDispositivo] => List[ParteDispositivo] = { partes =>
-    val contemCaputAntesDoFim = partes.dropRight(1).exists {
-      case Caput => true
-      case _ => false
-    }
-    if (contemCaputAntesDoFim) {
-      partes.filter {
-        case Caput => false
-        case _ => true
-      }
-    } else {
-      partes
-    }
-  }
-
-  private def inverteFragmentosAgrupadores: List[ParteDispositivo] => List[ParteDispositivo] = { partes =>
-    var posInicio = Option.empty[Int]
-    var posFim = Option.empty[Int]
-    partes.zipWithIndex.foreach { case (parte, idx) =>
-      if (parte.isInstanceOf[DispositivoAgrupador]) {
-        if (posInicio.isEmpty && posFim.isEmpty) {
-          posInicio = Option(idx)
-        }
-      } else {
-        if (posInicio.isDefined && posFim.isEmpty) {
-          posFim = Option(idx)
-        }
-      }
-    }
-    if (posInicio.isDefined && posFim.isEmpty) {
-      posFim = Option(partes.length - 1)
-    }
-    (posInicio, posFim) match {
-      case (Some(ini), Some(fim)) =>
-        partes.take(ini) ++ partes.slice(ini, fim + 1).reverse ++ partes.slice(fim + 1, partes.length)
-      case _ => partes
-    }
-  }
-
-  object ParteDispositivo {
-
-    trait DispositivoAgrupador {
-      val conector: String
-    }
-
-    sealed abstract class ParteDispositivo
-
-    case class Artigo(numero: Int) extends ParteDispositivo
-
-    case object Caput extends ParteDispositivo
-
-    case object ParagrafoUnico extends ParteDispositivo
-
-    case class Inciso(numero: Int) extends ParteDispositivo
-
-    case class Alinea(numero: Int) extends ParteDispositivo
-
-    case class Paragrafo(numero: Int) extends ParteDispositivo
-
-    case class Item(numero: Int) extends ParteDispositivo
-
-    //TODO: Parte
-    //TODO: Alt
-
-    case class Titulo(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
-      override val conector: String = "do"
-    }
-
-    case class Capitulo(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
-      override val conector: String = "do"
-    }
-
-    case class Secao(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
-      override val conector: String = "da"
-    }
-
-    case class SubSecao(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
-      override val conector: String = "da"
-    }
-
-    case class Livro(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
-      override val conector: String = "do"
-    }
-
-    case class Anexo(numero: Int) extends ParteDispositivo with DispositivoAgrupador {
-      override val conector: String = "do"
-    }
-
-    case object Raiz extends ParteDispositivo
-
-    case object ComponentPrincipal extends ParteDispositivo
-
-    //TODO: Option/Either/Try
-    def parse(parteUrn: String): ParteDispositivo = parteUrn.take(3) match {
-      case "art" => Artigo(parteUrn.substring(3).toInt)
-      case "cpt" => Caput
-      case "par" if parteUrn.endsWith("u") => ParagrafoUnico
-      case "par" => Paragrafo(parteUrn.substring(3).toInt)
-      case "inc" => Inciso(parteUrn.substring(3).toInt)
-      case "ali" => Alinea(parteUrn.substring(3).toInt)
-      case "ite" => Item(parteUrn.substring(3).toInt)
-      case "tit" => Titulo(parteUrn.substring(3).toInt)
-      case "cap" => Capitulo(parteUrn.substring(3).toInt)
-      case "sec" => Secao(parteUrn.substring(3).toInt)
-      case "sub" => SubSecao(parteUrn.substring(3).toInt)
-      case "liv" => Livro(parteUrn.substring(3).toInt)
-      case "anx" => Anexo(parteUrn.substring(3).toInt)
-      case "lex" => Raiz
-      case "cpp" => ComponentPrincipal
-      case _ => throw new IllegalArgumentException(s"Invalid urn: $parteUrn")
-    }
-
-  }
-
-  case class Dispositivo(partes: List[ParteDispositivo])
-
-  object Dispositivo {
-
-    def apply(urn: String): Dispositivo = {
-      val partes = urn.split("_").map(ParteDispositivo.parse).toList
-      Dispositivo(partes)
-    }
-
-  }
-
 
 }
