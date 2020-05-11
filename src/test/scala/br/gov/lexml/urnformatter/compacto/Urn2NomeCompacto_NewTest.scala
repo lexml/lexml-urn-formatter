@@ -1,4 +1,4 @@
-package br.gov.lexml.urnformatter
+package br.gov.lexml.urnformatter.compacto
 
 import junit.framework.Assert.assertEquals
 import junit.framework.TestCase
