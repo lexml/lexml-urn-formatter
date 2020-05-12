@@ -48,12 +48,12 @@ private[compacto] object AgrupadorUrn {
     val fragmentosComum = (iniComum.concat("1")).split("_").map(parse(_, getEAlteraNivel))
     val fragmentos = (removeUltimoFragmento andThen inverteFragmentosAgrupadores) (fragmentosComum.toList)
 
-    criaNumeracoes(iniComum, dispPrincipal, numeros).map { num =>
-      GrupoUrns(dispPrincipal, fragmentos, num)
+    criaNumeracoes(iniComum, numeros).map { num =>
+      GrupoUrns(fragmentosComum.last.tipo, fragmentos, num)
     }
   }
 
-  private def criaNumeracoes(iniComum: String, dispPrincipal: String, numeros: List[Numero]): List[Numeracao] = {
+  private def criaNumeracoes(iniComum: String, numeros: List[Numero]): List[Numeracao] = {
     case class Value(currNumeros: List[Int], numeracoes: List[Numeracao])
 
     val accValue: Value = numeros.zipWithIndex.foldLeft(Value(Nil, Nil)) { case (v, (n, idx)) =>
@@ -125,7 +125,7 @@ private[compacto] object AgrupadorUrn {
     var posInicio = Option.empty[Int]
     var posFim = Option.empty[Int]
     fragmentos.zipWithIndex.foreach { case (fragmento, idx) =>
-      if (fragmento.isInstanceOf[DispositivoAgrupador]) {
+      if (fragmento.tipo.isInstanceOf[DispositivoAgrupador]) {
         if (posInicio.isEmpty && posFim.isEmpty) {
           posInicio = Option(idx)
         }

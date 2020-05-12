@@ -24,16 +24,8 @@ private[compacto] object Nomeador {
 
   }
 
-  private def nomear(grupo: GrupoUrns): String = {
-    val res = if (grupo.dispPrincipal == "sec") {
-      nomear(Secao(grupo.numeracao) :: grupo.partesComum)
-    } else if (grupo.dispPrincipal == "par") {
-      nomear(grupo.partesComum :+ Paragrafo(grupo.numeracao))
-    } else if (grupo.dispPrincipal == "inc") {
-      nomear(grupo.partesComum :+ Inciso(grupo.numeracao))
-    } else if (grupo.dispPrincipal == "ite") {
-      nomear(grupo.partesComum :+ Item(grupo.numeracao))
-    } else if (grupo.dispPrincipal == "art") {
+  private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {
+    case TipoUrnFragmento.Artigo =>
       val contemAnexo = grupo.partesComum.exists {
         case _: Anexo => true
         case _ => false
@@ -43,40 +35,24 @@ private[compacto] object Nomeador {
       } else {
         nomear(grupo.partesComum :+ Artigo(grupo.numeracao))
       }
-    } else if (grupo.dispPrincipal == "tit") {
-      nomear(Titulo(grupo.numeracao) :: grupo.partesComum)
-    } else if (grupo.dispPrincipal == "ali") {
-      nomear(grupo.partesComum :+ Alinea(grupo.numeracao))
-    } else if (grupo.dispPrincipal == "par1u") {
-      nomear(grupo.partesComum :+ ParagrafoUnico)
-    } else if (grupo.dispPrincipal == "anx") {
+    case TipoUrnFragmento.Caput => nomear(grupo.partesComum :+ Caput)
+    case TipoUrnFragmento.ParagrafoUnico => nomear(grupo.partesComum :+ ParagrafoUnico)
+    case TipoUrnFragmento.Inciso => nomear(grupo.partesComum :+ Inciso(grupo.numeracao))
+    case TipoUrnFragmento.Alinea => nomear(grupo.partesComum :+ Alinea(grupo.numeracao))
+    case TipoUrnFragmento.Paragrafo => nomear(grupo.partesComum :+ Paragrafo(grupo.numeracao))
+    case TipoUrnFragmento.Item => nomear(grupo.partesComum :+ Item(grupo.numeracao))
+    case TipoUrnFragmento.Parte => nomear(Parte(grupo.numeracao) :: grupo.partesComum)
+    case TipoUrnFragmento.Titulo => nomear(Titulo(grupo.numeracao) :: grupo.partesComum)
+    case TipoUrnFragmento.Capitulo => nomear(Capitulo(grupo.numeracao) :: grupo.partesComum)
+    case TipoUrnFragmento.Secao => nomear(Secao(grupo.numeracao) :: grupo.partesComum)
+    case TipoUrnFragmento.SubSecao => nomear(SubSecao(grupo.numeracao) :: grupo.partesComum)
+    case TipoUrnFragmento.Livro => nomear(Livro(grupo.numeracao) :: grupo.partesComum)
+    case TipoUrnFragmento.Anexo =>
       val maxNivel = Try(grupo.partesComum.map {
         case a: Anexo => a.nivel
         case _ => 0
       }.max).getOrElse(0)
       nomear(Anexo(grupo.numeracao, maxNivel + 1) :: grupo.partesComum)
-    } else if (grupo.dispPrincipal == "cpt") {
-      nomear(grupo.partesComum :+ Caput)
-    } else if (grupo.dispPrincipal == "cap") {
-      nomear(Capitulo(grupo.numeracao) :: grupo.partesComum)
-    } else if (grupo.dispPrincipal == "sub") {
-      nomear(SubSecao(grupo.numeracao) :: grupo.partesComum)
-    } else if (grupo.dispPrincipal == "liv") {
-      nomear(Livro(grupo.numeracao) :: grupo.partesComum)
-    } else if (grupo.dispPrincipal == "prt") {
-      nomear(Parte(grupo.numeracao) :: grupo.partesComum)
-    } else {
-      ???
-    }
-    res
-  }
-
-  private def conectorIntervalo(ini: Int, fim: Int): String = {
-    if (ini == (fim - 1)) {
-      "e"
-    } else {
-      "a"
-    }
   }
 
   private def nomearNumeros(ns: Numeros, fmt: Int => String): String = {
@@ -100,14 +76,14 @@ private[compacto] object Nomeador {
     val singular = maybeSingular.map(s => s"$s ").getOrElse("")
     val plural = maybePlural.map(s => s"$s ").getOrElse("")
     n match {
-    case NumUnico(Numero.IntNumero(i)) => s"${singular}${fmt(i)}"
-    case NumUnico(Numero.StrNumero(s)) => {
-      val partes = s.split("-")
-      s"${singular}${fmt(partes(0).toInt)}-${partes(1)}"
+      case NumUnico(Numero.IntNumero(i)) => s"${singular}${fmt(i)}"
+      case NumUnico(Numero.StrNumero(s)) => {
+        val partes = s.split("-")
+        s"${singular}${fmt(partes(0).toInt)}-${partes(1)}"
+      }
+      case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
+      case ns: Numeros => s"${plural}${nomearNumeros(ns, fmt)}"
     }
-    case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
-    case ns: Numeros => s"${plural}${nomearNumeros(ns, fmt)}"
-  }
   }
 
   private def nomearAnexo(a: Anexo): String = a.numeracao match {
@@ -123,7 +99,7 @@ private[compacto] object Nomeador {
     case ns: Numeros => s"Anexos ${nomearNumeros(ns, formatRomano)}"
   }
 
-  private def nomear(parteDispositivo: UrnFragmento): String = parteDispositivo match {
+  private def nomear(urnFragmento: UrnFragmento): String = urnFragmento match {
     case a: Artigo => nomear(a.numeracao, "art.", "arts.", "a", formatOrdinal)
     case Caput => "caput"
     case ParagrafoUnico => "parágrafo único"
@@ -140,17 +116,19 @@ private[compacto] object Nomeador {
     case p: Parte => nomear(p.numeracao, "Parte", "Partes", "a", _.toString)
   }
 
+  //TODO: Remover all "partes"
+  //TODO: Check compiler warnings
   private def nomear(partes: List[UrnFragmento]): String = {
     @tailrec
     def criarString(acc: String, partes: List[UrnFragmento]): String = {
       if (partes.isEmpty) {
         acc
       } else {
-        partes.head match {
-          case h: DispositivoAgrupador if acc.isEmpty => criarString(nomear(h), partes.tail)
-          case h: DispositivoAgrupador => criarString(s"${acc} ${h.conector} ${nomear(h)}", partes.tail)
-          case h if acc.isEmpty => criarString(nomear(h), partes.tail)
-          case h => criarString(s"${acc}, ${nomear(h)}", partes.tail)
+        (partes.head, partes.head.tipo) match {
+          case (h, _: DispositivoAgrupador) if acc.isEmpty => criarString(nomear(h), partes.tail)
+          case (h, d: DispositivoAgrupador) => criarString(s"${acc} ${d.conector} ${nomear(h)}", partes.tail)
+          case (h, _) if acc.isEmpty => criarString(nomear(h), partes.tail)
+          case (h, _) => criarString(s"${acc}, ${nomear(h)}", partes.tail)
         }
       }
     }
