@@ -90,74 +90,24 @@ private[compacto] object Nomeador {
     go("", ns.list)
   }
 
-  private def nomearSecao(n: Numeracao): String = n match {
-    case NumUnico(Numero.IntNumero(i)) => s"Seção ${formatRomano(i)}"
-    case IntervaloContinuo(i, f) => s"Seções ${formatRomano(i)} ${conectorIntervalo(i, f)} ${formatRomano(f)}"
-    case ns: Numeros => s"Seções ${nomearNumeros(ns, formatRomano)}"
-  }
+  private def nomear(n: Numeracao, singular: String, plural: String, conector: String, fmt: Int => String): String =
+    nomearComOption(n, Some(singular), Some(plural), conector, fmt)
 
-  private def nomearArtigo(n: Numeracao): String = n match {
-    case NumUnico(Numero.IntNumero(n)) => s"art. ${formatOrdinal(n)}"
+  private def nomear(n: Numeracao, conector: String, fmt: Int => String): String =
+    nomearComOption(n, None, None, conector, fmt)
+
+  private def nomearComOption(n: Numeracao, maybeSingular: Option[String], maybePlural: Option[String], conector: String, fmt: (Int) => String): String = {
+    val singular = maybeSingular.map(s => s"$s ").getOrElse("")
+    val plural = maybePlural.map(s => s"$s ").getOrElse("")
+    n match {
+    case NumUnico(Numero.IntNumero(i)) => s"${singular}${fmt(i)}"
     case NumUnico(Numero.StrNumero(s)) => {
       val partes = s.split("-")
-      s"art. ${formatOrdinal(partes(0).toInt)}-${partes(1)}"
+      s"${singular}${fmt(partes(0).toInt)}-${partes(1)}"
     }
-    case IntervaloContinuo(i, f) => s"arts. ${formatOrdinal(i)} ${conectorIntervalo(i, f)} ${formatOrdinal(f)}"
-    case ns: Numeros => s"arts. ${nomearNumeros(ns, formatOrdinal)}"
+    case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
+    case ns: Numeros => s"${plural}${nomearNumeros(ns, fmt)}"
   }
-
-  private def nomearAlinea(n: Numeracao): String = n match {
-    case NumUnico(Numero.IntNumero(n)) => formatAlfa(n)
-    case IntervaloContinuo(i, f) => s"${formatAlfa(i)} ${conectorIntervalo(i, f)} ${formatAlfa(f)}"
-    case ns: Numeros => nomearNumeros(ns, formatAlfa)
-  }
-
-  private def nomearInciso(n: Numeracao): String = n match {
-    case NumUnico(Numero.IntNumero(n)) => formatRomano(n)
-    case IntervaloContinuo(i, f) => s"${formatRomano(i)} ${conectorIntervalo(i, f)} ${formatRomano(f)}"
-    case ns: Numeros => nomearNumeros(ns, formatRomano)
-  }
-
-  private def nomearParagrafo(n: Numeracao): String = n match {
-    case NumUnico(Numero.IntNumero(n)) => s"§ ${formatOrdinal(n)}"
-    case IntervaloContinuo(i, f) => s"§§ ${formatOrdinal(i)} ao ${formatOrdinal(f)}"
-    case ns: Numeros => s"§§ ${nomearNumeros(ns, formatOrdinal)}"
-  }
-
-  private def nomearTitulo(n: Numeracao): String = n match {
-    case NumUnico(Numero.IntNumero(n)) => s"Título ${formatRomano(n)}"
-    case IntervaloContinuo(i, f) => s"Títulos ${formatRomano(i)} a ${formatRomano(f)}"
-    case ns: Numeros => s"Títulos ${nomearNumeros(ns, formatRomano)}"
-  }
-
-  private def nomearItem(n: Numeracao): String = n match {
-    case NumUnico(Numero.IntNumero(n)) => n.toString
-    case IntervaloContinuo(i, f) => s"$i ${conectorIntervalo(i, f)} $f"
-    case ns: Numeros => nomearNumeros(ns, _.toString)
-  }
-
-  private def nomearParte(n: Numeracao): String = n match {
-    case NumUnico(Numero.IntNumero(n)) => s"Parte $n"
-    case IntervaloContinuo(i, f) => s"Partes $i ${conectorIntervalo(i, f)} $f"
-    case ns: Numeros => s"Partes ${nomearNumeros(ns, _.toString)}"
-  }
-
-  private def nomearCapitulo(n: Numeracao): String = n match {
-    case NumUnico(Numero.IntNumero(n)) => s"Capítulo ${formatRomano(n)}"
-    case IntervaloContinuo(i, f) => s"Capítulos ${formatRomano(i)} a ${formatRomano(f)}"
-    case ns: Numeros => s"Capítulos ${nomearNumeros(ns, formatRomano)}"
-  }
-
-  private def nomearSubSecao(n: Numeracao): String = n match {
-    case NumUnico(Numero.IntNumero(n)) => s"Subseção ${formatRomano(n)}"
-    case IntervaloContinuo(i, f) => s"Subseções ${formatRomano(i)} a ${formatRomano(f)}"
-    case ns: Numeros => s"Subseções ${nomearNumeros(ns, formatRomano)}"
-  }
-
-  private def nomearLivro(n: Numeracao): String = n match {
-    case NumUnico(Numero.IntNumero(n)) => s"Livro ${formatRomano(n)}"
-    case IntervaloContinuo(i, f) => s"Livros ${formatRomano(i)} a ${formatRomano(f)}"
-    case ns: Numeros => s"Livros ${nomearNumeros(ns, formatRomano)}"
   }
 
   private def nomearAnexo(a: Anexo): String = a.numeracao match {
@@ -174,20 +124,20 @@ private[compacto] object Nomeador {
   }
 
   private def nomear(parteDispositivo: UrnFragmento): String = parteDispositivo match {
-    case a: Artigo => nomearArtigo(a.numeracao)
+    case a: Artigo => nomear(a.numeracao, "art.", "arts.", "a", formatOrdinal)
     case Caput => "caput"
     case ParagrafoUnico => "parágrafo único"
-    case i: Inciso => nomearInciso(i.numeracao)
-    case a: Alinea => nomearAlinea(a.numeracao)
-    case p: Paragrafo => nomearParagrafo(p.numeracao)
-    case i: Item => nomearItem(i.numeracao)
-    case c: Capitulo => nomearCapitulo(c.numeracao)
-    case s: Secao => nomearSecao(s.numeracao)
-    case sb: SubSecao => nomearSubSecao(sb.numeracao)
-    case l: Livro => nomearLivro(l.numeracao)
+    case i: Inciso => nomear(i.numeracao, "a", formatRomano)
+    case a: Alinea => nomear(a.numeracao, "a", formatAlfa)
+    case p: Paragrafo => nomear(p.numeracao, "§", "§§", "ao", formatOrdinal)
+    case i: Item => nomear(i.numeracao, "a", _.toString)
+    case c: Capitulo => nomear(c.numeracao, "Capítulo", "Capítulos", "a", formatRomano)
+    case s: Secao => nomear(s.numeracao, "Seção", "Seções", "a", formatRomano)
+    case sb: SubSecao => nomear(sb.numeracao, "Subseção", "Subseções", "a", formatRomano)
+    case l: Livro => nomear(l.numeracao, "Livro", "Livros", "a", formatRomano)
     case a: Anexo => nomearAnexo(a)
-    case t: Titulo => nomearTitulo(t.numeracao)
-    case p: Parte => nomearParte(p.numeracao)
+    case t: Titulo => nomear(t.numeracao, "Título", "Títulos", "a", formatRomano)
+    case p: Parte => nomear(p.numeracao, "Parte", "Partes", "a", _.toString)
   }
 
   private def nomear(partes: List[UrnFragmento]): String = {
