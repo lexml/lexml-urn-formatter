@@ -103,7 +103,6 @@ private[compacto] object Nomeador {
     case p: Parte => nomear(p.numeracao, "Parte", "Partes", "a", _.toString)
   }
 
-  //TODO: Check compiler warnings
   private def nomear(fragmentoes: List[UrnFragmento]): String = {
     @tailrec
     def criarString(acc: String, fragmentoes: List[UrnFragmento]): String = {

@@ -1132,4 +1132,8 @@ class Urn2NomeCompacto_NewTest extends TestCase {
   def testLabel_livros() {
     assertEquals("Livros I a III, Livros V e VI e Livro VIII", Urn2NomeCompacto_New.format(List("liv1", "liv2", "liv3", "liv5", "liv6", "liv8")))
   }
+
+  def testLabel_anx1_tit1_art1200_1201() = {
+    assertEquals("arts. 1.200 e 1.201 do Anexo I", Urn2NomeCompacto_New.format(List("anx1_tit1_art1200", "anx1_tit1_art1201")))
+  }
 }
