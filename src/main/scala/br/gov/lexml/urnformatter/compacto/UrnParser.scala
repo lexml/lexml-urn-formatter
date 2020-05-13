@@ -7,7 +7,6 @@ private[compacto] object UrnParser {
   def parse(urns: List[String]): List[ParsedUrn] = urns.map { urn =>
     val fragmentos = (trataArtigo andThen trataCaputNoMeio andThen removeRaizEComponentePrincipal) (urn.split("_").toList)
     val ultimoFragmento = fragmentos.last
-    //TODO: Fazer parse para tipo aqui ao inves de string?
     val dispPrincipal = parseTipoDispositivo(ultimoFragmento)
     // Inicio Comum contém os fragmentos + o tipo do dispositivo principal, sem numeracao
     val inicioComum = fragmentos.dropRight(1) :+ dispPrincipal
