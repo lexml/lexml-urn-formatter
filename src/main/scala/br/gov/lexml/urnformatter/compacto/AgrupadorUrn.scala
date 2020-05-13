@@ -1,6 +1,7 @@
 package br.gov.lexml.urnformatter.compacto
 
 import br.gov.lexml.urnformatter.compacto.Numeracao._
+import br.gov.lexml.urnformatter.compacto.TipoUrnFragmento.DispositivoAgrupador
 import br.gov.lexml.urnformatter.compacto.UrnFragmento._
 
 import scala.collection.mutable
@@ -58,23 +59,23 @@ private[compacto] object AgrupadorUrn {
 
     val accValue: Value = numeros.zipWithIndex.foldLeft(Value(Nil, Nil)) { case (v, (n, idx)) =>
       n match {
-        case u@Numero.Unico => v.copy(numeracoes = v.numeracoes :+ Numeracao.NumUnico(u))
+        case u@Numero.Unico => v.copy(numeracoes = v.numeracoes :+ Numeracao.UmNumero(u))
         // numero str transforma o que tem no buffer em Numeracao e cria uma nova com o numero str
         case s: Numero.StrNumero =>
           val numeracoes = v.currNumeros.size match {
             case 0 => Option.empty
-            case 1 => Some(NumUnico(Numero.IntNumero(v.currNumeros.head)))
+            case 1 => Some(UmNumero(Numero.IntNumero(v.currNumeros.head)))
             // embora Numeros receba um List, ele sempre recebe 2 valores
-            case 2 => Some(Numeros(v.currNumeros))
+            case 2 => Some(DoisNumeros(v.currNumeros.head, v.currNumeros.last))
             case _ => Some(IntervaloContinuo(v.currNumeros.head, v.currNumeros.last))
           }
           v.copy(
-            numeracoes = v.numeracoes ++ List(numeracoes, Some(Numeracao.NumUnico(s))).flatten,
+            numeracoes = v.numeracoes ++ List(numeracoes, Some(Numeracao.UmNumero(s))).flatten,
             currNumeros = Nil
           )
         case sn@Numero.SemNumero =>
           v.copy(
-            numeracoes = v.numeracoes :+ Numeracao.NumUnico(sn)
+            numeracoes = v.numeracoes :+ Numeracao.UmNumero(sn)
           )
         case Numero.IntNumero(nInt) =>
           v.currNumeros.size match {
@@ -85,7 +86,7 @@ private[compacto] object AgrupadorUrn {
               numeros.lift(idx + 1) match {
                 case Some(Numero.IntNumero(nIntProximo)) if nInt + 1 == nIntProximo =>
                   v.copy(
-                    numeracoes = v.numeracoes :+ NumUnico(Numero.IntNumero(v.currNumeros.head)),
+                    numeracoes = v.numeracoes :+ UmNumero(Numero.IntNumero(v.currNumeros.head)),
                     currNumeros = List(nInt)
                   )
                 case _ =>
@@ -95,7 +96,7 @@ private[compacto] object AgrupadorUrn {
               }
             case 2 =>
               v.copy(
-                numeracoes = v.numeracoes :+ Numeros(v.currNumeros),
+                numeracoes = v.numeracoes :+ DoisNumeros(v.currNumeros.head, v.currNumeros.last),
                 currNumeros = List(nInt)
               )
             case _ =>
@@ -109,8 +110,8 @@ private[compacto] object AgrupadorUrn {
 
     val numeracaoRestante = accValue.currNumeros.size match {
       case 0 => Option.empty
-      case 1 => Some(NumUnico(Numero.IntNumero(accValue.currNumeros.head)))
-      case 2 => Some(Numeros(accValue.currNumeros))
+      case 1 => Some(UmNumero(Numero.IntNumero(accValue.currNumeros.head)))
+      case 2 => Some(DoisNumeros(accValue.currNumeros.head, accValue.currNumeros.last))
       case _ => Some(IntervaloContinuo(accValue.currNumeros.head, accValue.currNumeros.last))
     }
     accValue.numeracoes ++ List(numeracaoRestante).flatten
@@ -149,7 +150,7 @@ private[compacto] object AgrupadorUrn {
     case "art" =>
       val numStr = fragmentoUrn.substring(3)
       val num = Try(numStr.toInt).map(Numero.IntNumero).getOrElse(Numero.StrNumero(numStr))
-      Artigo(NumUnico(num))
+      Artigo(UmNumero(num))
     case "cpt" => Caput
     case "par" if fragmentoUrn.contains("par1u") => ParagrafoUnico
     case "par" => Paragrafo(unicoIntNumero(fragmentoUrn))
@@ -166,6 +167,6 @@ private[compacto] object AgrupadorUrn {
     case _ => throw new IllegalArgumentException(s"Urn Invalida: $fragmentoUrn")
   }
 
-  private def unicoIntNumero(fragmento: String) = NumUnico(Numero.IntNumero(fragmento.substring(3).toInt))
+  private def unicoIntNumero(fragmento: String) = UmNumero(Numero.IntNumero(fragmento.substring(3).toInt))
 
 }

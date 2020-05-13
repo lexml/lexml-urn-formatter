@@ -6,9 +6,8 @@ private[compacto] object Numeracao {
 
   case class IntervaloContinuo(inicio: Int, fim: Int) extends Numeracao
 
-  //TODO: 2 valores?
-  case class Numeros(list: List[Int]) extends Numeracao
+  case class DoisNumeros(n1: Int, n2: Int) extends Numeracao
 
-  case class NumUnico(n: Numero) extends Numeracao //TODO: UmNumero?
+  case class UmNumero(n: Numero) extends Numeracao
 
 }

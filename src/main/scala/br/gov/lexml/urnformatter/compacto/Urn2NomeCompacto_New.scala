@@ -2,6 +2,7 @@ package br.gov.lexml.urnformatter.compacto
 
 //TODO: Teste/verificar se algo quebra com dispositivo com numero grande (1000 e pk por exemplo)
 //TODO: teste com multiplo que tem caput
+//TODO: Precisa de teste com OMI, ALT..?
 object Urn2NomeCompacto_New {
 
   def format(urn: String): String = {

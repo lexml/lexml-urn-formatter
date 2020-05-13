@@ -4,11 +4,15 @@ import br.gov.lexml.urnformatter.compacto.UrnFragmento._
 
 private[compacto] case class ParsedUrn(inicioComum: String, disPrincipal: String, numero: Numero)
 
-private[compacto] case class GrupoUrns(dispPrincipal: TipoUrnFragmento, partesComum: List[UrnFragmento], numeracao: Numeracao)
+private[compacto] case class GrupoUrns(dispPrincipal: TipoUrnFragmento, fragmentosComum: List[UrnFragmento], numeracao: Numeracao)
 
 private[compacto] sealed abstract class TipoUrnFragmento
 
 private[compacto] object TipoUrnFragmento {
+
+  trait DispositivoAgrupador {
+    val conector: String
+  }
 
   case object Artigo extends TipoUrnFragmento
 
@@ -55,10 +59,6 @@ private[compacto] object TipoUrnFragmento {
 }
 
 private[compacto] object UrnFragmento {
-
-  trait DispositivoAgrupador {
-    val conector: String
-  }
 
   sealed abstract class UrnFragmento(val tipo: TipoUrnFragmento)
 
