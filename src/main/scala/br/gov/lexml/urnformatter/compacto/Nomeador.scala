@@ -87,7 +87,7 @@ private[compacto] object Nomeador {
       }
     case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
     case ns: DoisNumeros => s"Anexos ${formatRomano(ns.n1)} e ${formatRomano(ns.n2)}"
-    case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: $a.numeracao")
+    case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: ${a.numeracao}")
   }
 
   private def nomear(urnFragmento: UrnFragmento): String = urnFragmento match {
