@@ -66,7 +66,9 @@ private[compacto] object Nomeador {
       case UmNumero(Numero.IntNumero(i)) => s"${singular}${fmt(i)}"
       case UmNumero(Numero.StrNumero(s)) => {
         val partesNumero = s.split("-")
-        s"${singular}${fmt(partesNumero(0).toInt)}-${partesNumero(1)}"
+        val primeiraParte = fmt(partesNumero(0).toInt)
+        val segundaParte = Try(partesNumero(1).toInt).map(formatAlfa).getOrElse(partesNumero(1)).toUpperCase
+        s"${singular}${primeiraParte}-${segundaParte}"
       }
       case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
       case ns: DoisNumeros => s"${plural}${fmt(ns.n1)} e ${fmt(ns.n2)}"
