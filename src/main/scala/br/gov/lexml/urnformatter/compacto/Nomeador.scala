@@ -66,10 +66,13 @@ private[compacto] object Nomeador {
       case UmNumero(Numero.IntNumero(i)) => s"${singular}${fmt(i)}"
       case UmNumero(Numero.StrNumero(s)) => {
         val partesNumero = s.split("-")
-        s"${singular}${fmt(partesNumero(0).toInt)}-${partesNumero(1)}"
+        val primeiraParte = fmt(partesNumero(0).toInt)
+        val segundaParte = Try(partesNumero(1).toInt).map(formatAlfa).getOrElse(partesNumero(1)).toUpperCase
+        s"${singular}${primeiraParte}-${segundaParte}"
       }
       case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
       case ns: DoisNumeros => s"${plural}${fmt(ns.n1)} e ${fmt(ns.n2)}"
+      case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: $n")
     }
   }
 
@@ -84,6 +87,7 @@ private[compacto] object Nomeador {
       }
     case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
     case ns: DoisNumeros => s"Anexos ${formatRomano(ns.n1)} e ${formatRomano(ns.n2)}"
+    case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: ${a.numeracao}")
   }
 
   private def nomear(urnFragmento: UrnFragmento): String = urnFragmento match {

@@ -1,8 +1,11 @@
 package br.gov.lexml.urnformatter.compacto
 
 import scala.util.Try
+import org.slf4j.LoggerFactory;
 
 object Urn2NomeCompacto {
+
+  val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.Urn2NomeCompacto")
 
   def format(urn: String): String = {
     format(List(urn))
@@ -16,8 +19,7 @@ object Urn2NomeCompacto {
         (UrnParser.parse _ andThen AgrupadorUrn.agrupar andThen Nomeador.nomearGrupos) (urns)
       }.recover {
         case t: Throwable =>
-          println(s"Erro ao gerar urn compacta: ${t.getMessage}")
-          t.printStackTrace
+          logger.warn(s"Erro ao gerar urn compacta: $urns - ${t.getMessage}")
           ""
       }.get
     }
