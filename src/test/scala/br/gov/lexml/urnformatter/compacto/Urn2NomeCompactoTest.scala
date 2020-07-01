@@ -1140,4 +1140,16 @@ class Urn2NomeCompactoTest extends TestCase {
   def testReturnEmpty_QuandoHaUmErro(): Unit = {
     assertEquals("", Urn2NomeCompacto.format(List("unexpected_1")))
   }
+
+  def testLabel_art10_1_cpt_inc1() = {
+    assertEquals("art. 10-A, I", Urn2NomeCompacto.format(List("art10-1_cpt_inc1")))
+  }
+
+  def testLabel_art10_a_cpt_inc1() = {
+    assertEquals("art. 10-A, I", Urn2NomeCompacto.format(List("art10-a_cpt_inc1")))
+  }
+
+  def testLabel_art10_A_cpt_inc1() = {
+    assertEquals("art. 10-A, I", Urn2NomeCompacto.format(List("art10-A_cpt_inc1")))
+  }
 }
