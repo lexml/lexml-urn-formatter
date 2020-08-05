@@ -22,8 +22,9 @@ private[compacto] object Nomeador {
     go("", grupos)
   }
 
-  def nomearDispositivo(urn: String, urnAgrupador: String): String = {
-    urn ++ urnAgrupador
+  def nomearDispositivo(nomeDispositivo: String, urnAgrupador: String): String = {
+    // impl regra urnAgrupador 'cap' deveria retornar 'desde capitulo'
+    nomeDispositivo ++ urnAgrupador
   }
 
   private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {
