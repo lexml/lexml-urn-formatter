@@ -14,6 +14,19 @@ private[compacto] object UrnParser {
     ParsedUrn(inicioComum.mkString("_"), dispPrincipal, numero)
   }
 
+  def hasCommomContext(urn: String, context: String): Boolean =
+    context.startsWith(urn.split("_").init.mkString("_"))
+
+  type Urn = String
+  type Agrupador = String
+  def extractContext(urn: String, context: String): (Urn, Agrupador) = {
+    if (!hasCommomContext(urn, context)) throw new IllegalArgumentException("Sem contexto em comum.")
+    val urnSpplited = urn.split("_")
+    val urnWithoutContext = urnSpplited.last
+    val agrupador = urnSpplited.init.last.take(3)
+    (urnWithoutContext, agrupador)
+  }
+
   /**
    * Tratamento especial para caso de artigos, caso exista um.
    * Se existir um artigo, remove todos fragmentos antecessores à ele, exceto se for anexo.

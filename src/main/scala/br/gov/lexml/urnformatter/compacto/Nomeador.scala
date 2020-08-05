@@ -22,6 +22,10 @@ private[compacto] object Nomeador {
     go("", grupos)
   }
 
+  def nomearDispositivo(urn: String, urnAgrupador: String): String = {
+    urn ++ urnAgrupador
+  }
+
   private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {
     case TipoUrnFragmento.Artigo =>
       val contemAnexo = grupo.fragmentosComum.exists {
