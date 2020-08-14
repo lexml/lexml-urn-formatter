@@ -1,7 +1,7 @@
 package br.gov.lexml.urnformatter.compacto
 
 import br.gov.lexml.urnformatter.Urn2Format.{formatAlfa, formatOrdinal, formatRomano}
-import br.gov.lexml.urnformatter.compacto.Numeracao.{IntervaloContinuo, UmNumero, DoisNumeros}
+import br.gov.lexml.urnformatter.compacto.Numeracao.{IntervaloContinuo, UmNumero, DoisNumeros, SemNumero}
 import br.gov.lexml.urnformatter.compacto.TipoUrnFragmento.DispositivoAgrupador
 import br.gov.lexml.urnformatter.compacto.UrnFragmento._
 
@@ -23,8 +23,11 @@ private[compacto] object Nomeador {
   }
 
   def nomearDispositivo(nomeDispositivo: String, urnAgrupador: String): String = {
-    // impl regra urnAgrupador 'cap' deveria retornar 'desde capitulo'
-    nomeDispositivo ++ urnAgrupador
+    AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {
+      case d: DispositivoAgrupador =>
+        s"$nomeDispositivo ${d.pronomeDemostrativo} ${nomear(AgrupadorUrn.urnFragmento(urnAgrupador)).toLowerCase.trim}"
+      case d => throw new IllegalArgumentException(s"Tipo agrupador não esperado: $d")
+    }
   }
 
   private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {
@@ -77,6 +80,7 @@ private[compacto] object Nomeador {
       }
       case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
       case ns: DoisNumeros => s"${plural}${fmt(ns.n1)} e ${fmt(ns.n2)}"
+      case sn: SemNumero.type => singular
       case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: $n")
     }
   }
