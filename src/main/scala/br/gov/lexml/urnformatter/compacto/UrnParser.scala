@@ -15,7 +15,7 @@ private[compacto] object UrnParser {
   }
 
   def hasCommomContext(urn: String, context: String): Boolean =
-    context.startsWith(urn.split("_").init.mkString("_"))
+    urn.split("_").size > 1 && context.startsWith(urn.split("_").init.mkString("_"))
 
   type Urn = String
   type Agrupador = String

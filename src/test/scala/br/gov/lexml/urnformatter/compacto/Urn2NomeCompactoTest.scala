@@ -1156,4 +1156,8 @@ class Urn2NomeCompactoTest extends TestCase {
   def testLabel_tit3_cap4_sec2_with_context_tit3_cap4_sec1_art62_inc4() = {
     assertEquals("Seção II deste capítulo", Urn2NomeCompacto.format(List("tit3_cap4_sec2"), "tit3_cap4_sec1_art62_inc4"))
   }
+
+  def testLabel_anx1_with_context_cpp_prt1_liv1_art2_cpt() = {
+    assertEquals("Anexo I", Urn2NomeCompacto.format(List("anx1"), "cpp_prt1_liv1_art2_cpt"))
+  }
 }
