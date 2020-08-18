@@ -15,15 +15,20 @@ private[compacto] object UrnParser {
   }
 
   def hasCommomContext(urn: String, context: String): Boolean =
-    urn.split("_").size > 1 && context.startsWith(urn.split("_").init.mkString("_"))
+    urn.split("_").size > 1 && (context.startsWith(urn) || context.startsWith(urn.split("_").init.mkString("_")))
 
   type Urn = String
   type Agrupador = String
-  def extractContext(urn: String, context: String): (Urn, Agrupador) = {
+  def extractContext(urn: String, context: String): (Option[Urn], Agrupador) = {
     if (!hasCommomContext(urn, context)) throw new IllegalArgumentException("Sem contexto em comum.")
+
+    val extractContextRegex = s"""^($urn){0,1}(.*)""".r
+    val extractContextRegex(prefix, suffix) = context
+    val sameContext = prefix != null
+
     val urnSpplited = urn.split("_")
-    val urnWithoutContext = urnSpplited.last
-    val agrupador = urnSpplited.init.last.take(3)
+    val urnWithoutContext = if (sameContext) None else Some(urnSpplited.last)
+    val agrupador = if (sameContext) urnSpplited.last.take(3) else urnSpplited.init.last.take(3)
     (urnWithoutContext, agrupador)
   }
 
