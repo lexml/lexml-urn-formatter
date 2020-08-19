@@ -14,8 +14,11 @@ private[compacto] object UrnParser {
     ParsedUrn(inicioComum.mkString("_"), dispPrincipal, numero)
   }
 
-  def hasCommomContext(urn: String, context: String): Boolean =
-    urn.split("_").size > 1 && (context.startsWith(urn) || context.startsWith(urn.split("_").init.mkString("_")))
+  def hasCommomContext(urn: String, context: String): Boolean = {
+    val urnSpplited = urn.split("_")
+    val isArt = urnSpplited.last.contains("art")
+    !isArt && urnSpplited.size > 1 && (context.startsWith(urn) || context.startsWith(urnSpplited.init.mkString("_")))
+  }
 
   type Urn = String
   type Agrupador = String
