@@ -22,13 +22,13 @@ private[compacto] object Nomeador {
     go("", grupos)
   }
 
-  def nomearDispositivo(nomeDispositivo: Option[String], urnAgrupador: String): String = {
+  def nomearDispositivo(nomeDispositivo: Option[String], urnAgrupador: String): String =
     AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {
       case d: DispositivoAgrupador =>
-        s"${nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")}${nomear(AgrupadorUrn.urnFragmento(urnAgrupador)).toLowerCase.trim}"
+        val nomeDispositivoFmt = nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")
+        s"${nomeDispositivoFmt}${nomear(AgrupadorUrn.urnFragmento(urnAgrupador)).toLowerCase.trim}"
       case d => throw new IllegalArgumentException(s"Tipo agrupador não esperado: $d")
     }
-  }
 
   private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {
     case TipoUrnFragmento.Artigo =>

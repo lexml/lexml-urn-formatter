@@ -1,8 +1,11 @@
 package br.gov.lexml.urnformatter.compacto
 
 import scala.util.{Success, Try}
+import org.slf4j.LoggerFactory;
 
 private[compacto] object UrnParser {
+
+  val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.UrnParser")
 
   def parse(urns: List[String]): List[ParsedUrn] = urns.map { urn =>
     val fragmentos = (trataArtigo andThen trataCaputNoMeio andThen removeRaizEComponentePrincipal) (urn.split("_").toList)
@@ -17,6 +20,7 @@ private[compacto] object UrnParser {
   def hasCommomContext(urn: String, context: String): Boolean = {
     val urnSpplited = urn.split("_")
     val isArt = urnSpplited.last.contains("art")
+    logger.info(s"hasCommomContext: urn $urn - context $context")
     !isArt && urnSpplited.size > 1 && (context.startsWith(urn) || context.startsWith(urnSpplited.init.mkString("_")))
   }
 
@@ -31,6 +35,7 @@ private[compacto] object UrnParser {
 
     val urnSpplited = urn.split("_")
     val urnWithoutContext = if (sameContext) None else Some(urnSpplited.last)
+    logger.info(s"extractContext 1: $urn - ${urnSpplited} urnWithoutContext - ${urnWithoutContext}")
     val agrupador = if (sameContext) urnSpplited.last.take(3) else urnSpplited.init.last.take(3)
     (urnWithoutContext, agrupador)
   }
