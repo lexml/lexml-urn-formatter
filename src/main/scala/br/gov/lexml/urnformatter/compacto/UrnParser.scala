@@ -20,8 +20,9 @@ private[compacto] object UrnParser {
   def hasCommomContext(urn: String, context: String): Boolean = {
     val urnSpplited = urn.split("_")
     val isArt = urnSpplited.last.contains("art")
-    logger.info(s"hasCommomContext: urn $urn - context $context")
-    !isArt && urnSpplited.size > 1 && (context.startsWith(urn) || context.startsWith(urnSpplited.init.mkString("_")))
+    val commomContext = extractCommomContext(urn, context)
+    logger.info(s"hasCommomContext: urn $urn - context $context - commomContext $commomContext")
+    !isArt && urnSpplited.size > 1 && commomContext != null
   }
 
   type Urn = String
@@ -33,12 +34,19 @@ private[compacto] object UrnParser {
     val extractContextRegex(prefix, suffix) = context
     val sameContext = prefix != null
 
+    val commomContext = extractCommomContext(urn, context)
+    val commomContextSpplited = commomContext.split("_")
+    val commomContextSize = commomContextSpplited.size
+
     val urnSpplited = urn.split("_")
-    val urnWithoutContext = if (sameContext) None else Some(urnSpplited.last)
-    logger.info(s"extractContext 1: $urn - ${urnSpplited} urnWithoutContext - ${urnWithoutContext}")
-    val agrupador = if (sameContext) urnSpplited.last.take(3) else urnSpplited.init.last.take(3)
+    val urnWithoutContext = if (sameContext) None else Some(urnSpplited.takeRight(urnSpplited.size - commomContextSize).mkString("_"))
+    val agrupador = if (sameContext) urnSpplited.last.take(3) else commomContextSpplited.last.take(3)
+    logger.info(s"extractContext: $urn $urnSpplited - urnWithoutContext $urnWithoutContext - commomContext $commomContext - agrupador $agrupador")
     (urnWithoutContext, agrupador)
   }
+
+  private def extractCommomContext(urn: String, context: String): String =
+    urn.zip(context).takeWhile(Function.tupled(_ == _)).map(_._1).mkString.split("_").init.mkString("_")
 
   /**
    * Tratamento especial para caso de artigos, caso exista um.
