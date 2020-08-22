@@ -1176,4 +1176,21 @@ class Urn2NomeCompactoTest extends TestCase {
   def testLabel_cpp_tit3_cap4_art72_with_context_cpp_tit3_cap4_sec3_art80_cpt() = {
     assertEquals("art. 72", Urn2NomeCompacto.format(List("cpp_tit3_cap4_art72"), "cpp_tit3_cap4_sec3_art80_cpt"))
   }
+
+  def testLabel_anx1_prt1_cap2_art3_with_context_anx1_prt1_cap7_art15_cpt_inc() = {
+    assertEquals("art. 3º", Urn2NomeCompacto.format(List("anx1_prt1_cap2_art3"), "anx1_prt1_cap7_art15_cpt_inc"))
+  }
+
+  def testLabel_anx1_prt1_cap7_with_context_anx1_prt1_cap7_art15_cpt_inc2() = {
+    assertEquals("Capítulo VII deste anexo", Urn2NomeCompacto.format(List("anx1_prt1_cap7"), "anx1_prt1_cap7_art15_cpt_inc2"))
+  }
+
+  def testLabel_anx2_prt1_cap7_with_context_anx1_prt1_cap7_art15_cpt_inc2() = {
+    assertEquals("Anexo II", Urn2NomeCompacto.format(List("anx2"), "anx1_prt1_cap7_art15_cpt_inc2"))
+  }
+
+  def testLabel_anx2_tit3_cap3_sec2_with_context_anx1_prt1_cap7_art15_cpt_inc2() = {
+    assertEquals("Seção II do Capítulo III do Título III do Anexo II", Urn2NomeCompacto.format(List("anx2_tit3_cap3_sec2"), "anx1_prt1_cap7_art15_cpt_inc2"))
+  }
+
 }

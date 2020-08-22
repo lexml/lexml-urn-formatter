@@ -12,7 +12,7 @@ object Urn2NomeCompacto {
   def format(urns: List[String], context: String = ""): String =
     if (urns.size == 1 && UrnParser.hasCommonContext(urns.head, context)) {
       val (urnWithoutContext, agrupador) = UrnParser.extractContext(urns.head, context)
-      logger.info(s"formating with context: $urnWithoutContext: $urnWithoutContext - agrupador: $agrupador")
+      logger.info(s"formating with context. urnWithoutContext: $urnWithoutContext - agrupador: $agrupador")
       Nomeador.nomearDispositivo(urnWithoutContext.map(urn => format(List(urn))), agrupador)
     } else format(urns)
 

@@ -19,16 +19,19 @@ private[compacto] object UrnParser {
 
   def hasCommonContext(urn: String, context: String): Boolean = {
     val urnSpplited = urn.split("_")
-    val isArt = urnSpplited.last.contains("art")
     val commonContext = extractCommonContext(urn, context)
     logger.info(s"hasCommonContext: urn $urn - context $context - commonContext $commonContext")
-    !isArt && urnSpplited.size > 1 && commonContext != null
+    urnSpplited.size > 1 && commonContext != ""
   }
 
   type Urn = String
   type Agrupador = String
   def extractContext(urn: String, context: String): (Option[Urn], Agrupador) = {
     if (!hasCommonContext(urn, context)) throw new IllegalArgumentException("Sem contexto em comum.")
+
+    val urnSpplited = urn.split("_")
+    val isArt = urnSpplited.last.contains("art")
+    if (isArt) return (Some(urnSpplited.last), "")
 
     val extractContextRegex = s"""^($urn){0,1}(.*)""".r
     val extractContextRegex(prefix, suffix) = context
@@ -38,11 +41,13 @@ private[compacto] object UrnParser {
     val commonContextSpplited = commonContext.split("_")
     val commonContextSize = commonContextSpplited.size
 
-    val urnSpplited = urn.split("_")
     val urnWithoutContext = if (sameContext) None else Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_"))
     val agrupador = if (sameContext) urnSpplited.last.take(3) else commonContextSpplited.last.take(3)
-    logger.info(s"extractContext: $urn $urnSpplited - urnWithoutContext $urnWithoutContext - commonContext $commonContext - agrupador $agrupador")
-    (urnWithoutContext, agrupador)
+    logger.info(s"extractContext: urn $urn - context $context - urnWithoutContext $urnWithoutContext - commonContext $commonContext - agrupador $agrupador")
+
+    val isAnexoSameContext = urnSpplited.head.contains("anx") && urnSpplited.head == commonContextSpplited.head
+    if (isAnexoSameContext) (Some(urnSpplited.last), commonContextSpplited.head.take(3))
+    else (urnWithoutContext, agrupador)
   }
 
   /**

@@ -23,6 +23,8 @@ private[compacto] object Nomeador {
   }
 
   def nomearDispositivo(nomeDispositivo: Option[String], urnAgrupador: String): String =
+    if (urnAgrupador == "") nomeDispositivo.getOrElse("")
+    else
     AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {
       case d: DispositivoAgrupador =>
         val nomeDispositivoFmt = nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")
@@ -96,6 +98,7 @@ private[compacto] object Nomeador {
       }
     case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
     case ns: DoisNumeros => s"Anexos ${formatRomano(ns.n1)} e ${formatRomano(ns.n2)}"
+    case SemNumero => "Anexo"
     case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: ${a.numeracao}")
   }
 
