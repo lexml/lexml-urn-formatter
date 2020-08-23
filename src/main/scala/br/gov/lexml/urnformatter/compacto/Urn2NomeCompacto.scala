@@ -9,6 +9,12 @@ object Urn2NomeCompacto {
 
   def format(urn: String): String = format(List(urn))
 
+  /**
+   * Nomeia uma ou mais normas representadas por URN a partir de um norma contexto
+   * 
+   * urns: uma ou mais normas nomeadas
+   * context: uma norma que menciona ou nomeia a lista em urns 
+   */
   def format(urns: List[String], context: String = ""): String =
     if (urns.size == 1 && UrnParser.hasCommonContext(urns.head, context)) {
       val (urnWithoutContext, agrupador) = UrnParser.extractContext(urns.head, context)
