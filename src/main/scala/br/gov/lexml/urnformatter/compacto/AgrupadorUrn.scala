@@ -32,7 +32,7 @@ private[compacto] object AgrupadorUrn {
   }
 
   def urnFragmento(fragmentoUrn: String): UrnFragmento =
-    parse(fragmentoUrn, (a: String) => a { 0 })
+    parse(fragmentoUrn, (unused: String) => unused { 0 })
 
   private def criaGrupos(iniComum: String, dispPrincipal: String, numeros: List[Numero]): List[GrupoUrns] = {
     val nivelAtualAnexoPorFragmento = mutable.Map[String, Int]()

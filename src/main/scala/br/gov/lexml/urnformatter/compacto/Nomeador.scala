@@ -24,8 +24,7 @@ private[compacto] object Nomeador {
 
   def nomearDispositivo(nomeDispositivo: Option[String], urnAgrupador: String): String =
     if (urnAgrupador == "") nomeDispositivo.getOrElse("")
-    else
-    AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {
+    else AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {
       case d: DispositivoAgrupador =>
         val nomeDispositivoFmt = nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")
         s"${nomeDispositivoFmt}${nomear(AgrupadorUrn.urnFragmento(urnAgrupador)).toLowerCase.trim}"
