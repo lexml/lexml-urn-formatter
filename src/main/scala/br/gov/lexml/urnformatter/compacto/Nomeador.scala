@@ -28,7 +28,8 @@ private[compacto] object Nomeador {
       case d: DispositivoAgrupador =>
         val nomeDispositivoFmt = nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")
         s"${nomeDispositivoFmt}${nomear(AgrupadorUrn.urnFragmento(urnAgrupador)).toLowerCase.trim}"
-      case d => throw new IllegalArgumentException(s"Tipo agrupador não esperado: $d")
+
+      case _ => nomeDispositivo.getOrElse("")
     }
 
   private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {

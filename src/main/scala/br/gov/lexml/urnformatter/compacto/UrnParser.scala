@@ -52,11 +52,14 @@ private[compacto] object UrnParser {
 
   /**
   * Extract the deepest common context
-  * urn: cpp_tit3_cap3_sec2, context: cpp_tit3_cap4_sec1_art76_cpt_inc4
-  * result => cpp_tit3
+  * urn: cpp_tit3_cap3_sec2, context: cpp_tit3_cap4_sec1_art76_cpt_inc4, result => cpp_tit3
+  * urn: cpp_tit3_cap4_art72_par1, context: cpp_tit3_cap4_art72_cpt, result => cpp_tit3_cap4_art72
   */
-  private def extractCommonContext(urn: String, context: String): String =
-    urn.zip(context).takeWhile(Function.tupled(_ == _)).map(_._1).mkString.split("_").init.mkString("_")
+  private def extractCommonContext(urn: String, context: String): String = {
+    val commonContext = urn.zip(context).takeWhile(Function.tupled(_ == _)).map(_._1).mkString
+    if (commonContext.endsWith("_")) commonContext.split("_").mkString("_")
+    else commonContext.split("_").init.mkString("_")
+  }
 
   /**
    * Tratamento especial para caso de artigos, caso exista um.
