@@ -29,17 +29,18 @@ private[compacto] object UrnParser {
   def extractContext(urn: String, context: String): (Option[Urn], Agrupador) = {
     if (!hasCommonContext(urn, context)) throw new IllegalArgumentException("Sem contexto em comum.")
 
+    val commonContext = extractCommonContext(urn, context)
+    val commonContextSpplited = commonContext.split("_")
+    val commonContextSize = commonContextSpplited.size
+
     val urnSpplited = urn.split("_")
-    val isArt = urnSpplited.last.contains("art")
-    if (isArt) return (Some(urnSpplited.last), "")
+    val isArt = urnSpplited.last.startsWith("art")
+    val isFilhoDeAnx = urnSpplited.head.startsWith("anx")
+    if (isArt) return (Some(urnSpplited.last), if (isFilhoDeAnx) "anx" else "")
 
     val extractContextRegex = s"""^($urn){0,1}(.*)""".r
     val extractContextRegex(prefix, suffix) = context
     val sameContext = prefix != null
-
-    val commonContext = extractCommonContext(urn, context)
-    val commonContextSpplited = commonContext.split("_")
-    val commonContextSize = commonContextSpplited.size
 
     val urnWithoutContext = if (sameContext) None else Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_"))
     val agrupador = if (sameContext) urnSpplited.last.take(3) else commonContextSpplited.last.take(3)
