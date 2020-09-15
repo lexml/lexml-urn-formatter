@@ -25,11 +25,17 @@ private[compacto] object Nomeador {
   def nomearDispositivo(nomeDispositivo: Option[String], urnAgrupador: String): String =
     if (urnAgrupador == "") nomeDispositivo.getOrElse("")
     else AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {
-      case d: DispositivoAgrupador =>
+      case d: TipoUrnFragmento with DispositivoAgrupador =>
         val nomeDispositivoFmt = nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")
         s"${nomeDispositivoFmt}${nomear(AgrupadorUrn.urnFragmento(urnAgrupador)).toLowerCase.trim}"
 
-      case _ => nomeDispositivo.getOrElse("")
+      case d @ TipoUrnFragmento.Artigo =>
+        nomeDispositivo.getOrElse("artigo")
+
+      case d @ TipoUrnFragmento.Caput =>
+        nomeDispositivo.getOrElse("caput")
+
+      // case _ => nomeDispositivo.getOrElse("")
     }
 
   private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {

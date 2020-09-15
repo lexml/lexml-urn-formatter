@@ -6,28 +6,44 @@ private[compacto] case class ParsedUrn(inicioComum: String, disPrincipal: String
 
 private[compacto] case class GrupoUrns(dispPrincipal: TipoUrnFragmento, fragmentosComum: List[UrnFragmento], numeracao: Numeracao)
 
-private[compacto] sealed abstract class TipoUrnFragmento
+private[compacto] sealed abstract class TipoUrnFragmento {
+    val pronomeDemostrativo: String
+}
 
 private[compacto] object TipoUrnFragmento {
 
   trait DispositivoAgrupador {
     val conector: String
-    val pronomeDemostrativo: String
+    // val pronomeDemostrativo: String
   }
 
-  case object Artigo extends TipoUrnFragmento
+  case object Artigo extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
-  case object Caput extends TipoUrnFragmento
+  case object Caput extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
-  case object ParagrafoUnico extends TipoUrnFragmento
+  case object ParagrafoUnico extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
-  case object Inciso extends TipoUrnFragmento
+  case object Inciso extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
-  case object Alinea extends TipoUrnFragmento
+  case object Alinea extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "desta"
+  }
 
-  case object Paragrafo extends TipoUrnFragmento
+  case object Paragrafo extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
-  case object Item extends TipoUrnFragmento
+  case object Item extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
   case object Parte extends TipoUrnFragmento with DispositivoAgrupador {
     override val conector: String = "da"
