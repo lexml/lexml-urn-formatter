@@ -27,7 +27,7 @@ private[compacto] object Nomeador {
     else AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {
       case d: TipoUrnFragmento with DispositivoAgrupador =>
         val nomeDispositivoFmt = nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")
-        s"${nomeDispositivoFmt}${nomear(AgrupadorUrn.urnFragmento(urnAgrupador)).toLowerCase.trim}"
+        s"${nomeDispositivoFmt}${nomear(List(AgrupadorUrn.urnFragmento(urnAgrupador))).toLowerCase.trim}"
 
       case d @ TipoUrnFragmento.Artigo =>
         nomeDispositivo.getOrElse("artigo")
@@ -108,11 +108,14 @@ private[compacto] object Nomeador {
     case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: ${a.numeracao}")
   }
 
-  private def nomear(urnFragmento: UrnFragmento): String = urnFragmento match {
+  private def nomear(urnFragmento: UrnFragmento, fragmentos: List[UrnFragmento]): String = urnFragmento match {
     case a: Artigo => nomear(a.numeracao, "art.", "arts.", "a", formatOrdinal)
     case Caput => "caput"
     case ParagrafoUnico => "parágrafo único"
-    case i: Inciso => nomear(i.numeracao, "a", formatRomano)
+    case i: Inciso =>
+      val compacto = fragmentos.size > 1
+      if (compacto) nomear(i.numeracao, "a", formatRomano)
+      else nomear(i.numeracao, "inciso", "", "a", formatRomano).trim
     case a: Alinea => nomear(a.numeracao, "a", formatAlfa)
     case p: Paragrafo => nomear(p.numeracao, "§", "§§", "ao", formatOrdinal)
     case i: Item => nomear(i.numeracao, "a", _.toString)
@@ -125,22 +128,22 @@ private[compacto] object Nomeador {
     case p: Parte => nomear(p.numeracao, "Parte", "Partes", "a", _.toString)
   }
 
-  private def nomear(fragmentoes: List[UrnFragmento]): String = {
+  private def nomear(urnFragmentos: List[UrnFragmento]): String = {
     @tailrec
     def criarString(acc: String, fragmentoes: List[UrnFragmento]): String = {
       if (fragmentoes.isEmpty) {
         acc
       } else {
         (fragmentoes.head, fragmentoes.head.tipo) match {
-          case (h, _: DispositivoAgrupador) if acc.isEmpty => criarString(nomear(h), fragmentoes.tail)
-          case (h, d: DispositivoAgrupador) => criarString(s"${acc} ${d.conector} ${nomear(h)}", fragmentoes.tail)
-          case (h, _) if acc.isEmpty => criarString(nomear(h), fragmentoes.tail)
-          case (h, _) => criarString(s"${acc}, ${nomear(h)}", fragmentoes.tail)
+          case (h, _: DispositivoAgrupador) if acc.isEmpty => criarString(nomear(h, urnFragmentos), fragmentoes.tail)
+          case (h, d: DispositivoAgrupador) => criarString(s"${acc} ${d.conector} ${nomear(h, urnFragmentos)}", fragmentoes.tail)
+          case (h, _) if acc.isEmpty => criarString(nomear(h, urnFragmentos), fragmentoes.tail)
+          case (h, _) => criarString(s"${acc}, ${nomear(h, urnFragmentos)}", fragmentoes.tail)
         }
       }
     }
 
-    criarString("", fragmentoes)
+    criarString("", urnFragmentos)
   }
 
 }
