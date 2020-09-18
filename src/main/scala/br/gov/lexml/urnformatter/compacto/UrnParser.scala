@@ -61,9 +61,11 @@ private[compacto] object UrnParser {
   * urn: cpp_tit3_cap4_art72, cpp_tit3_cap4_art72_inc1 => cpp_tit3_cap4_art72
   */
   private def extractCommonContext(urn: String, context: String): String = {
-    val commonContext = context.zip(urn).takeWhile(Function.tupled(_ == _)).map(_._1).mkString
-    if (commonContext.endsWith("_") || commonContext == urn) commonContext.split("_").mkString("_")
-    else commonContext.split("_").init.mkString("_")
+    val commonContext = urn.zip(context).takeWhile(Function.tupled(_ == _)).map(_._1).mkString
+    val commonContextSpplited = commonContext.split("_")
+    val considerarUltimoFragmento = urn.split("_").contains(commonContextSpplited.last)
+    if (commonContext.endsWith("_") || commonContext == urn || considerarUltimoFragmento) commonContextSpplited.mkString("_")
+    else commonContextSpplited.init.mkString("_")
   }
 
   /**

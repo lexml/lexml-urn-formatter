@@ -35,6 +35,10 @@ private[compacto] object Nomeador {
       case d @ TipoUrnFragmento.Caput =>
         nomeDispositivo.getOrElse("caput")
 
+      case d @ TipoUrnFragmento.Paragrafo =>
+        nomeDispositivo.getOrElse("parágrafo")
+
+
       // case _ => nomeDispositivo.getOrElse("")
     }
 
@@ -117,7 +121,9 @@ private[compacto] object Nomeador {
       if (compacto) nomear(i.numeracao, "a", formatRomano)
       else nomear(i.numeracao, "inciso", "", "a", formatRomano).trim
     case a: Alinea => nomear(a.numeracao, "a", formatAlfa)
-    case p: Paragrafo => nomear(p.numeracao, "§", "§§", "ao", formatOrdinal)
+    case p: Paragrafo =>
+      val compacto = fragmentos.size > 1
+      nomear(p.numeracao, if (compacto) "§" else "parágrafo", "§§", "ao", formatOrdinal)
     case i: Item => nomear(i.numeracao, "a", _.toString)
     case c: Capitulo => nomear(c.numeracao, "Capítulo", "Capítulos", "a", formatRomano)
     case s: Secao => nomear(s.numeracao, "Seção", "Seções", "a", formatRomano)
