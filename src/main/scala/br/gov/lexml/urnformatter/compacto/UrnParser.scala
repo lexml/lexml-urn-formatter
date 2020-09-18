@@ -58,7 +58,8 @@ private[compacto] object UrnParser {
   * Extract the deepest common context
   * urn: cpp_tit3_cap3_sec2, context: cpp_tit3_cap4_sec1_art76_cpt_inc4, result => cpp_tit3
   * urn: cpp_tit3_cap4_art72_par1, context: cpp_tit3_cap4_art72_cpt, result => cpp_tit3_cap4_art72
-  * urn: cpp_tit3_cap4_art72, cpp_tit3_cap4_art72_inc1 => cpp_tit3_cap4_art72
+  * urn: cpp_tit3_cap4_art72, context: cpp_tit3_cap4_art72_inc1, result => cpp_tit3_cap4_art72
+  * urn: cpp_tit3_cap4_art72_par1_inc3, context: cpp_tit3_cap4_art72_par1, result => cpp_tit3_cap4_art72_par1
   */
   private def extractCommonContext(urn: String, context: String): String = {
     val commonContext = urn.zip(context).takeWhile(Function.tupled(_ == _)).map(_._1).mkString
