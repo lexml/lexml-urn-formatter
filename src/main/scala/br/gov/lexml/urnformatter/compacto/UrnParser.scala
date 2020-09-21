@@ -1,7 +1,8 @@
 package br.gov.lexml.urnformatter.compacto
 
 import scala.util.{Success, Try}
-import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory
+import scala.annotation.tailrec
 
 private[compacto] object UrnParser {
 
@@ -26,6 +27,23 @@ private[compacto] object UrnParser {
 
   type Urn = String
   type Agrupador = String
+  def extractContext(urns: List[String], context: String): (List[Urn], Agrupador) = {
+    @tailrec
+    def extract(urns: List[String], acc: List[Option[Urn]]): (List[Option[Urn]], Agrupador) = urns match  {
+      case head :: Nil =>
+        val result: (Option[Urn], Agrupador) = extractContext(head, context)
+        (acc :+ result._1, result._2)
+
+      case head :: tail =>
+        val result: (Option[Urn], Agrupador) = extractContext(head, context)
+        extract(tail, acc :+ result._1)
+
+      case Nil => (acc, "")
+    }
+    val result = extract(urns, List())
+    (result._1.flatten, result._2)
+  }
+
   def extractContext(urn: String, context: String): (Option[Urn], Agrupador) = {
     if (!hasCommonContext(urn, context)) throw new IllegalArgumentException("Sem contexto em comum.")
 
