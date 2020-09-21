@@ -8,7 +8,11 @@ import br.gov.lexml.urnformatter.compacto.UrnFragmento._
 import scala.annotation.tailrec
 import scala.util.Try
 
+import org.slf4j.LoggerFactory
+
 private[compacto] object Nomeador {
+
+  val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.Nomeador")
 
   def nomearGrupos(grupos: List[GrupoUrns]): String = {
     @tailrec
@@ -38,8 +42,9 @@ private[compacto] object Nomeador {
       case d @ TipoUrnFragmento.Paragrafo =>
         nomeDispositivo.getOrElse("parágrafo")
 
-
-      // case _ => nomeDispositivo.getOrElse("")
+      case _ =>
+        logger.warn(s"fallback nomearDispositivo: $nomeDispositivo - $urnAgrupador")
+        nomeDispositivo.getOrElse("")
     }
 
   private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {
