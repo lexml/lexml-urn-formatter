@@ -1006,11 +1006,11 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def testLabel_par1_2() {
-    assertEquals("parágrafos 1º e 2º", Urn2NomeCompacto.format(List("par1", "par2")))
+    assertEquals("§§ 1º e 2º", Urn2NomeCompacto.format(List("par1", "par2")))
   }
 
   def testLabel_par1_3() {
-    assertEquals("parágrafos 1º ao 3º", Urn2NomeCompacto.format(List("par1", "par2", "par3")))
+    assertEquals("§§ 1º ao 3º", Urn2NomeCompacto.format(List("par1", "par2", "par3")))
   }
 
   def testLabel_art1_2() {
@@ -1232,7 +1232,7 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def testLabel_cpp_tit3_cap4_art72_par1_context_cpp_tit3_cap4_art72_cpt() = {
-    assertEquals("parágrafo 1º", Urn2NomeCompacto.format(List("cpp_tit3_cap4_art72_par1"), "cpp_tit3_cap4_art72_cpt"))
+    assertEquals("§ 1º", Urn2NomeCompacto.format(List("cpp_tit3_cap4_art72_par1"), "cpp_tit3_cap4_art72_cpt"))
   }
 
   def testLabel_cpp_tit3_cap4_art72_inc1_context_cpp_tit3_cap4_art72_cpt() = {
@@ -1240,7 +1240,7 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def testLabel_cap4_art72_par1_context_art72_cpt() = {
-    assertEquals("parágrafo 1º", Urn2NomeCompacto.format(List("art72_par1"), "art72_cpt"))
+    assertEquals("§ 1º", Urn2NomeCompacto.format(List("art72_par1"), "art72_cpt"))
   }
 
   def testLabel_cap4_art72_par1_inc3_context_art72_cpt() = {
@@ -1275,14 +1275,14 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def testLabel_cap4_art72_par124_context_art72_cpt() {
-    assertEquals("parágrafos 1º e 2º e parágrafo 4º", Urn2NomeCompacto.format(List("art72_par1", "art72_par2", "art72_par4"), "art72_cpt"))
+    assertEquals("§§ 1º e 2º e § 4º", Urn2NomeCompacto.format(List("art72_par1", "art72_par2", "art72_par4"), "art72_cpt"))
   }
 
   def testLabel_cap4_art72_par1235_context_art72_cpt() {
-    assertEquals("parágrafos 1º ao 3º e parágrafo 5º", Urn2NomeCompacto.format(List("art72_par1", "art72_par2", "art72_par3",  "art72_par5"), "art72_cpt"))
+    assertEquals("§§ 1º ao 3º e § 5º", Urn2NomeCompacto.format(List("art72_par1", "art72_par2", "art72_par3",  "art72_par5"), "art72_cpt"))
   }
 
   def testLabel_cap4_art72_par1235_context_cap1_art72_cpt() {
-    assertEquals("parágrafos 1º ao 3º e parágrafo 5º", Urn2NomeCompacto.format(List("cap1_art72_par1", "cap1_art72_par2", "cap1_art72_par3",  "cap1_art72_par5"), "cap1_art72_cpt"))
+    assertEquals("§§ 1º ao 3º e § 5º", Urn2NomeCompacto.format(List("cap1_art72_par1", "cap1_art72_par2", "cap1_art72_par3",  "cap1_art72_par5"), "cap1_art72_cpt"))
   }
 }

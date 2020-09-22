@@ -129,7 +129,7 @@ private[compacto] object Nomeador {
     case p: Paragrafo =>
       val compacto = fragmentos.size > 1
       if (compacto) nomear(p.numeracao, "§", "§§", "ao", formatOrdinal)
-      else nomear(p.numeracao, "parágrafo", "parágrafos", "ao", formatOrdinal)
+      else nomear(p.numeracao, "§", "§§", "ao", formatOrdinal)
     case i: Item => nomear(i.numeracao, "a", _.toString)
     case c: Capitulo => nomear(c.numeracao, "Capítulo", "Capítulos", "a", formatRomano)
     case s: Secao => nomear(s.numeracao, "Seção", "Seções", "a", formatRomano)
