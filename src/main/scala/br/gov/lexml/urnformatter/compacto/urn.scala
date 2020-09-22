@@ -6,54 +6,78 @@ private[compacto] case class ParsedUrn(inicioComum: String, disPrincipal: String
 
 private[compacto] case class GrupoUrns(dispPrincipal: TipoUrnFragmento, fragmentosComum: List[UrnFragmento], numeracao: Numeracao)
 
-private[compacto] sealed abstract class TipoUrnFragmento
+private[compacto] sealed abstract class TipoUrnFragmento {
+    val pronomeDemostrativo: String
+}
 
 private[compacto] object TipoUrnFragmento {
 
   trait DispositivoAgrupador {
     val conector: String
+    // val pronomeDemostrativo: String
   }
 
-  case object Artigo extends TipoUrnFragmento
+  case object Artigo extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
-  case object Caput extends TipoUrnFragmento
+  case object Caput extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
-  case object ParagrafoUnico extends TipoUrnFragmento
+  case object ParagrafoUnico extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
-  case object Inciso extends TipoUrnFragmento
+  case object Inciso extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
-  case object Alinea extends TipoUrnFragmento
+  case object Alinea extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "desta"
+  }
 
-  case object Paragrafo extends TipoUrnFragmento
+  case object Paragrafo extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
-  case object Item extends TipoUrnFragmento
+  case object Item extends TipoUrnFragmento {
+    override val pronomeDemostrativo: String = "deste"
+  }
 
   case object Parte extends TipoUrnFragmento with DispositivoAgrupador {
     override val conector: String = "da"
+    override val pronomeDemostrativo: String = "desta"
   }
 
   case object Titulo extends TipoUrnFragmento with DispositivoAgrupador {
     override val conector: String = "do"
+    override val pronomeDemostrativo: String = "deste"
   }
 
   case object Capitulo extends TipoUrnFragmento with DispositivoAgrupador {
     override val conector: String = "do"
+    override val pronomeDemostrativo: String = "deste"
   }
 
   case object Secao extends TipoUrnFragmento with DispositivoAgrupador {
     override val conector: String = "da"
+    override val pronomeDemostrativo: String = "desta"
   }
 
   case object SubSecao extends TipoUrnFragmento with DispositivoAgrupador {
     override val conector: String = "da"
+    override val pronomeDemostrativo: String = "desta"
   }
 
   case object Livro extends TipoUrnFragmento with DispositivoAgrupador {
     override val conector: String = "do"
+    override val pronomeDemostrativo: String = "deste"
   }
 
   case object Anexo extends TipoUrnFragmento with DispositivoAgrupador {
     override val conector: String = "do"
+    override val pronomeDemostrativo: String = "deste"
   }
 
 }
@@ -91,3 +115,4 @@ private[compacto] object UrnFragmento {
   case class Anexo(numeracao: Numeracao, nivel: Int) extends UrnFragmento(TipoUrnFragmento.Anexo)
 
 }
+
