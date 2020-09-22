@@ -31,6 +31,9 @@ private[compacto] object AgrupadorUrn {
     v.grupos ++ criaGrupos(v.iniComum, v.dispPrincipal, v.numeros)
   }
 
+  def urnFragmento(fragmentoUrn: String): UrnFragmento =
+    parse(fragmentoUrn, (unused: String) => unused { 0 })
+
   private def criaGrupos(iniComum: String, dispPrincipal: String, numeros: List[Numero]): List[GrupoUrns] = {
     val nivelAtualAnexoPorFragmento = mutable.Map[String, Int]()
 
@@ -160,6 +163,6 @@ private[compacto] object AgrupadorUrn {
     case _ => throw new IllegalArgumentException(s"Urn Invalida: $fragmentoUrn")
   }
 
-  private def unicoIntNumero(fragmento: String) = UmNumero(Numero.IntNumero(fragmento.substring(3).toInt))
+  private def unicoIntNumero(fragmento: String) = Try(UmNumero(Numero.IntNumero(fragmento.substring(3).toInt))).getOrElse(Numeracao.SemNumero)
 
 }
