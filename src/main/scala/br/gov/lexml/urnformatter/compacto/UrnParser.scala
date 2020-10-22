@@ -68,7 +68,7 @@ private[compacto] object UrnParser {
     logger.info(s"extractContext: urn $urn - context $context - urnWithoutContext $urnWithoutContext - commonContext $commonContext - agrupador $agrupador")
 
     val isAnexoSameContext = urnSpplited.head.contains("anx") && urnSpplited.head == commonContextSpplited.head
-    if (isAnexoSameContext) (Some(urnSpplited.last), commonContextSpplited.head.take(3))
+    if (isAnexoSameContext && !urnWithoutContext.isDefined) (Some(urnSpplited.last), commonContextSpplited.head.take(3))
     else (urnWithoutContext, agrupador)
   }
 
