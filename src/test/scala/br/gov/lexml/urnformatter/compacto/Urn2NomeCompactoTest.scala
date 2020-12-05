@@ -1173,10 +1173,12 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("capítulo", Urn2NomeCompacto.format(List("cpp_tit1_cap4"), "cpp_tit1_cap4_art35_par1"))
   }
 
+  // interessante
   def testLabel_cpp_tit3_cap4_art72_with_context_cpp_tit3_cap4_sec3_art80_cpt() = {
     assertEquals("art. 72", Urn2NomeCompacto.format(List("cpp_tit3_cap4_art72"), "cpp_tit3_cap4_sec3_art80_cpt"))
   }
 
+  // interessante
   def testLabel_anx1_prt1_cap2_art3_with_context_anx1_prt1_cap7_art15_cpt_inc() = {
     assertEquals("art. 3º deste anexo", Urn2NomeCompacto.format(List("anx1_prt1_cap2_art3"), "anx1_prt1_cap7_art15_cpt_inc"))
   }
@@ -1255,6 +1257,30 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("inciso III", Urn2NomeCompacto.format(List("art72_cpt_par1_inc3"), "art72_cpt_par1"))
   }
 
+  def testLabel_cpp_tit2_art5_par1_context_cpp_tit2_art6_par4() = {
+    assertEquals("art. 5º, § 1º", Urn2NomeCompacto.format(List("cpp_tit2_art5_par1"), "cpp_tit2_art6_par4"))
+  }
+
+  def testLabel_anx100_tit22_art5_par1_context_anx100_tit22_art6_par4() = {
+    assertEquals("art. 5º, § 1º", Urn2NomeCompacto.format(List("anx100_tit22_art5_par1"), "anx100_tit22_art6_par4"))
+  }
+
+  def testLabel_cpp_tit2_art5_par1_context_cpp_tit200_art6_par4() = {
+    assertEquals("art. 5º, § 1º", Urn2NomeCompacto.format(List("cpp_tit2_art5_par1"), "cpp_tit200_art6_par4"))
+  }
+
+  def testLabel_cpp_tit2context_cpp_tit200() = {
+    assertEquals("Título II", Urn2NomeCompacto.format(List("cpp_tit2"), "cpp_tit200"))
+  }
+
+  def testLabel_cpp_tit2_sec2_context_cpp_tit2_sec1() = {
+    assertEquals("Seção II deste título", Urn2NomeCompacto.format(List("cpp_tit2_sec2"), "cpp_tit2_sec1"))
+  }
+
+  def testLabel_cpp_tit2_sec2_context_cpp_tit200_sec1() = {
+    assertEquals("Seção II do Título II", Urn2NomeCompacto.format(List("cpp_tit2_sec2"), "cpp_tit200_sec1"))
+  }
+
   /*
    *
    * se houver contexto, e a remissão for para dispositivos filhos do próprio **artigo**
@@ -1293,7 +1319,6 @@ class Urn2NomeCompactoTest extends TestCase {
   def testcpp_anexos_sequencias() {
     assertEquals("Anexos XXIX a XXXI, Anexo 1 do Anexo XXXI e Anexos XXXII e XXXIII", Urn2NomeCompacto.format(List("cpp_anx29", "cpp_anx30", "cpp_anx31", "cpp_anx31_anx1", "cpp_anx32", "cpp_anx33")))
   }
-
 
 
 /*
