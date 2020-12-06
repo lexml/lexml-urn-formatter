@@ -68,7 +68,7 @@ private[compacto] object UrnParser {
     if (urnSpplited.exists(_.startsWith("art"))) {
       println("## Contem art")
       //TODO: remove return
-      return (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "")
+      return (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), if (isFilhoDeAnx) "anx" else "")
     }
 
     ///
