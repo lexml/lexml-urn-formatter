@@ -27,33 +27,26 @@ private[compacto] object Nomeador {
   }
 
   def nomearDispositivo(nomeDispositivo: Option[String], urnAgrupadorInput: String): String = {
-    def removeRaizEComponentePrincipal: List[String] => List[String] = { fragmentos =>
-      fragmentos.filterNot(p => p.startsWith("lex") || p.startsWith("cpp"))
-    }
-    println(s"==((( nomeDispositivo: $nomeDispositivo - urnAgrupadorInput: $urnAgrupadorInput")
-    val urnAgrupador = removeRaizEComponentePrincipal(urnAgrupadorInput.split("_").toList).mkString("_")
-    println(s"==((( urnAgrupador: $urnAgrupador")
+    val urnAgrupador = UrnParser.removeRaizEComponentePrincipal(urnAgrupadorInput.split("_").toList).mkString("_")
 
     if (urnAgrupador == "") nomeDispositivo.getOrElse("")
-    else {
-      AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {
-        case d: TipoUrnFragmento with DispositivoAgrupador =>
-          val nomeDispositivoFmt = nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")
-          s"${nomeDispositivoFmt}${nomear(List(AgrupadorUrn.urnFragmento(urnAgrupador))).toLowerCase.trim}"
+    else AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {
+      case d: TipoUrnFragmento with DispositivoAgrupador =>
+        val nomeDispositivoFmt = nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")
+        s"${nomeDispositivoFmt}${nomear(List(AgrupadorUrn.urnFragmento(urnAgrupador))).toLowerCase.trim}"
 
-        case d @ TipoUrnFragmento.Artigo =>
-          nomeDispositivo.getOrElse("artigo")
+      case d@TipoUrnFragmento.Artigo =>
+        nomeDispositivo.getOrElse("artigo")
 
-        case d @ TipoUrnFragmento.Caput =>
-          nomeDispositivo.getOrElse("caput")
+      case d@TipoUrnFragmento.Caput =>
+        nomeDispositivo.getOrElse("caput")
 
-        case d @ TipoUrnFragmento.Paragrafo =>
-          nomeDispositivo.getOrElse("parágrafo")
+      case d@TipoUrnFragmento.Paragrafo =>
+        nomeDispositivo.getOrElse("parágrafo")
 
-        case _ =>
-          logger.warn(s"fallback nomearDispositivo: $nomeDispositivo - $urnAgrupador")
-          nomeDispositivo.getOrElse("")
-      }
+      case _ =>
+        logger.warn(s"fallback nomearDispositivo: $nomeDispositivo - $urnAgrupador")
+        nomeDispositivo.getOrElse("")
     }
   }
 
