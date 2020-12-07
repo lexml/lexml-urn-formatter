@@ -26,26 +26,29 @@ private[compacto] object Nomeador {
     go("", grupos)
   }
 
-  def nomearDispositivo(nomeDispositivo: Option[String], urnAgrupador: String): String =
+  def nomearDispositivo(nomeDispositivo: Option[String], urnAgrupadorInput: String): String = {
+    val urnAgrupador = UrnParser.removeRaizEComponentePrincipal(urnAgrupadorInput.split("_").toList).mkString("_")
+
     if (urnAgrupador == "") nomeDispositivo.getOrElse("")
     else AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {
       case d: TipoUrnFragmento with DispositivoAgrupador =>
         val nomeDispositivoFmt = nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")
         s"${nomeDispositivoFmt}${nomear(List(AgrupadorUrn.urnFragmento(urnAgrupador))).toLowerCase.trim}"
 
-      case d @ TipoUrnFragmento.Artigo =>
+      case d@TipoUrnFragmento.Artigo =>
         nomeDispositivo.getOrElse("artigo")
 
-      case d @ TipoUrnFragmento.Caput =>
+      case d@TipoUrnFragmento.Caput =>
         nomeDispositivo.getOrElse("caput")
 
-      case d @ TipoUrnFragmento.Paragrafo =>
+      case d@TipoUrnFragmento.Paragrafo =>
         nomeDispositivo.getOrElse("parágrafo")
 
       case _ =>
         logger.warn(s"fallback nomearDispositivo: $nomeDispositivo - $urnAgrupador")
         nomeDispositivo.getOrElse("")
     }
+  }
 
   private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {
     case TipoUrnFragmento.Artigo =>

@@ -27,9 +27,10 @@ private[compacto] object UrnParser {
 
   type Urn = String
   type Agrupador = String
+
   def extractContext(urns: List[String], context: String): (List[Urn], Agrupador) = {
     @tailrec
-    def extract(urns: List[String], acc: List[Option[Urn]]): (List[Option[Urn]], Agrupador) = urns match  {
+    def extract(urns: List[String], acc: List[Option[Urn]]): (List[Option[Urn]], Agrupador) = urns match {
       case head :: Nil =>
         val result: (Option[Urn], Agrupador) = extractContext(head, context)
         (acc :+ result._1, result._2)
@@ -40,6 +41,7 @@ private[compacto] object UrnParser {
 
       case Nil => (acc, "")
     }
+
     val result = extract(urns, List())
     (result._1.flatten, result._2)
   }
@@ -54,33 +56,38 @@ private[compacto] object UrnParser {
     val urnSpplited = urn.split("_")
     val isArt = urnSpplited.last.startsWith("art")
     val isFilhoDeAnx = urnSpplited.head.startsWith("anx")
+
     if (isArt) {
-      return if (commonContext == urn) (None, "art")
-      else (Some(urnSpplited.last), if (isFilhoDeAnx) "anx" else "")
+      if (commonContext == urn) (None, "art") else (Some(urnSpplited.last), if (isFilhoDeAnx) "anx" else "")
+    } else if (urnSpplited.exists(_.startsWith("art"))) {
+      (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), if (isFilhoDeAnx) "anx" else "")
+    } else {
+      val extractContextRegex = s"""^($urn)(_(.*)|$$)""".r
+      val maybePrefix = extractContextRegex.findFirstIn(context)
+
+      val (urnWithoutContext, agrupador) = maybePrefix match {
+        case Some(_) => (None, urnSpplited.last.take(3))
+        case None => (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), commonContextSpplited.last.take(3))
+      }
+
+      val isAnexoSameContext = isFilhoDeAnx && urnSpplited.head == commonContextSpplited.head
+      if (isAnexoSameContext) {
+        (Some(urnSpplited.last), commonContextSpplited.head.take(3))
+      } else {
+        (urnWithoutContext, agrupador)
+      }
     }
-
-    val extractContextRegex = s"""^($urn){0,1}(.*)""".r
-    val extractContextRegex(prefix, suffix) = context
-    val sameContext = prefix != null
-
-    val urnWithoutContext = if (sameContext) None else Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_"))
-    val agrupador = if (sameContext) urnSpplited.last.take(3) else commonContextSpplited.last.take(3)
-    logger.info(s"extractContext: urn $urn - context $context - urnWithoutContext $urnWithoutContext - commonContext $commonContext - agrupador $agrupador")
-
-    val isAnexoSameContext = urnSpplited.head.contains("anx") && urnSpplited.head == commonContextSpplited.head
-    if (isAnexoSameContext) (Some(urnSpplited.last), commonContextSpplited.head.take(3))
-    else (urnWithoutContext, agrupador)
   }
 
   /**
-  * Extract the deepest common context
-  * urn: cpp_tit3_cap3_sec2, context: cpp_tit3_cap4_sec1_art76_cpt_inc4, result => cpp_tit3
-  * urn: cpp_tit3_cap4_art72_par1, context: cpp_tit3_cap4_art72_cpt, result => cpp_tit3_cap4_art72
-  * urn: cpp_tit3_cap4_art72, context: cpp_tit3_cap4_art72_inc1, result => cpp_tit3_cap4_art72
-  * urn: cpp_tit3_cap4_art72_par1_inc3, context: cpp_tit3_cap4_art72_par1, result => cpp_tit3_cap4_art72_par1
-  */
+   * Extract the deepest common context
+   * urn: cpp_tit3_cap3_sec2, context: cpp_tit3_cap4_sec1_art76_cpt_inc4, result => cpp_tit3
+   * urn: cpp_tit3_cap4_art72_par1, context: cpp_tit3_cap4_art72_cpt, result => cpp_tit3_cap4_art72
+   * urn: cpp_tit3_cap4_art72, context: cpp_tit3_cap4_art72_inc1, result => cpp_tit3_cap4_art72
+   * urn: cpp_tit3_cap4_art72_par1_inc3, context: cpp_tit3_cap4_art72_par1, result => cpp_tit3_cap4_art72_par1
+   */
   private def extractCommonContext(urn: String, context: String): String = {
-    val commonContext = urn.zip(context).takeWhile(Function.tupled(_ == _)).map(_._1).mkString
+    val commonContext = urn.split("_").zip(context.split("_")).takeWhile(Function.tupled(_ == _)).map(_._1).mkString("_")
     val commonContextSpplited = commonContext.split("_")
     val considerarUltimoFragmento = urn.split("_").contains(commonContextSpplited.last)
     if (commonContext.endsWith("_") || commonContext == urn || considerarUltimoFragmento) commonContextSpplited.mkString("_")
@@ -115,7 +122,7 @@ private[compacto] object UrnParser {
     }
   }
 
-  private def removeRaizEComponentePrincipal: List[String] => List[String] = { fragmentos =>
+  private[compacto] def removeRaizEComponentePrincipal: List[String] => List[String] = { fragmentos =>
     fragmentos.filterNot(p => p.startsWith("lex") || p.startsWith("cpp"))
   }
 
