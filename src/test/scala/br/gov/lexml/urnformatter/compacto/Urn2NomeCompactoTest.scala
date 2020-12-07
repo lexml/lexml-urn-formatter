@@ -1289,4 +1289,13 @@ class Urn2NomeCompactoTest extends TestCase {
   def testLabel_anx2_art3_inc3_context_anx2_art9_par1() = {
     assertEquals("art. 9º, § 1º deste anexo", Urn2NomeCompacto.format(List("anx2_art9_par1"), "anx2_art3_inc3"))
   }
+  
+  def testcpp_anx30_anx1() {
+    assertEquals("Anexo 1 do Anexo XXX", Urn2NomeCompacto.format(List("cpp_anx30_anx1")))
+  }
+
+  def testcpp_anexos_sequencias() {
+    assertEquals("Anexos XXIX a XXXI, Anexo 1 do Anexo XXXI e Anexos XXXII e XXXIII", Urn2NomeCompacto.format(List("cpp_anx29", "cpp_anx30", "cpp_anx31", "cpp_anx31_anx1", "cpp_anx32", "cpp_anx33")))
+  }
+  
 }
