@@ -9,7 +9,7 @@ private[compacto] object UrnParser {
   val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.UrnParser")
 
   def parse(urns: List[String]): List[ParsedUrn] = urns.map { urn =>
-    val fragmentos = (trataArtigo andThen trataCaputNoMeio andThen removeRaizEComponentePrincipal) (urn.split("_").toList)
+    val fragmentos = (trataArtigo andThen trataCaputNoMeio andThen removeRaizECppEAtc) (urn.split("_").toList)
     val ultimoFragmento = fragmentos.last
     val dispPrincipal = parseTipoDispositivo(ultimoFragmento)
     // Inicio Comum contém os fragmentos + o tipo do dispositivo principal, sem numeracao
@@ -122,8 +122,8 @@ private[compacto] object UrnParser {
     }
   }
 
-  private[compacto] def removeRaizEComponentePrincipal: List[String] => List[String] = { fragmentos =>
-    fragmentos.filterNot(p => p.startsWith("lex") || p.startsWith("cpp"))
+  private[compacto] def removeRaizECppEAtc: List[String] => List[String] = { fragmentos =>
+    fragmentos.filterNot(p => p.startsWith("lex") || p.startsWith("cpp") || p.startsWith("atc"))
   }
 
   private def parseTipoDispositivo(fragmento: String): String =
