@@ -112,7 +112,7 @@ private[compacto] object Nomeador {
         s"Anexo ${formatAlfa(n).toUpperCase}"
       }
     case UmNumero(Numero.StrNumero(n)) =>
-        s"Anexo $n"
+        s"Anexo ${n.split(";").last}"
     case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
     case ns: DoisNumeros => s"Anexos ${formatRomano(ns.n1)} e ${formatRomano(ns.n2)}"
     case SemNumero => "Anexo"

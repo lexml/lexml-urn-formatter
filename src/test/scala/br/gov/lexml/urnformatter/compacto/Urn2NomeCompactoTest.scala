@@ -1298,13 +1298,13 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("Anexo IX", Urn2NomeCompacto.format("anx;IX"))
   }
 
-  // def test_cpp_anx1() = {
-  //   assertEquals("Anexo 11", Urn2NomeCompacto.format("cpp_anx;11"))
-  // }
+  def test_cpp_anx1() = {
+    assertEquals("Anexo 11", Urn2NomeCompacto.format("cpp_anx;11"))
+  }
 
-  // def test_anx1() = {
-  //   assertEquals("Anexo 1", Urn2NomeCompacto.format("anx;1"))
-  // }
+  def test_anx1() = {
+    assertEquals("Anexo 1", Urn2NomeCompacto.format("anx;1"))
+  }
 
   def test_cpp_anxI() = {
     assertEquals("Anexo I", Urn2NomeCompacto.format("cpp_anx;I"))
