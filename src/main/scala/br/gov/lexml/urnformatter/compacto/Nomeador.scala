@@ -27,7 +27,7 @@ private[compacto] object Nomeador {
   }
 
   def nomearDispositivo(nomeDispositivo: Option[String], urnAgrupadorInput: String): String = {
-    val urnAgrupador = UrnParser.removeRaizEComponentePrincipal(urnAgrupadorInput.split("_").toList).mkString("_")
+    val urnAgrupador = UrnParser.removeRaizECppEAtc(urnAgrupadorInput.split("_").toList).mkString("_")
 
     if (urnAgrupador == "") nomeDispositivo.getOrElse("")
     else AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {

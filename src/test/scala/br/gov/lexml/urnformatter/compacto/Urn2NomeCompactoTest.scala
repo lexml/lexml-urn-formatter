@@ -1346,6 +1346,25 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("Anexo I", Urn2NomeCompacto.format("anx;I"))
   }
 
+  def test_clausula_revogacao_enorme() = {
+    assertEquals("arts. 1º e 2º e art. 2º, caput e arts. 3º e 4º e arts. 6º e 7º e art. 7º, § 3º e Capítulo III e arts. 9º a 16 e art. 16, caput e arts. 17 e 18 e Anexo 3, Anexo 4 e Anexo 5",
+      Urn2NomeCompacto.format(List("cpp_atc_art1", "cpp_atc_art2", "cpp_atc_art2_cpt", "cpp_atc_cap1_art3",
+        "cpp_atc_cap1_art4", "cpp_atc_cap2_art6", "cpp_atc_cap2_art7", "cpp_atc_cap2_art7_par3", "cpp_atc_cap3", "cpp_atc_cap3_art9",
+        "cpp_atc_cap4_art10", "cpp_atc_cap4_art11", "cpp_atc_cap4_art12", "cpp_atc_cap4_art13", "cpp_atc_cap4_art14", "cpp_atc_cap4_art15",
+        "cpp_atc_cap4_art16", "cpp_atc_cap4_art16_cpt", "cpp_atc_cap4_art17", "cpp_atc_cap4_art18", "cpp_anx;3", "cpp_anx;4", "cpp_anx;5")))
+  }
+
+  def test_cpp_atc_art1() = {
+    assertEquals("art. 1º", Urn2NomeCompacto.format(List("cpp_atc_art1")))
+  }
+
+  def test_cpp_atc_art1_cpp_atc_cap3() = {
+    assertEquals("art. 1º e Capítulo III", Urn2NomeCompacto.format(List("cpp_atc_art1", "cpp_atc_cap3")))
+  }
+
+  def test_cpp_art1_cpp_cap3() = {
+    assertEquals("art. 1º e Capítulo III", Urn2NomeCompacto.format(List("cpp_art1", "cpp_cap3")))
+  }
 /*
   // para implementação futura:
 
