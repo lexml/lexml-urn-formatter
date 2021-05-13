@@ -1,7 +1,5 @@
 package br.gov.lexml.urnformatter
 
-import br.gov.lexml.parser.pl.output.LexmlRenderer
-
 object Urn2Format {
 
   val compReN = "^([a-z]+\\*+?|[a-z]+)_((?:1u|[0-9-])*)$".r
@@ -23,11 +21,35 @@ object Urn2Format {
     case x => Algum(x.toInt)
   }
 
-  def formatOrdinal(num: Int): String = LexmlRenderer.renderOrdinal(num)
+  def formatOrdinal(num: Int): String = 
+    renderNumeral(num) + (if (num < 10) "º" else "")
 
-  def formatRomano(n: Int): String = LexmlRenderer.renderRomano(n)
+  def renderNumeral(num : Int) : String = {
+        if (num > 1000) { f"${renderNumeral(num / 1000)}.${num % 1000}%03d" }
+        else { num.toString }
+  }
 
-  def formatAlfa(n: Int): String = LexmlRenderer.renderAlphaSeq(n - 1)
+  def formatRomano(num: Int): String = {
+     def rom(cX: String, cV: String, cI: String, d: Int): String = d match {
+        case 0 ⇒ ""
+        case 9 ⇒ cI + cX
+        case 4 ⇒ cI + cV
+        case _ if d >= 5 ⇒ cV + (cI * (d - 5))
+        case _ ⇒ cI * d
+     }
+     ("M" * (num / 1000)) + rom("M", "D", "C", (num / 100) % 10) + rom("C", "L", "X", (num / 10) % 10) + rom("X", "V", "I", num % 10)
+  }
+
+  def formatAlfa(num: Int): String = {
+     def rend(n: Int): String = n match {
+         case 0 ⇒ ""
+         case _ ⇒ {
+           val nn = n - 1
+           rend(nn / 26) + ('a' + (nn % 26)).asInstanceOf[Char]
+         }
+     }
+     rend(num)
+  }
 
   def formatComplementos(cs: List[Numero]): String = cs.map(c => formatComplemento(c.n + 1)).map("-" + _).mkString("")
   def formatComplemento(n: Int): String = formatAlfa(n - 1).toUpperCase

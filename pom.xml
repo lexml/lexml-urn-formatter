@@ -4,81 +4,71 @@
 	<artifactId>lexml-urn-formatter</artifactId>
 	<version>0.0.28-SNAPSHOT</version>
 
+	<licenses>
+	    <license>
+		<name>GPLv3</name>
+		<url>https://www.gnu.org/licenses/gpl-3.0.html</url>
+	    </license>
+	</licenses>
+ 
+	<developers>
+	      <developer>
+		<id>jrafael</id>
+		<name>João Nicola</name>
+		<email>jrafael@senado.leg.br</email>
+	      </developer>
+	 </developers>
+
+	<distributionManagement>
+	    <snapshotRepository>
+		<id>ossrh</id>
+		<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+	    </snapshotRepository>
+	    <repository>
+		<id>ossrh</id>
+		<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+	    </repository>
+	</distributionManagement>
+
 	<properties>
-		<scala.version>2.11.12</scala.version>
-		<scala.lib.version>${scala.version}</scala.lib.version>
+		<scala.version>2.13</scala.version>
+		<scala.lib.version>${scala.version}.2</scala.lib.version>
 		<java.version>11</java.version>
-
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-		<!-- github server corresponds to entry in ~/.m2/settings.xml -->
-		<github.global.server>github</github.global.server>
-
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 	</properties>
 
 	<scm>
-		<url>https://github.com/lexml/${project.artifactId}</url>
-		<developerConnection>scm:git:https://github.com/lexml/${project.artifactId}.git</developerConnection>
-		<connection>scm:git:https://github.com/lexml/${project.artifactId}.git</connection>
-		<tag>0.0.18</tag>
+		<url>https://github.com/lexml/lexml-urn-formatter</url>
+		<developerConnection>scm:git:https://github.com/lexml/lexml-urn-formatter.git</developerConnection>
+		<connection>scm:git:https://github.com/lexml/lexml-urn-formatter.git</connection>
+		<tag>HEAD</tag>
 	</scm>
 
-	<distributionManagement>
-		<repository>
-			<id>bintray-lexml</id>
-			<name>Bintray ${project.artifactId} Repository</name>
-			<url>https://api.bintray.com/maven/lexml/lexml/lexml-urn-formatter/;publish=1</url>
-		</repository>
-	</distributionManagement>
-
-	<repositories>
-		<repository>
-			<id>jcenter</id>
-			<name>jcenter</name>
-			<url>https://jcenter.bintray.com</url>
-		</repository>
-	</repositories>
-
-
 	<dependencies>
-
-		<!-- lexml -->
-		<dependency>
-			<groupId>br.gov.lexml.parser.pl</groupId>
-			<artifactId>lexml-parser-projeto-lei</artifactId>
-			<version>1.11.16</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.logging.log4j</groupId>
-					<artifactId>log4j-slf4j-impl</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.scala-lang</groupId>
-					<artifactId>scala-library</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 		<dependency>
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
-			<version>${scala.version}</version>
+			<version>${scala.lib.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<artifactId>slf4j-api</artifactId>
 			<version>1.7.22</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.22</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -106,34 +96,29 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<groupId>net.alchim31.maven</groupId>
-				<artifactId>scala-maven-plugin</artifactId>
-				<version>3.4.4</version>
-				<executions>
-					<execution>
-						<id>scala-compile-first</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>add-source</goal>
-							<goal>compile</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>scala-test-compile</id>
-						<phase>process-test-resources</phase>
-						<goals>
-							<goal>testCompile</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<args>
-						<arg>-nobootcp</arg>
-					</args>
-					<scalaVersion>${scala.version}</scalaVersion>
-					<scalaCompatVersion>${scala.version}</scalaCompatVersion>
-				</configuration>
+	    		<plugin>
+			   <groupId>net.alchim31.maven</groupId>
+			   <artifactId>scala-maven-plugin</artifactId>
+			   <version>4.3.1</version>
+			   <executions>
+			       <execution>
+				   <goals>
+				       <goal>compile</goal>
+				       <goal>testCompile</goal>
+				   </goals>
+			       </execution>
+			   </executions>
+			   <configuration>
+			       <!--                    <sourceDir>src/main/scala</sourceDir> -->
+			       <fork>true</fork>
+			       <scalaVersion>${scala.lib.version}</scalaVersion>
+			       <scalaCompatVersion>${scala.lib.version}</scalaCompatVersion>
+			       <jvmArgs>
+				   <jvmArg>-Xms1024m</jvmArg>
+				   <jvmArg>-Xmx4096m</jvmArg>
+				   <jvmArg>-Xss16m</jvmArg>
+			       </jvmArgs>
+			   </configuration>
 			</plugin>
 
 			<plugin>
@@ -166,19 +151,92 @@
 					</execution>
 				</executions>
 			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>3.0.0-M1</version>
-				<configuration>
-					<detail>true</detail>
-					<allowTimestampedSnapshots>true</allowTimestampedSnapshots>
-					<tagNameFormat>@{project.version}</tagNameFormat>
-				</configuration>
-			</plugin>
-
 		</plugins>
 	</build>
+    <profiles>
+      <profile>
+	<id>release</id>
+	<activation>
+	  <activeByDefault>false</activeByDefault>
+	</activation>
+	<build>
+	  <plugins>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-release-plugin</artifactId>
+		<version>2.5.3</version>
+		<configuration>
+		    <detail>true</detail>
+		    <tagNameFormat>@{project.version}</tagNameFormat>
+		</configuration>
+	    </plugin>
+	      <plugin>
+		  <groupId>org.sonatype.plugins</groupId>
+		  <artifactId>nexus-staging-maven-plugin</artifactId>
+		  <version>1.6.7</version>
+		  <extensions>true</extensions>
+		  <configuration>
+		      <serverId>ossrh</serverId>
+		      <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+		      <autoReleaseAfterClose>true</autoReleaseAfterClose>
+		  </configuration>
+	      </plugin>
+	    <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-source-plugin</artifactId>
+		<version>3.0.1</version>
+		<executions>
+		    <execution>
+			<id>attach-sources</id>
+			<goals>
+			    <goal>jar-no-fork</goal>
+			</goals>
+		    </execution>
+		</executions>
+	      </plugin>
+	  <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-jar-plugin</artifactId>
+	    <executions>
+		<execution>
+		    <id>empty-javadoc-jar</id>
+		    <phase>package</phase>
+		    <goals>
+			<goal>jar</goal>
+		    </goals>
+		    <configuration>
+			<classifier>javadoc</classifier>
+			<classesDirectory>${basedir}/javadoc</classesDirectory>
+		    </configuration>
+		</execution>
+	     </executions>
+	   </plugin>
+	      <plugin>
+		  <groupId>org.apache.maven.plugins</groupId>
+		  <artifactId>maven-gpg-plugin</artifactId>
+		  <version>3.0.1</version>
+		  <executions>
+		      <execution>
+			  <id>sign-artifacts</id>
+			  <phase>verify</phase>
+			  <goals>
+			      <goal>sign</goal>
+			  </goals>
+			  <configuration>
+			      <!-- Prevent gpg from using pinentry programs. Fixes: gpg: signing
+				  failed: Inappropriate ioctl for device -->
+			      <gpgArguments>
+				  <arg>--pinentry-mode</arg>
+				  <arg>loopback</arg>
+			      </gpgArguments>
+			  </configuration>
+		      </execution>
+		  </executions>
+	      </plugin>
+	 </plugins>
+       </build>
+
+       </profile>
+    </profiles>
 
 </project>
