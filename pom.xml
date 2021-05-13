@@ -3,6 +3,9 @@
 	<groupId>br.gov.lexml</groupId>
 	<artifactId>lexml-urn-formatter</artifactId>
 	<version>0.0.33-SNAPSHOT</version>
+	<name>LexML Brazil URN Formatter</name>
+	<description>Library with functions for formatting LexML Brazil URN references in portuguese</description>
+	<url>https://github.com/lexml/lexml-urn-formatter</url>
 
 	<licenses>
 	    <license>
