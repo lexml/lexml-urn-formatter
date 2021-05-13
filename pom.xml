@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.gov.lexml</groupId>
 	<artifactId>lexml-urn-formatter</artifactId>
-	<version>0.0.34-SNAPSHOT</version>
+	<version>0.0.33-SNAPSHOT</version>
 
 	<licenses>
 	    <license>
