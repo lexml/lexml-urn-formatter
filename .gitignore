@@ -29,4 +29,5 @@ project/plugins/project/
 # IntelliJ Idea
 lexml-urn-formatter.iml
 .idea/
-*.iml
+*.iml**/*.swp
+.*.swp
