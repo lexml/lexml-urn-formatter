@@ -998,11 +998,11 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def testLabel_inc1_2() {
-    assertEquals("I e II", Urn2NomeCompacto.format(List("inc1", "inc2")))
+    assertEquals("incisos I e II", Urn2NomeCompacto.format(List("inc1", "inc2")))
   }
 
   def testLabel_inc1_3() {
-    assertEquals("I a III", Urn2NomeCompacto.format(List("inc1", "inc2", "inc3")))
+    assertEquals("incisos I a III", Urn2NomeCompacto.format(List("inc1", "inc2", "inc3")))
   }
 
   def testLabel_par1_2() {
@@ -1152,4 +1152,228 @@ class Urn2NomeCompactoTest extends TestCase {
   def testLabel_art10_A_cpt_inc1() = {
     assertEquals("art. 10-A, I", Urn2NomeCompacto.format(List("art10-A_cpt_inc1")))
   }
+
+  def testLabel_tit3_cap4_sec2_with_context_tit3_cap4_sec1_art62_inc4() = {
+    assertEquals("Seção II deste capítulo", Urn2NomeCompacto.format(List("tit3_cap4_sec2"), "tit3_cap4_sec1_art62_inc4"))
+  }
+
+  def testLabel_cpp_tit3_cap4_sec2_with_context_cpp_tit3_cap4_sec1_art76_cpt_inc4() = {
+    assertEquals("Seção II deste capítulo", Urn2NomeCompacto.format(List("cpp_tit3_cap4_sec2"), "cpp_tit3_cap4_sec1_art76_cpt_inc4"))
+  }
+
+  def testLabel_cpp_tit3_cap3_sec2_with_context_cpp_tit3_cap4_sec1_art76_cpt_inc4() = {
+    assertEquals("Seção II do Capítulo III deste título", Urn2NomeCompacto.format(List("cpp_tit3_cap3_sec2"), "cpp_tit3_cap4_sec1_art76_cpt_inc4"))
+  }
+
+  def testLabel_anx1_with_context_cpp_prt1_liv1_art2_cpt() = {
+    assertEquals("Anexo I", Urn2NomeCompacto.format(List("anx1"), "cpp_prt1_liv1_art2_cpt"))
+  }
+
+  def testLabel_cpp_tit1_cap4_with_context_cpp_tit1_cap4_art35_par1() = {
+    assertEquals("capítulo", Urn2NomeCompacto.format(List("cpp_tit1_cap4"), "cpp_tit1_cap4_art35_par1"))
+  }
+
+  def testLabel_cpp_tit3_cap4_art72_with_context_cpp_tit3_cap4_sec3_art80_cpt() = {
+    assertEquals("art. 72", Urn2NomeCompacto.format(List("cpp_tit3_cap4_art72"), "cpp_tit3_cap4_sec3_art80_cpt"))
+  }
+
+  def testLabel_anx1_prt1_cap2_art3_with_context_anx1_prt1_cap7_art15_cpt_inc() = {
+    assertEquals("art. 3º deste anexo", Urn2NomeCompacto.format(List("anx1_prt1_cap2_art3"), "anx1_prt1_cap7_art15_cpt_inc"))
+  }
+
+  def testLabel_anx1_prt1_cap7_with_context_anx1_prt1_cap7_art15_cpt_inc2() = {
+    assertEquals("Capítulo VII deste anexo", Urn2NomeCompacto.format(List("anx1_prt1_cap7"), "anx1_prt1_cap7_art15_cpt_inc2"))
+  }
+
+  def testLabel_anx2_prt1_cap7_with_context_anx1_prt1_cap7_art15_cpt_inc2() = {
+    assertEquals("Anexo II", Urn2NomeCompacto.format(List("anx2"), "anx1_prt1_cap7_art15_cpt_inc2"))
+  }
+
+  def testLabel_anx2_tit3_cap3_sec2_with_context_anx1_prt1_cap7_art15_cpt_inc2() = {
+    assertEquals("Seção II do Capítulo III do Título III do Anexo II", Urn2NomeCompacto.format(List("anx2_tit3_cap3_sec2"), "anx1_prt1_cap7_art15_cpt_inc2"))
+  }
+
+  def testLabel_anx2_tit3_cap3_sec2_art1_with_context_anx1_prt1_cap7_art15_cpt_inc2() = {
+    assertEquals("art. 1º do Anexo II", Urn2NomeCompacto.format(List("anx2_tit3_cap3_sec2_art1"), "anx1_prt1_cap7_art15_cpt_inc2"))
+  }
+
+  def testLabel_anx2_art1_with_context_anx1_prt1_cap7_art15_cpt_inc2() = {
+    assertEquals("art. 1º do Anexo II", Urn2NomeCompacto.format(List("anx2_art1"), "anx1_prt1_cap7_art15_cpt_inc2"))
+  }
+
+  def testLabel_anx2_tit3_cap3_sec2_art1_with_context_anx2_prt1_cap7_art15_cpt_inc2() = {
+    assertEquals("art. 1º deste anexo", Urn2NomeCompacto.format(List("anx2_tit3_cap3_sec2_art1"), "anx2_prt1_cap7_art15_cpt_inc2"))
+  }
+
+  def testLabel_anx2_art1_with_context_anx2_prt1_cap7_art15_cpt_inc2() = {
+    assertEquals("art. 1º deste anexo", Urn2NomeCompacto.format(List("anx2_art1"), "anx2_prt1_cap7_art15_cpt_inc2"))
+  }
+
+  /*
+   *
+   * se houver contexto, e a remissão for para dispositivos filhos do próprio **artigo**
+   * do dispositivo contexto, então o que for comum deve ser omitido também.
+   * Usa-se, nesse caso, uma mistura da formatação completa com a formatação compacta
+   *
+   *   - indica-se o nome do tipo do dispositivo, mais o número dele, como nos exemplos abaixo
+   *
+   */
+
+  def testLabel_cpp_tit3_cap4_art72_context_cpp_tit3_cap4_art72_inc1() = {
+    assertEquals("artigo", Urn2NomeCompacto.format(List("cpp_tit3_cap4_art72"), "cpp_tit3_cap4_art72_inc1"))
+  }
+
+  def testLabel_anx1_art25_27_anx1_art30_contexto_art30() {
+    assertEquals("arts. 25 a 27 deste anexo", Urn2NomeCompacto.format(List("anx1_art25", "anx1_art26", "anx1_art27"), "anx1_art30"))
+  }
+
+  def testLabel_cpp_tit3_cap4_art72_cpt_context_cpp_tit3_cap4_art72_par1() = {
+    assertEquals("caput", Urn2NomeCompacto.format(List("cpp_tit3_cap4_art72_cpt"), "cpp_tit3_cap4_art72_par1"))
+  }
+
+  def testLabel_cpp_tit3_cap4_art72_par1_context_cpp_tit3_cap4_art72_cpt() = {
+    assertEquals("§ 1º", Urn2NomeCompacto.format(List("cpp_tit3_cap4_art72_par1"), "cpp_tit3_cap4_art72_cpt"))
+  }
+
+  def testLabel_cpp_tit3_cap4_art72_inc1_context_cpp_tit3_cap4_art72_cpt() = {
+    assertEquals("inciso I", Urn2NomeCompacto.format(List("cpp_tit3_cap4_art72_cpt_inc1"), "cpp_tit3_cap4_art72_cpt"))
+  }
+
+  def testLabel_cap4_art72_par1_context_art72_cpt() = {
+    assertEquals("§ 1º", Urn2NomeCompacto.format(List("art72_par1"), "art72_cpt"))
+  }
+
+  def testLabel_cap4_art72_par1_inc3_context_art72_cpt() = {
+    assertEquals("§ 1º, III", Urn2NomeCompacto.format(List("art72_par1_inc3"), "art72_cpt"))
+  }
+
+  def testLabel_cap4_art72_par1_inc3_context_art72_par1() = {
+    assertEquals("inciso III", Urn2NomeCompacto.format(List("cpp_tit3_cap4_art72_par1_inc3"), "cpp_tit3_cap4_art72_par1"))
+  }
+
+  def testLabel_cap4_art72_par1_inc3_context_art72_cpt_par1() = {
+    assertEquals("inciso III", Urn2NomeCompacto.format(List("art72_cpt_par1_inc3"), "art72_cpt_par1"))
+  }
+
+  def testLabel_cpp_tit2_art5_par1_context_cpp_tit2_art6_par4() = {
+    assertEquals("art. 5º, § 1º", Urn2NomeCompacto.format(List("cpp_tit2_art5_par1"), "cpp_tit2_art6_par4"))
+  }
+
+  def testLabel_anx100_tit22_art5_par1_context_anx100_tit22_art6_par4() = {
+    assertEquals("art. 5º, § 1º deste anexo", Urn2NomeCompacto.format(List("anx100_tit22_art5_par1"), "anx100_tit22_art6_par4"))
+  }
+
+  def testLabel_cpp_tit2_art5_par1_context_cpp_tit200_art6_par4() = {
+    assertEquals("art. 5º, § 1º", Urn2NomeCompacto.format(List("cpp_tit2_art5_par1"), "cpp_tit200_art6_par4"))
+  }
+
+  def testLabel_cpp_tit2context_cpp_tit200() = {
+    assertEquals("Título II", Urn2NomeCompacto.format(List("cpp_tit2"), "cpp_tit200"))
+  }
+
+  def testLabel_cpp_tit2_sec2_context_cpp_tit2_sec1() = {
+    assertEquals("Seção II deste título", Urn2NomeCompacto.format(List("cpp_tit2_sec2"), "cpp_tit2_sec1"))
+  }
+
+  def testLabel_cpp_tit2_sec2_context_cpp_tit200_sec1() = {
+    assertEquals("Seção II do Título II", Urn2NomeCompacto.format(List("cpp_tit2_sec2"), "cpp_tit200_sec1"))
+  }
+
+  /*
+   *
+   * se houver contexto, e a remissão for para dispositivos filhos do próprio **artigo**
+   * casos múltiplos: usa-se o plural dos tipos múltiplos
+   *
+   */
+
+  def testLabel_art9_inc1_4_context_art9() {
+    assertEquals("incisos I a IV", Urn2NomeCompacto.format(List("art9_inc1", "art9_inc2", "art9_inc3", "art9_inc4"), "art9"))
+  }
+
+  def testLabel_art9_inc1_4_inc5_ali_1_context_art9() {
+    assertEquals("incisos I a IV e V, a", Urn2NomeCompacto.format(List("art9_inc1", "art9_inc2", "art9_inc3", "art9_inc4", "art9_inc5_ali1"), "art9"))
+  }
+
+  def testLabel_art9_inc1_4_inc5_ali_1_2context_art9() {
+    assertEquals("incisos I a IV e V, a e b", Urn2NomeCompacto.format(List("art9_inc1", "art9_inc2", "art9_inc3", "art9_inc4", "art9_inc5_ali1", "art9_inc5_ali2"), "art9"))
+  }
+
+  def testLabel_cap4_art72_par124_context_art72_cpt() {
+    assertEquals("§§ 1º e 2º e § 4º", Urn2NomeCompacto.format(List("art72_par1", "art72_par2", "art72_par4"), "art72_cpt"))
+  }
+
+  def testLabel_cap4_art72_par1235_context_art72_cpt() {
+    assertEquals("§§ 1º ao 3º e § 5º", Urn2NomeCompacto.format(List("art72_par1", "art72_par2", "art72_par3",  "art72_par5"), "art72_cpt"))
+  }
+
+  def testLabel_cap4_art72_par1235_context_cap1_art72_cpt() {
+    assertEquals("§§ 1º ao 3º e § 5º", Urn2NomeCompacto.format(List("cap1_art72_par1", "cap1_art72_par2", "cap1_art72_par3",  "cap1_art72_par5"), "cap1_art72_cpt"))
+  }
+
+  def testLabel_anx2_art3_inc3_context_anx2_art9_par1() = {
+    assertEquals("art. 9º, § 1º deste anexo", Urn2NomeCompacto.format(List("anx2_art9_par1"), "anx2_art3_inc3"))
+  }
+
+  def testcpp_anx30_anx1() {
+    assertEquals("Anexo 1 do Anexo XXX", Urn2NomeCompacto.format(List("cpp_anx30_anx1")))
+  }
+
+  def testcpp_anexos_sequencias() {
+    assertEquals("Anexos XXIX a XXXI, Anexo 1 do Anexo XXXI e Anexos XXXII e XXXIII", Urn2NomeCompacto.format(List("cpp_anx29", "cpp_anx30", "cpp_anx31", "cpp_anx31_anx1", "cpp_anx32", "cpp_anx33")))
+  }
+
+  def test_cpp_anxIX() = {
+    assertEquals("Anexo IX", Urn2NomeCompacto.format("cpp_anx;IX"))
+  }
+
+  def test_anxIX() = {
+    assertEquals("Anexo IX", Urn2NomeCompacto.format("anx;IX"))
+  }
+
+  def test_cpp_anx1() = {
+    assertEquals("Anexo 11", Urn2NomeCompacto.format("cpp_anx;11"))
+  }
+
+  def test_anx1() = {
+    assertEquals("Anexo 1", Urn2NomeCompacto.format("anx;1"))
+  }
+
+  def test_cpp_anxI() = {
+    assertEquals("Anexo I", Urn2NomeCompacto.format("cpp_anx;I"))
+  }
+
+  def test_anxI() = {
+    assertEquals("Anexo I", Urn2NomeCompacto.format("anx;I"))
+  }
+
+  def test_clausula_revogacao_enorme() = {
+    assertEquals("arts. 1º e 2º e art. 2º, caput e arts. 3º e 4º e arts. 6º e 7º e art. 7º, § 3º e Capítulo III e arts. 9º a 16 e art. 16, caput e arts. 17 e 18 e Anexo 3, Anexo 4 e Anexo 5",
+      Urn2NomeCompacto.format(List("cpp_atc_art1", "cpp_atc_art2", "cpp_atc_art2_cpt", "cpp_atc_cap1_art3",
+        "cpp_atc_cap1_art4", "cpp_atc_cap2_art6", "cpp_atc_cap2_art7", "cpp_atc_cap2_art7_par3", "cpp_atc_cap3", "cpp_atc_cap3_art9",
+        "cpp_atc_cap4_art10", "cpp_atc_cap4_art11", "cpp_atc_cap4_art12", "cpp_atc_cap4_art13", "cpp_atc_cap4_art14", "cpp_atc_cap4_art15",
+        "cpp_atc_cap4_art16", "cpp_atc_cap4_art16_cpt", "cpp_atc_cap4_art17", "cpp_atc_cap4_art18", "cpp_anx;3", "cpp_anx;4", "cpp_anx;5")))
+  }
+
+  def test_cpp_atc_art1() = {
+    assertEquals("art. 1º", Urn2NomeCompacto.format(List("cpp_atc_art1")))
+  }
+
+  def test_cpp_atc_art1_cpp_atc_cap3() = {
+    assertEquals("art. 1º e Capítulo III", Urn2NomeCompacto.format(List("cpp_atc_art1", "cpp_atc_cap3")))
+  }
+
+  def test_cpp_art1_cpp_cap3() = {
+    assertEquals("art. 1º e Capítulo III", Urn2NomeCompacto.format(List("cpp_art1", "cpp_cap3")))
+  }
+/*
+  // para implementação futura:
+
+  def testcpp_anx_XXX_anx_A() {
+    assertEquals("Anexo A do Anexo XXX", Urn2NomeCompacto.format(List("cpp_anx;XXX_anx;A"))
+  }
+
+  def testcpp_anx_XXX_anx_A() {
+    assertEquals("Anexo TTTTT do Anexo ZZZZZZ", Urn2NomeCompacto.format(List("cpp_anx;ZZZZZZ_anx;TTTTT"))
+  }
+ */
 }

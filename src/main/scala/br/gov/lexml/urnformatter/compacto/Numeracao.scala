@@ -10,4 +10,6 @@ private[compacto] object Numeracao {
 
   case class UmNumero(n: Numero) extends Numeracao
 
+  case object SemNumero extends Numeracao
+
 }

@@ -1,14 +1,18 @@
 package br.gov.lexml.urnformatter.compacto
 
 import br.gov.lexml.urnformatter.Urn2Format.{formatAlfa, formatOrdinal, formatRomano}
-import br.gov.lexml.urnformatter.compacto.Numeracao.{IntervaloContinuo, UmNumero, DoisNumeros}
+import br.gov.lexml.urnformatter.compacto.Numeracao.{IntervaloContinuo, UmNumero, DoisNumeros, SemNumero}
 import br.gov.lexml.urnformatter.compacto.TipoUrnFragmento.DispositivoAgrupador
 import br.gov.lexml.urnformatter.compacto.UrnFragmento._
 
 import scala.annotation.tailrec
 import scala.util.Try
 
+import org.slf4j.LoggerFactory
+
 private[compacto] object Nomeador {
+
+  val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.Nomeador")
 
   def nomearGrupos(grupos: List[GrupoUrns]): String = {
     @tailrec
@@ -20,6 +24,30 @@ private[compacto] object Nomeador {
       case g1 :: _ => go(s"${acc}${nomear(g1)} e ", grupos.tail)
     }
     go("", grupos)
+  }
+
+  def nomearDispositivo(nomeDispositivo: Option[String], urnAgrupadorInput: String): String = {
+    val urnAgrupador = UrnParser.removeRaizECppEAtc(urnAgrupadorInput.split("_").toList).mkString("_")
+
+    if (urnAgrupador == "") nomeDispositivo.getOrElse("")
+    else AgrupadorUrn.urnFragmento(urnAgrupador).tipo match {
+      case d: TipoUrnFragmento with DispositivoAgrupador =>
+        val nomeDispositivoFmt = nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")
+        s"${nomeDispositivoFmt}${nomear(List(AgrupadorUrn.urnFragmento(urnAgrupador))).toLowerCase.trim}"
+
+      case d@TipoUrnFragmento.Artigo =>
+        nomeDispositivo.getOrElse("artigo")
+
+      case d@TipoUrnFragmento.Caput =>
+        nomeDispositivo.getOrElse("caput")
+
+      case d@TipoUrnFragmento.Paragrafo =>
+        nomeDispositivo.getOrElse("parágrafo")
+
+      case _ =>
+        logger.warn(s"fallback nomearDispositivo: $nomeDispositivo - $urnAgrupador")
+        nomeDispositivo.getOrElse("")
+    }
   }
 
   private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {
@@ -72,6 +100,7 @@ private[compacto] object Nomeador {
       }
       case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
       case ns: DoisNumeros => s"${plural}${fmt(ns.n1)} e ${fmt(ns.n2)}"
+      case sn: SemNumero.type => singular
       case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: $n")
     }
   }
@@ -85,18 +114,27 @@ private[compacto] object Nomeador {
       } else {
         s"Anexo ${formatAlfa(n).toUpperCase}"
       }
+    case UmNumero(Numero.StrNumero(n)) =>
+        s"Anexo ${n.split(";").last}"
     case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
     case ns: DoisNumeros => s"Anexos ${formatRomano(ns.n1)} e ${formatRomano(ns.n2)}"
+    case SemNumero => "Anexo"
     case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: ${a.numeracao}")
   }
 
-  private def nomear(urnFragmento: UrnFragmento): String = urnFragmento match {
+  private def nomear(urnFragmento: UrnFragmento, fragmentos: List[UrnFragmento]): String = urnFragmento match {
     case a: Artigo => nomear(a.numeracao, "art.", "arts.", "a", formatOrdinal)
     case Caput => "caput"
     case ParagrafoUnico => "parágrafo único"
-    case i: Inciso => nomear(i.numeracao, "a", formatRomano)
+    case i: Inciso =>
+      val compacto = fragmentos.size > 1
+      if (compacto) nomear(i.numeracao, "a", formatRomano)
+      else nomear(i.numeracao, "inciso", "incisos", "a", formatRomano).trim
     case a: Alinea => nomear(a.numeracao, "a", formatAlfa)
-    case p: Paragrafo => nomear(p.numeracao, "§", "§§", "ao", formatOrdinal)
+    case p: Paragrafo =>
+      val compacto = fragmentos.size > 1
+      if (compacto) nomear(p.numeracao, "§", "§§", "ao", formatOrdinal)
+      else nomear(p.numeracao, "§", "§§", "ao", formatOrdinal)
     case i: Item => nomear(i.numeracao, "a", _.toString)
     case c: Capitulo => nomear(c.numeracao, "Capítulo", "Capítulos", "a", formatRomano)
     case s: Secao => nomear(s.numeracao, "Seção", "Seções", "a", formatRomano)
@@ -107,22 +145,22 @@ private[compacto] object Nomeador {
     case p: Parte => nomear(p.numeracao, "Parte", "Partes", "a", _.toString)
   }
 
-  private def nomear(fragmentoes: List[UrnFragmento]): String = {
+  private def nomear(urnFragmentos: List[UrnFragmento]): String = {
     @tailrec
     def criarString(acc: String, fragmentoes: List[UrnFragmento]): String = {
       if (fragmentoes.isEmpty) {
         acc
       } else {
         (fragmentoes.head, fragmentoes.head.tipo) match {
-          case (h, _: DispositivoAgrupador) if acc.isEmpty => criarString(nomear(h), fragmentoes.tail)
-          case (h, d: DispositivoAgrupador) => criarString(s"${acc} ${d.conector} ${nomear(h)}", fragmentoes.tail)
-          case (h, _) if acc.isEmpty => criarString(nomear(h), fragmentoes.tail)
-          case (h, _) => criarString(s"${acc}, ${nomear(h)}", fragmentoes.tail)
+          case (h, _: DispositivoAgrupador) if acc.isEmpty => criarString(nomear(h, urnFragmentos), fragmentoes.tail)
+          case (h, d: DispositivoAgrupador) => criarString(s"${acc} ${d.conector} ${nomear(h, urnFragmentos)}", fragmentoes.tail)
+          case (h, _) if acc.isEmpty => criarString(nomear(h, urnFragmentos), fragmentoes.tail)
+          case (h, _) => criarString(s"${acc}, ${nomear(h, urnFragmentos)}", fragmentoes.tail)
         }
       }
     }
 
-    criarString("", fragmentoes)
+    criarString("", urnFragmentos)
   }
 
 }
