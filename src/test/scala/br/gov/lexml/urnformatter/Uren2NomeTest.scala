@@ -26,6 +26,8 @@ class Uren2NomeTest extends TestCase {
     
     assertEquals("item 1", Urn2Nome.format("ite_1"))
 
+    assertEquals("artigo 223-A do caput do artigo 1º", Urn2Nome.format("art1_cpt_alt1_art223-1"))
+
 
   }
 
