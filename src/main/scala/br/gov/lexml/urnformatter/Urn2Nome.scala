@@ -1,35 +1,39 @@
 package br.gov.lexml.urnformatter
 
+import scala.util.matching.Regex.Match
+
 object Urn2Nome {
 
   import Urn2Format._
 
-  type Comp = (String, List[Numero])
+  def format(urnFrag: String): String = format(getComps(urnFrag))
 
-  def format(urnFrag: String) = {
-    var comps: List[FormattedComp] = List()
-    if (urnFrag.matches("^(inc|ali|ite|art|tit|par)_((?:1u|[0-9-])*)$"))
-        comps = compReN.findFirstMatchIn(urnFrag)
-        .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_))))
-        .flatMap(formatComp(_))
-        .toList
-        .reverse
-    else 
-        comps = urnFrag
+  private def getComps(urnFrag: String) = {
+    if (urnFrag.matches("^(inc|ali|ite|art|tit|par)_((?:1u|[0-9-])*)$")) {
+      compReN.findFirstMatchIn(urnFrag).toList
+    } else {
+      urnFrag
         .split("_").toList
         .flatMap(compRe.findFirstMatchIn(_))
-        .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_))))
-        .flatMap(formatComp(_))
-        .reverse
-    comps match {
+    }
+  }
+
+  private def format(matches: List[Match]) = {
+    val formattedComps = matches
+      .map(m => (m.group(1), m.group(2).split("-").toList.filter(!_.isEmpty).map(readInt(_))))
+      .takeWhile(!isAlteracao(_))
+      .flatMap(formatComp(_))
+      .reverse
+    formattedComps match {
       case ((_, t) :: r) => (t + r.map({ case (g, txt) => "d" + g + " " + txt }).mkString(" ", " ", "")).trim()
       case _ => ""
     }
   }
 
-  type FormattedComp = (String, String)
+  private type Comp = (String, List[Numero])
+  private type FormattedComp = (String, String)
 
-  val agregadores: Map[String, (String, String)] = Map(
+  private val agregadores: Map[String, (String, String)] = Map(
     "prt" -> ("a", "parte"),
     "liv" -> ("o", "livro"),
     "cap" -> ("o", "capítulo"),
@@ -37,16 +41,19 @@ object Urn2Nome {
     "sec" -> ("a", "seção"),
     "sub" -> ("a", "subseção"))
 
-  def formatComp: Comp => Option[FormattedComp] = {
-    case ("alt", _) => Some(("a", "alteração"))
+  private val isAlteracao: Comp => Boolean = {
+    case ("alt", _) => true
+    case _ => false
+  }
+
+  private val formatComp: Comp => Option[FormattedComp] = {
     case ("omi", _) => Some(("o", "omissis"))
     case ("cpp", _) => Some(("o", "componente principal"))
     case ("lex", _) => Some(("a", "raiz"))
-
     case ("art", Unico :: _) =>
       Some(("o", "artigo único"))
     case ("art", Algum(n) :: cs) =>
-      Some(("o", "artigo " + formatOrdinal(n) + formatComplementos(cs)))
+      Some(("o", "art. " + formatOrdinal(n) + formatComplementos(cs)))
     case ("anx", Algum(n) :: cs) =>
       Some(("o", "anexo " + formatAlfa(n) + formatComplementos(cs)))
     case ("cpt", _) =>
