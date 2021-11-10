@@ -107,18 +107,42 @@ Se a urn for de um bloco de alteração, vale as regras acima de acordo com o ú
 
 ## Release
 
-Para publicar uma versão no Bintray, você precisa de acesso ao repositório e configurar o acesso
+Para publicar uma versão no Maven central, você precisa de acesso ao repositório e configurar o acesso
 no maven. Insira o snippet abaixo - com o correto user_name e api_key - no `~/.m2/settings.xml`.
 
 ```xml
-    <server>
-      <id>bintray-connexus-connexus-lexml</id>
-      <username>user_name</username>
-      <password>api_key</password>
-    </server>
+	....
+    <servers>
+    ...
+        <server>
+          <id>ossrh</id>
+          <username>XXX</username>
+          <password>XXX</password>
+        </server>
+      </servers>
+      ...
+      <profiles>
+     ...
+        <profile>
+          <id>gpg</id>
+          <properties>
+            <gpg.executable>gpg2</gpg.executable>
+            <gpg.keyname>XXXX</gpg.keyname>
+            <gpg.passphrase>XXXX</gpg.passphrase>
+          </properties>
+        </profile>
+      </profiles>
+  ....
+  <activeProfiles>
+    ...
+    <activeProfile>gpg</activeProfile>
+  </activeProfiles>
+        
 ```
 
 Depois execute o comando abaixo para fazer o release do projeto:
 
-    mvn deploy
-
+```
+    mvn -Prelease release:prepare
+    mvn -Prelease release:perform
+```
