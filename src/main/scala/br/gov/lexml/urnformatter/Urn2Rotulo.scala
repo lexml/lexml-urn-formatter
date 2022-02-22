@@ -47,7 +47,7 @@ object Urn2Rotulo {
     case ("art", Unico :: _) => Some("Art. Único.")
     case ("art", Algum(n) :: cs) => 
         Some("Art. " 
-              +  (if (n< 10){formatOrdinal(n)}else{n}) 
+              + formatOrdinal(n)
               + formatComplementos(cs) 
               + (if (n> 9) {"."} else {""}))
     case ("par", Unico :: _) => Some("Parágrafo Único.")
