@@ -38,6 +38,12 @@ class Urn2RotuloTest extends TestCase {
   def testLabel_art1_28() {
     assertEquals(Urn2Rotulo.format("art1-28"), "Art. 1º-AB")
   }
+  def testLabel_art999(): Unit = {
+    assertEquals(Urn2Rotulo.format("art999"), "Art. 999.")
+  }
+  def testLabel_art1000(): Unit = {
+    assertEquals(Urn2Rotulo.format("art1000"), "Art. 1.000.")
+  }
  
   // parágrafo
   def testLabel_art1_par1u() {

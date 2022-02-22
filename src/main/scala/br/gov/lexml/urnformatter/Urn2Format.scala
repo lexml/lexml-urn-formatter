@@ -25,7 +25,7 @@ object Urn2Format {
     renderNumeral(num) + (if (num < 10) "º" else "")
 
   def renderNumeral(num : Int) : String = {
-        if (num > 1000) { f"${renderNumeral(num / 1000)}.${num % 1000}%03d" }
+        if (num >= 1000) { f"${renderNumeral(num / 1000)}.${num % 1000}%03d" }
         else { num.toString }
   }
 
