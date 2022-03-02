@@ -107,6 +107,14 @@ Se a urn for de um bloco de alteração, vale as regras acima de acordo com o ú
 
 ## Release
 
+Importar chave
+
+```
+gpg --import lexml.public.key
+
+gpg --allow-secret-key-import --import lexml.secret.key
+```
+
 Para publicar uma versão no Maven central, você precisa de acesso ao repositório e configurar o acesso
 no maven. Insira o snippet abaixo - com o correto user_name e api_key - no `~/.m2/settings.xml`.
 
