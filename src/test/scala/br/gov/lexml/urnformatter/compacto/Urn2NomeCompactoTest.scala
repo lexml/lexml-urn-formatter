@@ -1366,45 +1366,68 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("art. 1º e Capítulo III", Urn2NomeCompacto.format(List("cpp_art1", "cpp_cap3")))
   }
 
-  // para implementação futura:
-  def test() = {
+  def test_cpp_anx_CIII_atc_art1_par2() = {
     assertEquals("art. 1º, § 2º do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_art1_par2"))
-    // assertEquals("art. 1º do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_art1"))
   }
 
-  def test1() = {
+  def test_cpp_anx_CIII_atc_art1_par1u() = {
+    assertEquals("art. 1º, parágrafo único do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_art1_par1u"))
+  }
+
+  def test_cpp_anx_CIII_atc_art14_cpt_inc12_ali2_ite1() = {
+    assertEquals("art. 14, XII, b, 1 do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_art14_cpt_inc12_ali2_ite1"))
+  }
+
+  def test_cpp_anx_CIII_atc_art1_par1u_inc3_ali2() = {
     assertEquals("art. 1º, parágrafo único, III, b do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_art1_par1u_inc3_ali2"))
-    //assertEquals("art. 1º, parágrafo único, III, b", Urn2NomeCompacto.format("art1_par1u_inc3_ali2"))
   }
 
-  def test2() = {
+  def test_cpp_anx_CIII_atc_tit1() = {
+    assertEquals("Título I do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_tit1"))
+  }
+
+  def test_cpp_anx_CIII_atc_tit1_cap1_sec2_sub4() = {
     assertEquals("Subseção IV da Seção II do Capítulo I do Título I do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_tit1_cap1_sec2_sub4"))
-    //assertEquals("art. 1º, parágrafo único, III, b", Urn2NomeCompacto.format("art1_par1u_inc3_ali2"))
   }
 
-  def test3() = {
+  def test_cpp_anx_CIII_atc_tit1_cap1_art19_cpt() = {
     assertEquals("art. 19, caput do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_tit1_cap1_art19_cpt"))
-    //assertEquals("art. 1º, parágrafo único, III, b", Urn2NomeCompacto.format("art1_par1u_inc3_ali2"))
   }
 
-  def test4() = {
+  def test_cpp_anx_IX_atc_cap5_art28_par2_inc11() = {
     assertEquals("art. 28, § 2º, XI do Anexo IX", Urn2NomeCompacto.format("cpp_anx;IX_atc_cap5_art28_par2_inc11"))
-    //assertEquals("art. 1º, parágrafo único, III, b", Urn2NomeCompacto.format("art1_par1u_inc3_ali2"))
   }
 
-  def test5() = {
+  def test_cpp_anx_IX_atc_cap5_art29_par2_inc16() = {
     assertEquals("art. 29, § 2º, XVI do Anexo IX", Urn2NomeCompacto.format("cpp_anx;IX_atc_cap5_art29_par2_inc16"))
-    //assertEquals("art. 1º, parágrafo único, III, b", Urn2NomeCompacto.format("art1_par1u_inc3_ali2"))
   }
 
-
-  /*
-  def testcpp_anx_XXX_anx_A() {
-    assertEquals("Anexo A do Anexo XXX", Urn2NomeCompacto.format(List("cpp_anx;XXX_anx;A"))
+  def test_cpp_anx_I_atc_tit1_art1() = {
+    assertEquals("art. 1º do Anexo I", Urn2NomeCompacto.format("cpp_anx;I_atc_tit1_art1"))
   }
 
-  def testcpp_anx_XXX_anx_A() {
-    assertEquals("Anexo TTTTT do Anexo ZZZZZZ", Urn2NomeCompacto.format(List("cpp_anx;ZZZZZZ_anx;TTTTT"))
+  def test_cpp_anx_I_atc_tit1_cap1() = {
+    assertEquals("Capítulo I do Título I do Anexo IX", Urn2NomeCompacto.format("cpp_anx;IX_atc_tit1_cap1"))
   }
- */
+
+  def test_cpp_anx_IX_atc_tit1_cap1_sec2() = {
+    assertEquals("Seção II do Capítulo I do Título I do Anexo IX", Urn2NomeCompacto.format("cpp_anx;IX_atc_tit1_cap1_sec2"))
+  }
+
+  def test_cpp_anx_IX_atc_tit1_cap1_sec2_sub4() = {
+    assertEquals("Subseção IV da Seção II do Capítulo I do Título I do Anexo IX", Urn2NomeCompacto.format("cpp_anx;IX_atc_tit1_cap1_sec2_sub4"))
+  }
+
+  def test_cpp_anx_IX_atc_liv3() = {
+    assertEquals("Livro III do Anexo IX", Urn2NomeCompacto.format("cpp_anx;IX_atc_liv3"))
+  }
+
+  def test_cpp_anx_XXX_anx_A() {
+    assertEquals("Anexo A do Anexo XXX", Urn2NomeCompacto.format(List("cpp_anx;XXX_anx;A")));
+  }
+
+  def test_cpp_anx_ZZZZZZ_anx_TTTTT() {
+    assertEquals("Anexo TTTTT do Anexo ZZZZZZ", Urn2NomeCompacto.format(List("cpp_anx;ZZZZZZ_anx;TTTTT")));
+  }
+
 }
