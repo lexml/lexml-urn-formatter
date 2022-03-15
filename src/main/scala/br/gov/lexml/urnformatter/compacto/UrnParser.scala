@@ -10,6 +10,10 @@ private[compacto] object UrnParser {
 
   def parse(urns: List[String]): List[ParsedUrn] = urns.map { urn =>
     val fragmentos = (trataArtigo andThen trataCaputNoMeio andThen removeRaizECppEAtc) (urn.split("_").toList)
+    println("===")
+    println("fragmentos")
+    fragmentos.foreach(println)
+    println("===")
     val ultimoFragmento = fragmentos.last
     val dispPrincipal = parseTipoDispositivo(ultimoFragmento)
     // Inicio Comum contém os fragmentos + o tipo do dispositivo principal, sem numeracao

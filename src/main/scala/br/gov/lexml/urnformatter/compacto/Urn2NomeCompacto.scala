@@ -15,13 +15,19 @@ object Urn2NomeCompacto {
    * urns: uma ou mais normas nomeadas
    * context: uma norma que menciona ou nomeia a lista em urns
    */
-  def format(urns: List[String], context: String = ""): String =
+  def format(urns: List[String], context: String = ""): String = {
+    logger.error("aaa")
+    System.out.println("==aaa")
     if (UrnParser.hasCommonContext(urns.head, context)) {
       val (urnsWithoutContext, agrupador) = UrnParser.extractContext(urns, context)
       logger.info(s"formating with context. urnsWithoutContext: $urnsWithoutContext - agrupador: $agrupador")
       val nome = if (urnsWithoutContext.isEmpty) None else Some(format(urnsWithoutContext))
       Nomeador.nomearDispositivo(nome, agrupador)
-    } else format(urns)
+    } else {
+      println("Else")
+      format(urns)
+    }
+  }
 
   def format(urns: List[String]): String =
     if (urns.isEmpty) ""

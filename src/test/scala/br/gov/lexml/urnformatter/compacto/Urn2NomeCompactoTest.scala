@@ -1343,7 +1343,7 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def test_anxI() = {
-    assertEquals("Anexo I", Urn2NomeCompacto.format("anx;I"))
+    assertEquals("Anexo VI", Urn2NomeCompacto.format("anx;VI"))
   }
 
   def test_clausula_revogacao_enorme() = {
@@ -1365,9 +1365,40 @@ class Urn2NomeCompactoTest extends TestCase {
   def test_cpp_art1_cpp_cap3() = {
     assertEquals("art. 1º e Capítulo III", Urn2NomeCompacto.format(List("cpp_art1", "cpp_cap3")))
   }
-/*
-  // para implementação futura:
 
+  // para implementação futura:
+  def test() = {
+    assertEquals("art. 1º, § 2º do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_art1_par2"))
+    // assertEquals("art. 1º do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_art1"))
+  }
+
+  def test1() = {
+    assertEquals("art. 1º, parágrafo único, III, b do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_art1_par1u_inc3_ali2"))
+    //assertEquals("art. 1º, parágrafo único, III, b", Urn2NomeCompacto.format("art1_par1u_inc3_ali2"))
+  }
+
+  def test2() = {
+    assertEquals("Subseção IV da Seção II do Capítulo I do Título I do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_tit1_cap1_sec2_sub4"))
+    //assertEquals("art. 1º, parágrafo único, III, b", Urn2NomeCompacto.format("art1_par1u_inc3_ali2"))
+  }
+
+  def test3() = {
+    assertEquals("art. 19, caput do Anexo CIII", Urn2NomeCompacto.format("cpp_anx;CIII_atc_tit1_cap1_art19_cpt"))
+    //assertEquals("art. 1º, parágrafo único, III, b", Urn2NomeCompacto.format("art1_par1u_inc3_ali2"))
+  }
+
+  def test4() = {
+    assertEquals("art. 28, § 2º, XI do Anexo IX", Urn2NomeCompacto.format("cpp_anx;IX_atc_cap5_art28_par2_inc11"))
+    //assertEquals("art. 1º, parágrafo único, III, b", Urn2NomeCompacto.format("art1_par1u_inc3_ali2"))
+  }
+
+  def test5() = {
+    assertEquals("art. 29, § 2º, XVI do Anexo IX", Urn2NomeCompacto.format("cpp_anx;IX_atc_cap5_art29_par2_inc16"))
+    //assertEquals("art. 1º, parágrafo único, III, b", Urn2NomeCompacto.format("art1_par1u_inc3_ali2"))
+  }
+
+
+  /*
   def testcpp_anx_XXX_anx_A() {
     assertEquals("Anexo A do Anexo XXX", Urn2NomeCompacto.format(List("cpp_anx;XXX_anx;A"))
   }

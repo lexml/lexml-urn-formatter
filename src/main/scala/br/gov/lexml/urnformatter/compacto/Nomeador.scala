@@ -15,12 +15,16 @@ private[compacto] object Nomeador {
   val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.Nomeador")
 
   def nomearGrupos(grupos: List[GrupoUrns]): String = {
+    println("==> nomearGrupos")
+    grupos.foreach(println)
     @tailrec
     def go(acc: String, grupos: List[GrupoUrns]): String = grupos match {
       case Nil => acc
       case g1 :: g2 :: g3 :: _ if g1.dispPrincipal == g2.dispPrincipal && g2.dispPrincipal == g3.dispPrincipal =>
         go(s"${acc}${nomear(g1)}, ", grupos.tail)
-      case g1 :: Nil => go(s"${acc}${nomear(g1)}", Nil)
+      case g1 :: Nil =>
+        println(s"here. g1: $g1")
+        go(s"${acc}${nomear(g1)}", Nil)
       case g1 :: _ => go(s"${acc}${nomear(g1)} e ", grupos.tail)
     }
     go("", grupos)
@@ -61,11 +65,56 @@ private[compacto] object Nomeador {
       } else {
         nomear(grupo.fragmentosComum :+ Artigo(grupo.numeracao))
       }
-    case TipoUrnFragmento.Caput => nomear(grupo.fragmentosComum :+ Caput)
+    case TipoUrnFragmento.Caput =>
+      println("here4")
+      val l = List(grupo.fragmentosComum(0), Caput, grupo.fragmentosComum(1)) //art, cpt, anx
+      l.foreach(println)
+
+      nomear(l)
+
+      //nomear(grupo.fragmentosComum :+ Caput)
     case TipoUrnFragmento.ParagrafoUnico => nomear(grupo.fragmentosComum :+ ParagrafoUnico)
-    case TipoUrnFragmento.Inciso => nomear(grupo.fragmentosComum :+ Inciso(grupo.numeracao))
-    case TipoUrnFragmento.Alinea => nomear(grupo.fragmentosComum :+ Alinea(grupo.numeracao))
-    case TipoUrnFragmento.Paragrafo => nomear(grupo.fragmentosComum :+ Paragrafo(grupo.numeracao))
+    case TipoUrnFragmento.Inciso =>
+      val idxAnx = grupo.fragmentosComum.indexWhere {
+        case _: Anexo => true
+        case _ => false
+      }
+      println("here-inc")
+      val l = List(grupo.fragmentosComum(0), grupo.fragmentosComum(2), Inciso(grupo.numeracao), grupo.fragmentosComum(1)) //art, par, inc, anexo
+      l.foreach(println)
+
+      nomear(l)
+
+      //nomear(grupo.fragmentosComum :+ Inciso(grupo.numeracao))
+    case TipoUrnFragmento.Alinea =>
+      println("here3")
+      val l = List(grupo.fragmentosComum(0), grupo.fragmentosComum(2), grupo.fragmentosComum(3), Alinea(grupo.numeracao), grupo.fragmentosComum(1)) //art, par, inc, ali, anx
+      l.foreach(println)
+
+      nomear(l)
+
+      // nomear(grupo.fragmentosComum :+ Alinea(grupo.numeracao))
+    case TipoUrnFragmento.Paragrafo =>
+      println("here2")
+      // val l = List(Paragrafo(grupo.numeracao), grupo.fragmentosComum(1), grupo.fragmentosComum(0))
+      val l = List(grupo.fragmentosComum(0), Paragrafo(grupo.numeracao), grupo.fragmentosComum(1)) //art, par, anexo
+      l.foreach(println)
+
+      nomear(l)
+//      val contemAnexo = grupo.fragmentosComum.exists {
+//        case _: Anexo => true
+//        case _ => false
+//      }
+
+
+//      if (contemAnexo) {
+//        nomear(Paragrafo(grupo.numeracao) :: grupo.fragmentosComum)
+//      } else {
+//        nomear(grupo.fragmentosComum :+ Paragrafo(grupo.numeracao))
+//      }
+
+
+      // nomear(grupo.fragmentosComum :+ Paragrafo(grupo.numeracao))
     case TipoUrnFragmento.Item => nomear(grupo.fragmentosComum :+ Item(grupo.numeracao))
     case TipoUrnFragmento.Parte => nomear(Parte(grupo.numeracao) :: grupo.fragmentosComum)
     case TipoUrnFragmento.Titulo => nomear(Titulo(grupo.numeracao) :: grupo.fragmentosComum)
