@@ -15,17 +15,12 @@ private[compacto] object Nomeador {
   val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.Nomeador")
 
   def nomearGrupos(grupos: List[GrupoUrns]): String = {
-    println("==> nomearGrupos")
-    grupos.foreach(println)
-
     @tailrec
     def go(acc: String, grupos: List[GrupoUrns]): String = grupos match {
       case Nil => acc
       case g1 :: g2 :: g3 :: _ if g1.dispPrincipal == g2.dispPrincipal && g2.dispPrincipal == g3.dispPrincipal =>
         go(s"${acc}${nomear(g1)}, ", grupos.tail)
-      case g1 :: Nil =>
-        println(s"here. g1: $g1")
-        go(s"${acc}${nomear(g1)}", Nil)
+      case g1 :: Nil => go(s"${acc}${nomear(g1)}", Nil)
       case g1 :: _ => go(s"${acc}${nomear(g1)} e ", grupos.tail)
     }
 

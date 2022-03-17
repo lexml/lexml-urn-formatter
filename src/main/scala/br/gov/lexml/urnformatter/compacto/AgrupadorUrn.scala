@@ -10,10 +10,6 @@ import scala.util.Try
 private[compacto] object AgrupadorUrn {
 
   def agrupar(parsedUrns: List[ParsedUrn]): List[GrupoUrns] = {
-    println("==> agrupar")
-    parsedUrns.foreach(println)
-    println("========")
-
     case class ValueAux(iniComum: String, dispPrincipal: String, numeros: List[Numero], grupos: List[GrupoUrns])
 
     val v = parsedUrns.tail.foldLeft(
@@ -53,7 +49,6 @@ private[compacto] object AgrupadorUrn {
     val fragmentosComum = (iniComum.concat("1")).split("_").map(parse(_, getEAlteraNivel))
     val fragmentos = (removeUltimoFragmento andThen inverteFragmentosAgrupadores) (fragmentosComum.toList)
 
-    println(s"iniComum: $iniComum; numeros: ${numeros.mkString((","))}")
     criaNumeracoes(iniComum, numeros).map { num =>
       GrupoUrns(fragmentosComum.last.tipo, fragmentos, num)
     }
@@ -148,29 +143,25 @@ private[compacto] object AgrupadorUrn {
     }
   }
 
-  private def parse(fragmentoUrn: String, getEAlteraNivel: String => Int): UrnFragmento = {
-    val r = fragmentoUrn.take(3) match {
-      case "art" =>
-        val numStr = fragmentoUrn.substring(3)
-        val num = Try(numStr.toInt).map(Numero.IntNumero).getOrElse(Numero.StrNumero(numStr))
-        Artigo(UmNumero(num))
-      case "cpt" => Caput
-      case "par" if fragmentoUrn.contains("par1u") => ParagrafoUnico
-      case "par" => Paragrafo(unicoIntNumero(fragmentoUrn))
-      case "inc" => Inciso(unicoIntNumero(fragmentoUrn))
-      case "ali" => Alinea(unicoIntNumero(fragmentoUrn))
-      case "ite" => Item(unicoIntNumero(fragmentoUrn))
-      case "tit" => Titulo(unicoIntNumero(fragmentoUrn))
-      case "cap" => Capitulo(unicoIntNumero(fragmentoUrn))
-      case "sec" => Secao(unicoIntNumero(fragmentoUrn))
-      case "sub" => SubSecao(unicoIntNumero(fragmentoUrn))
-      case "liv" => Livro(unicoIntNumero(fragmentoUrn))
-      case "anx" => Anexo((unicoIntNumero(fragmentoUrn)), getEAlteraNivel("anx"))
-      case "prt" => Parte(unicoIntNumero(fragmentoUrn))
-      case _ => throw new IllegalArgumentException(s"Urn Invalida: $fragmentoUrn")
-    }
-    println(s"parse. fragmentoUrn: $fragmentoUrn; r: $r")
-    r
+  private def parse(fragmentoUrn: String, getEAlteraNivel: String => Int): UrnFragmento = fragmentoUrn.take(3) match {
+    case "art" =>
+      val numStr = fragmentoUrn.substring(3)
+      val num = Try(numStr.toInt).map(Numero.IntNumero).getOrElse(Numero.StrNumero(numStr))
+      Artigo(UmNumero(num))
+    case "cpt" => Caput
+    case "par" if fragmentoUrn.contains("par1u") => ParagrafoUnico
+    case "par" => Paragrafo(unicoIntNumero(fragmentoUrn))
+    case "inc" => Inciso(unicoIntNumero(fragmentoUrn))
+    case "ali" => Alinea(unicoIntNumero(fragmentoUrn))
+    case "ite" => Item(unicoIntNumero(fragmentoUrn))
+    case "tit" => Titulo(unicoIntNumero(fragmentoUrn))
+    case "cap" => Capitulo(unicoIntNumero(fragmentoUrn))
+    case "sec" => Secao(unicoIntNumero(fragmentoUrn))
+    case "sub" => SubSecao(unicoIntNumero(fragmentoUrn))
+    case "liv" => Livro(unicoIntNumero(fragmentoUrn))
+    case "anx" => Anexo((unicoIntNumero(fragmentoUrn)), getEAlteraNivel("anx"))
+    case "prt" => Parte(unicoIntNumero(fragmentoUrn))
+    case _ => throw new IllegalArgumentException(s"Urn Invalida: $fragmentoUrn")
   }
 
   private def unicoIntNumero(fragmento: String) = {
