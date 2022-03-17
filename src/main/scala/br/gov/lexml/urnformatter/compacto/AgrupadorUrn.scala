@@ -165,11 +165,13 @@ private[compacto] object AgrupadorUrn {
   }
 
   private def unicoIntNumero(fragmento: String) = {
-    if (fragmento.contains("anx")) {
-      val n = fragmento.substring(3)
-      Try(UmNumero(Numero.IntNumero(n.toInt))).getOrElse(UmNumero(Numero.StrNumero(n)))
-    } else {
-      Try(UmNumero(Numero.IntNumero(fragmento.substring(3).toInt))).getOrElse(Numeracao.SemNumero)
+    val numero = fragmento.substring(3)
+    Try(UmNumero(Numero.IntNumero(numero.toInt))).getOrElse {
+      if (fragmento.contains("anx")) {
+        UmNumero(Numero.StrNumero(numero))
+      } else {
+        Numeracao.SemNumero
+      }
     }
   }
 
