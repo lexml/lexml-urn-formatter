@@ -21,7 +21,9 @@ object Urn2NomeCompacto {
       logger.info(s"formating with context. urnsWithoutContext: $urnsWithoutContext - agrupador: $agrupador")
       val nome = if (urnsWithoutContext.isEmpty) None else Some(format(urnsWithoutContext))
       Nomeador.nomearDispositivo(nome, agrupador)
-    } else format(urns)
+    } else {
+      format(urns)
+    }
 
   def format(urns: List[String]): String =
     if (urns.isEmpty) ""

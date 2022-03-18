@@ -23,6 +23,7 @@ private[compacto] object Nomeador {
       case g1 :: Nil => go(s"${acc}${nomear(g1)}", Nil)
       case g1 :: _ => go(s"${acc}${nomear(g1)} e ", grupos.tail)
     }
+
     go("", grupos)
   }
 
@@ -50,23 +51,24 @@ private[compacto] object Nomeador {
     }
   }
 
+  private def nomearNaoAgrupador(grupo: GrupoUrns, principal: UrnFragmento): String = {
+    val idxAnx = grupo.posAnexo
+    if (idxAnx == -1) {
+      nomear(grupo.fragmentosComum :+ principal)
+    } else {
+      val todosMenosAnx = grupo.fragmentosComum.zipWithIndex.filter(_._2 != idxAnx).map(_._1)
+      nomear(todosMenosAnx :+ principal :+ grupo.fragmentosComum(idxAnx))
+    }
+  }
+
   private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {
-    case TipoUrnFragmento.Artigo =>
-      val contemAnexo = grupo.fragmentosComum.exists {
-        case _: Anexo => true
-        case _ => false
-      }
-      if (contemAnexo) {
-        nomear(Artigo(grupo.numeracao) :: grupo.fragmentosComum)
-      } else {
-        nomear(grupo.fragmentosComum :+ Artigo(grupo.numeracao))
-      }
-    case TipoUrnFragmento.Caput => nomear(grupo.fragmentosComum :+ Caput)
-    case TipoUrnFragmento.ParagrafoUnico => nomear(grupo.fragmentosComum :+ ParagrafoUnico)
-    case TipoUrnFragmento.Inciso => nomear(grupo.fragmentosComum :+ Inciso(grupo.numeracao))
-    case TipoUrnFragmento.Alinea => nomear(grupo.fragmentosComum :+ Alinea(grupo.numeracao))
-    case TipoUrnFragmento.Paragrafo => nomear(grupo.fragmentosComum :+ Paragrafo(grupo.numeracao))
-    case TipoUrnFragmento.Item => nomear(grupo.fragmentosComum :+ Item(grupo.numeracao))
+    case TipoUrnFragmento.Artigo => nomearNaoAgrupador(grupo, Artigo(grupo.numeracao))
+    case TipoUrnFragmento.Caput => nomearNaoAgrupador(grupo, Caput)
+    case TipoUrnFragmento.ParagrafoUnico => nomearNaoAgrupador(grupo, ParagrafoUnico)
+    case TipoUrnFragmento.Inciso => nomearNaoAgrupador(grupo, Inciso(grupo.numeracao))
+    case TipoUrnFragmento.Alinea => nomearNaoAgrupador(grupo, Alinea(grupo.numeracao))
+    case TipoUrnFragmento.Paragrafo => nomearNaoAgrupador(grupo, Paragrafo(grupo.numeracao))
+    case TipoUrnFragmento.Item => nomearNaoAgrupador(grupo, Item(grupo.numeracao))
     case TipoUrnFragmento.Parte => nomear(Parte(grupo.numeracao) :: grupo.fragmentosComum)
     case TipoUrnFragmento.Titulo => nomear(Titulo(grupo.numeracao) :: grupo.fragmentosComum)
     case TipoUrnFragmento.Capitulo => nomear(Capitulo(grupo.numeracao) :: grupo.fragmentosComum)
@@ -115,7 +117,7 @@ private[compacto] object Nomeador {
         s"Anexo ${formatAlfa(n).toUpperCase}"
       }
     case UmNumero(Numero.StrNumero(n)) =>
-        s"Anexo ${n.split(";").last}"
+      s"Anexo ${n.split(";").last}"
     case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
     case ns: DoisNumeros => s"Anexos ${formatRomano(ns.n1)} e ${formatRomano(ns.n2)}"
     case SemNumero => "Anexo"

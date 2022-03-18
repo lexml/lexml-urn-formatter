@@ -4,10 +4,17 @@ import br.gov.lexml.urnformatter.compacto.UrnFragmento._
 
 private[compacto] case class ParsedUrn(inicioComum: String, disPrincipal: String, numero: Numero)
 
-private[compacto] case class GrupoUrns(dispPrincipal: TipoUrnFragmento, fragmentosComum: List[UrnFragmento], numeracao: Numeracao)
+private[compacto] case class GrupoUrns(dispPrincipal: TipoUrnFragmento, fragmentosComum: List[UrnFragmento], numeracao: Numeracao) {
+
+  def posAnexo: Int = fragmentosComum.indexWhere {
+    case _: Anexo => true
+    case _ => false
+  }
+
+}
 
 private[compacto] sealed abstract class TipoUrnFragmento {
-    val pronomeDemostrativo: String
+  val pronomeDemostrativo: String
 }
 
 private[compacto] object TipoUrnFragmento {
