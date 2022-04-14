@@ -1114,7 +1114,7 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def testLabel_partes() {
-    assertEquals("Partes 1 a 3, Partes 5 e 6 e Parte 8", Urn2NomeCompacto.format(List("prt1", "prt2", "prt3", "prt5", "prt6", "prt8")))
+    assertEquals("Partes I a III, Partes V e VI e Parte VIII", Urn2NomeCompacto.format(List("prt1", "prt2", "prt3", "prt5", "prt6", "prt8")))
   }
 
   def testLabel_titulos() {

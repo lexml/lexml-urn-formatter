@@ -144,7 +144,7 @@ private[compacto] object Nomeador {
     case l: Livro => nomear(l.numeracao, "Livro", "Livros", "a", formatRomano)
     case a: Anexo => nomearAnexo(a)
     case t: Titulo => nomear(t.numeracao, "Título", "Títulos", "a", formatRomano)
-    case p: Parte => nomear(p.numeracao, "Parte", "Partes", "a", _.toString)
+    case p: Parte => nomear(p.numeracao, "Parte", "Partes", "a", formatRomano)
   }
 
   private def nomear(urnFragmentos: List[UrnFragmento]): String = {
