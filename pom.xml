@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.gov.lexml</groupId>
 	<artifactId>lexml-urn-formatter</artifactId>
-	<version>0.0.40-SNAPSHOT</version>
+	<version>0.0.40</version>
 	<name>LexML Brazil URN Formatter</name>
 	<description>Library with functions for formatting LexML Brazil URN references in portuguese</description>
 	<url>https://github.com/lexml/lexml-urn-formatter</url>
@@ -45,7 +45,7 @@
 		<url>https://github.com/lexml/lexml-urn-formatter</url>
 		<developerConnection>scm:git:https://github.com/lexml/lexml-urn-formatter.git</developerConnection>
 		<connection>scm:git:https://github.com/lexml/lexml-urn-formatter.git</connection>
-		<tag>HEAD</tag>
+		<tag>0.0.40</tag>
 	</scm>
 
 	<dependencies>
