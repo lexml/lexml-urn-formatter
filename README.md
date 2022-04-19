@@ -154,3 +154,9 @@ Depois execute o comando abaixo para fazer o release do projeto:
     mvn -Prelease release:prepare
     mvn -Prelease release:perform
 ```
+
+O repositório será:
+
+```
+https://repo1.maven.org/maven2/br/gov/lexml/lexml-urn-formatter/
+```
