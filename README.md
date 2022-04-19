@@ -36,7 +36,7 @@ Now when you run `java -version` you will see the version 1.8.
 
 ### artN 
 
-- `Se N = "1u"`, deve-se gerar "Art. Único." (acho que esse caso não ocorre com o nosso atual acervo)
+- `Se N = "1u"`, deve-se gerar "Art. único." (acho que esse caso não ocorre com o nosso atual acervo)
 - `Se N < 10`, deve-se gerar "Art. 2º"  (com o símbolo de ordinal, sem ponto)
 - `Se N > 9`, deve-se gerar  "Art. 12." (sem o símbolo de ordinal, com ponto)`
 
@@ -59,7 +59,7 @@ Se for necessário gerar um rótulo expandido/contextual, deve-se concatenar o d
 
 ### Rótulo de parágrafo (`artM_parN`)
 
-- `Se N = "1u"', deve-se gerar "Parágrafo Único.". (acho que esse caso não ocorre com o nosso atual acervo)
+- `Se N = "1u"', deve-se gerar "Parágrafo único.". (acho que esse caso não ocorre com o nosso atual acervo)
 - `Se N < 10', deve-se gerar "§ 2º"  (com o símbolo de ordinal, sem ponto)
 - `Se N > 9', deve-se gerar  "§ 12." (sem o símbolo de ordinal, com ponto)
 

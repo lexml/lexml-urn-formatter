@@ -15,7 +15,7 @@ class Urn2RotuloTest extends TestCase {
 
   
   def testLabel_art1u() {
-    assertEquals(Urn2Rotulo.format("art1u"), "Art. Único.")
+    assertEquals(Urn2Rotulo.format("art1u"), "Art. único.")
   }
   
   def testLabel_art2() {
@@ -47,10 +47,10 @@ class Urn2RotuloTest extends TestCase {
  
   // parágrafo
   def testLabel_art1_par1u() {
-    assertEquals(Urn2Rotulo.format("art1_par1u"), "Parágrafo Único.")
+    assertEquals(Urn2Rotulo.format("art1_par1u"), "Parágrafo único.")
   }
     def testLabel_art1_par1u_cpt() {
-    assertEquals(Urn2Rotulo.format("art1_par1u_cpt"), "Parágrafo Único.")
+    assertEquals(Urn2Rotulo.format("art1_par1u_cpt"), "Parágrafo único.")
   }
 
   def testLabel_art1_par1() {

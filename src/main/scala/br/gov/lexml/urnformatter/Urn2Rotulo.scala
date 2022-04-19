@@ -44,13 +44,13 @@ object Urn2Rotulo {
     case ("cpt", _) => None
     case ("alt", _) => None
     case ("omi", _) => None
-    case ("art", Unico :: _) => Some("Art. Único.")
+    case ("art", Unico :: _) => Some("Art. único.")
     case ("art", Algum(n) :: cs) => 
         Some("Art. " 
               + formatOrdinal(n)
               + formatComplementos(cs) 
               + (if (n> 9) {"."} else {""}))
-    case ("par", Unico :: _) => Some("Parágrafo Único.")
+    case ("par", Unico :: _) => Some("Parágrafo único.")
     case ("par", Algum(n) :: cs) =>
       Some("§ " 
             + (if (n< 10){formatOrdinal(n)} else {n}) 
