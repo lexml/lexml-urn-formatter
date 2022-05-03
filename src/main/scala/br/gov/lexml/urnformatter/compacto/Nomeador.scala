@@ -1,13 +1,13 @@
 package br.gov.lexml.urnformatter.compacto
 
 import br.gov.lexml.urnformatter.Urn2Format.{formatAlfa, formatOrdinal, formatRomano}
-import br.gov.lexml.urnformatter.compacto.Numeracao.{IntervaloContinuo, UmNumero, DoisNumeros, SemNumero}
+import br.gov.lexml.urnformatter.compacto.Numeracao.{DoisNumeros, IntervaloContinuo, NumerosNaoContinuos, SemNumero, UmNumero}
+import br.gov.lexml.urnformatter.compacto.Numero.IntNumero
 import br.gov.lexml.urnformatter.compacto.TipoUrnFragmento.DispositivoAgrupador
 import br.gov.lexml.urnformatter.compacto.UrnFragmento._
 
 import scala.annotation.tailrec
 import scala.util.Try
-
 import org.slf4j.LoggerFactory
 
 private[compacto] object Nomeador {
@@ -15,6 +15,10 @@ private[compacto] object Nomeador {
   val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.Nomeador")
 
   def nomearGrupos(grupos: List[GrupoUrns]): String = {
+    println(s"==> grupos: ${grupos.mkString(",")}")
+//    val nGrupos = List(GrupoUrns(TipoUrnFragmento.Inciso, List(Artigo(UmNumero(IntNumero(56)))), NumerosNaoContinuos(List(1, 3, 5))))
+//    println(s"==> nGrupos: ${nGrupos.mkString(",")}")
+
     @tailrec
     def go(acc: String, grupos: List[GrupoUrns]): String = grupos match {
       case Nil => acc
@@ -102,7 +106,16 @@ private[compacto] object Nomeador {
       }
       case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
       case ns: DoisNumeros => s"${plural}${fmt(ns.n1)} e ${fmt(ns.n2)}"
-      case sn: SemNumero.type => singular
+      case _: SemNumero.type => singular
+      case numeros: NumerosNaoContinuos =>
+        //TODO: better way?
+
+//        def a(nInts: List[Int]) = {
+//          nInts.
+//        }
+
+        val sNumeros = numeros.ns.take(numeros.ns.size - 1).map(fmt).mkString(", ")
+        s"${plural}${sNumeros} e ${fmt(numeros.ns.last)}"
       case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: $n")
     }
   }

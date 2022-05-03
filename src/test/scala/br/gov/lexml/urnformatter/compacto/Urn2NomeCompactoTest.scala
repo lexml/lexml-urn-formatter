@@ -949,6 +949,14 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("art. 9º, I a IV", Urn2NomeCompacto.format(List("art9_inc1", "art9_inc2", "art9_inc3", "art9_inc4")))
   }
 
+  def test_art56_incI_e_III_e_V(){
+    assertEquals("art. 56, I, III e V", Urn2NomeCompacto.format(List("art56_cpt_inc1", "art56_cpt_inc3", "art56_cpt_inc5")));
+  }
+
+  def test_art56_incI_a_III_e_V(){
+    assertEquals("art. 56, I a III e V", Urn2NomeCompacto.format(List("art56_cpt_inc1", "art56_cpt_inc2", "art56_cpt_inc3", "art56_cpt_inc5")));
+  }
+
   def testLabel_anx1_art25_27_anx1_art30() {
     assertEquals("arts. 25 a 27 do Anexo I e art. 30 do Anexo I", Urn2NomeCompacto.format(List("anx1_art25", "anx1_art26", "anx1_art27", "anx1_art30")))
   }

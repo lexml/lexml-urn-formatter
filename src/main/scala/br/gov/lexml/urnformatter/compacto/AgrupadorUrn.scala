@@ -10,15 +10,20 @@ import scala.util.Try
 private[compacto] object AgrupadorUrn {
 
   def agrupar(parsedUrns: List[ParsedUrn]): List[GrupoUrns] = {
+    println("\n\n\n")
+    println(s"==> parsedUrns: ${parsedUrns.mkString(",")}")
     case class ValueAux(iniComum: String, dispPrincipal: String, numeros: List[Numero], grupos: List[GrupoUrns])
 
     val v = parsedUrns.tail.foldLeft(
       ValueAux(parsedUrns.head.inicioComum, parsedUrns.head.disPrincipal, List(parsedUrns.head.numero), Nil)
     ) {
       case (value, parsedUrn) =>
+        println(s"==> value: $value - ParsedUrn: $parsedUrn")
         if (parsedUrn.inicioComum.equals(value.iniComum)) {
+          println("==> iniComun")
           value.copy(numeros = value.numeros :+ parsedUrn.numero)
         } else {
+          println("==> !iniComun")
           value.copy(
             iniComum = parsedUrn.inicioComum,
             dispPrincipal = parsedUrn.disPrincipal,
@@ -27,7 +32,11 @@ private[compacto] object AgrupadorUrn {
           )
         }
     }
-    v.grupos ++ criaGrupos(v.iniComum, v.dispPrincipal, v.numeros)
+    println(s"==>v ${v}")
+    val ret = v.grupos ++ criaGrupos(v.iniComum, v.dispPrincipal, v.numeros)
+    println(s"==> ret: ${ret.mkString(",")}")
+    println("\n\n\n")
+    ret
   }
 
   def urnFragmento(fragmentoUrn: String): UrnFragmento =
@@ -48,8 +57,11 @@ private[compacto] object AgrupadorUrn {
     // 1 aqui nao importa, apenas precisamos adicionar um numero para o parse nao falhar
     val fragmentosComum = (iniComum.concat("1")).split("_").map(parse(_, getEAlteraNivel))
     val fragmentos = (removeUltimoFragmento andThen inverteFragmentosAgrupadores) (fragmentosComum.toList)
+    println(s"==> fragmentosComum: ${fragmentosComum.mkString(",")}")
+    println(s"==> fragmentos: ${fragmentos.mkString(",")}")
 
     criaNumeracoes(iniComum, numeros).map { num =>
+      println(s"==> num: $num")
       GrupoUrns(fragmentosComum.last.tipo, fragmentos, num)
     }
   }
@@ -58,6 +70,7 @@ private[compacto] object AgrupadorUrn {
     case class ValueAux(numeros: List[Int], numeracoes: List[Numeracao])
 
     val accValue: ValueAux = numeros.zipWithIndex.foldLeft(ValueAux(Nil, Nil)) { case (v, (n, idx)) =>
+      println(s"==> v: $v - n: $n - idx: $idx")
       n match {
         case u@Numero.Unico => v.copy(numeracoes = v.numeracoes :+ Numeracao.UmNumero(u))
         // numero str transforma o que tem no buffer em Numeracao e cria uma nova com o numero str
@@ -77,41 +90,56 @@ private[compacto] object AgrupadorUrn {
             numeracoes = v.numeracoes :+ Numeracao.UmNumero(sn)
           )
         case Numero.IntNumero(nInt) =>
+          println(s"==> IntNumero: $nInt")
           v.numeros.size match {
-            case 0 => v.copy(numeros = v.numeros :+ nInt)
-            case _ if v.numeros.last + 1 == nInt => v.copy(numeros = v.numeros :+ nInt)
+            case 0 =>
+              println("==> caso 1")
+              v.copy(numeros = v.numeros :+ nInt)
+            case _ if v.numeros.last + 1 == nInt =>
+              println("==> caso 2")
+              v.copy(numeros = v.numeros :+ nInt)
             case 1 =>
+              println("==> caso 3")
               // se for penultimo elemento ou anterior, verifica se ele e o próximo sao sequenciais
               numeros.lift(idx + 1) match {
                 case Some(Numero.IntNumero(nIntProximo)) if nInt + 1 == nIntProximo =>
+                  println("==> caso 3.1")
                   v.copy(
                     numeracoes = v.numeracoes :+ UmNumero(Numero.IntNumero(v.numeros.head)),
                     numeros = List(nInt)
                   )
                 case _ =>
+                  println("==> caso 3.2")
                   v.copy(
                     numeros = v.numeros :+ nInt
                   )
               }
-            case 2 =>
-              v.copy(
-                numeracoes = v.numeracoes :+ DoisNumeros(v.numeros.head, v.numeros.last),
-                numeros = List(nInt)
-              )
             case _ =>
+              println("==> caso 4")
               v.copy(
-                numeracoes = v.numeracoes :+ IntervaloContinuo(v.numeros.head, v.numeros.last),
-                numeros = List(nInt)
+//                 numeracoes = v.numeracoes :+ DoisNumeros(v.numeros.head, v.numeros.last),
+//                 numeros = List(nInt)
+                numeros = v.numeros :+ nInt
               )
+//            case _ =>
+//              println("==> caso 5")
+//              v.copy(
+//                numeracoes = v.numeracoes :+ IntervaloContinuo(v.numeros.head, v.numeros.last),
+//                numeros = List(nInt)
+////                numeros = v.numeros :+ nInt
+//              )
           }
       }
     }
 
+    println(s"==> accValue: ${accValue}")
+
     val numeracaoRestante = accValue.numeros.size match {
       case 0 => Option.empty
       case 1 => Some(UmNumero(Numero.IntNumero(accValue.numeros.head)))
-      case 2 => Some(DoisNumeros(accValue.numeros.head, accValue.numeros.last))
-      case _ => Some(IntervaloContinuo(accValue.numeros.head, accValue.numeros.last))
+      case _ => Some(NumerosNaoContinuos(accValue.numeros))
+//      case 2 => Some(DoisNumeros(accValue.numeros.head, accValue.numeros.last))
+//      case _ => Some(IntervaloContinuo(accValue.numeros.head, accValue.numeros.last))
     }
     accValue.numeracoes ++ List(numeracaoRestante).flatten
   }
