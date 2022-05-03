@@ -1,7 +1,7 @@
 package br.gov.lexml.urnformatter.compacto
 
 import br.gov.lexml.urnformatter.Urn2Format.{formatAlfa, formatOrdinal, formatRomano}
-import br.gov.lexml.urnformatter.compacto.Numeracao.{DoisNumeros, IntervaloContinuo, NumerosNaoContinuos, SemNumero, UmNumero}
+import br.gov.lexml.urnformatter.compacto.Numeracao._
 import br.gov.lexml.urnformatter.compacto.Numero.IntNumero
 import br.gov.lexml.urnformatter.compacto.TipoUrnFragmento.DispositivoAgrupador
 import br.gov.lexml.urnformatter.compacto.UrnFragmento._
@@ -104,18 +104,26 @@ private[compacto] object Nomeador {
         val segundaParte = Try(partesNumero(1).toInt).map(formatAlfa).getOrElse(partesNumero(1)).toUpperCase
         s"${singular}${primeiraParte}-${segundaParte}"
       }
-      case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
+      // case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
       case ns: DoisNumeros => s"${plural}${fmt(ns.n1)} e ${fmt(ns.n2)}"
       case _: SemNumero.type => singular
-      case numeros: NumerosNaoContinuos =>
+      case multiplos: MultiplosNumeros =>
+        val sMultiplos = multiplos.values.map {
+          case NumeracaoMultipla.IntervaloContinuo(inicio, fim) => s"${fmt(inicio)} $conector ${fmt(fim)}"
+          case NumeracaoMultipla.Numeros(values) =>
+            val sNumeros = values.take(values.size - 1).map(fmt).mkString(", ")
+            s"${sNumeros} e ${fmt(values.last)}"
+        }.mkString("")
+        s"${plural}$sMultiplos"
+
         //TODO: better way?
 
 //        def a(nInts: List[Int]) = {
 //          nInts.
 //        }
 
-        val sNumeros = numeros.ns.take(numeros.ns.size - 1).map(fmt).mkString(", ")
-        s"${plural}${sNumeros} e ${fmt(numeros.ns.last)}"
+//        val sNumeros = numeros.ns.take(numeros.ns.size - 1).map(fmt).mkString(", ")
+//        s"${plural}${sNumeros} e ${fmt(numeros.ns.last)}"
       case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: $n")
     }
   }
@@ -131,7 +139,7 @@ private[compacto] object Nomeador {
       }
     case UmNumero(Numero.StrNumero(n)) =>
       s"Anexo ${n.split(";").last}"
-    case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
+    // case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
     case ns: DoisNumeros => s"Anexos ${formatRomano(ns.n1)} e ${formatRomano(ns.n2)}"
     case SemNumero => "Anexo"
     case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: ${a.numeracao}")
