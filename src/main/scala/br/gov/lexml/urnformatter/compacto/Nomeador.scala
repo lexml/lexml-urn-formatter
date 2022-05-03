@@ -108,12 +108,18 @@ private[compacto] object Nomeador {
       case ns: DoisNumeros => s"${plural}${fmt(ns.n1)} e ${fmt(ns.n2)}"
       case _: SemNumero.type => singular
       case multiplos: MultiplosNumeros =>
-        val sMultiplos = multiplos.values.map {
-          case NumeracaoMultipla.IntervaloContinuo(inicio, fim) => s"${fmt(inicio)} $conector ${fmt(fim)}"
-          case NumeracaoMultipla.Numeros(values) =>
+        val sMultiplos = multiplos.values.zipWithIndex.map {
+          case (NumeracaoMultipla.IntervaloContinuo(inicio, fim), _) =>
+            if (inicio + 1 == fim) {
+              s"${fmt(inicio)} e ${fmt(fim)}"
+            } else {
+              s"${fmt(inicio)} $conector ${fmt(fim)}"
+            }
+          case (NumeracaoMultipla.Numeros(values), idx) =>
             val sNumeros = values.take(values.size - 1).map(fmt).mkString(", ")
-            s"${sNumeros} e ${fmt(values.last)}"
-        }.mkString("")
+            val connectorNumeros = if (idx < multiplos.values.size - 1) ", " else " e "
+            s"${sNumeros}${connectorNumeros}${fmt(values.last)}"
+        }.mkString("") //TODO:
         s"${plural}$sMultiplos"
 
         //TODO: better way?

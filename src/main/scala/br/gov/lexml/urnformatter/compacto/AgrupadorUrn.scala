@@ -71,28 +71,26 @@ private[compacto] object AgrupadorUrn {
   //TODO: Rename?? volta só um
   private def criaNumeracoes(iniComum: String, numeros: List[Numero]): List[Numeracao] = {
     //case class ValueAux(numeros: List[Int], numeracoes: List[Numeracao])
-    case class ValueAux(currNumeracao: Option[Numeracao], accNumeracoes: List[Numeracao])
+    case class ValueAux(currNumeracao: Option[Numeracao])
+    // val currNumeracao = Option[Numeracao]
 
-    val accValue: ValueAux = numeros.zipWithIndex.foldLeft(ValueAux(None, Nil)) { case (v, (n, idx)) =>
+    val accValue: ValueAux = numeros.zipWithIndex.foldLeft(ValueAux(None)) { case (v, (n, idx)) =>
       println(s"==> v: $v - n: $n - idx: $idx")
       n match {
-        // case u@Numero.Unico => v.copy(numeracoes = v.numeracoes :+ Numeracao.UmNumero(u))
+        case u@Numero.Unico => v.copy(currNumeracao = Some(UmNumero(u)))
         // numero str transforma o que tem no buffer em Numeracao e cria uma nova com o numero str
-        //        case s: Numero.StrNumero =>
-        //          val numeracoes = v.numeros.size match {
-        //            case 0 => Option.empty
-        //            case 1 => Some(UmNumero(Numero.IntNumero(v.numeros.head)))
-        //            case 2 => Some(DoisNumeros(v.numeros.head, v.numeros.last))
-        //            // case _ => Some(IntervaloContinuo(v.numeros.head, v.numeros.last))
-        //          }
-        //          v.copy(
-        //            numeracoes = v.numeracoes ++ numeracoes ++ List(Some(Numeracao.UmNumero(s))).flatten,
-        //            numeros = Nil
-        //          )
-        //        case sn@Numero.SemNumero =>
-        //          v.copy(
-        //            numeracoes = v.numeracoes :+ Numeracao.UmNumero(sn)
-        //          )
+//        case s: Numero.StrNumero =>
+//          val numeracoes = v.numeros.size match {
+//            case 0 => Option.empty
+//            case 1 => Some(UmNumero(Numero.IntNumero(v.numeros.head)))
+//            case 2 => Some(DoisNumeros(v.numeros.head, v.numeros.last))
+//            // case _ => Some(IntervaloContinuo(v.numeros.head, v.numeros.last))
+//          }
+//          v.copy(
+//            numeracoes = v.numeracoes ++ numeracoes ++ List(Some(Numeracao.UmNumero(s))).flatten,
+//            numeros = Nil
+//          )
+        case sn@Numero.SemNumero => v.copy(currNumeracao = Some(Numeracao.UmNumero(sn)))
         case Numero.IntNumero(nInt) =>
           println(s"==> IntNumero: $nInt")
           v.currNumeracao match {
@@ -115,12 +113,12 @@ private[compacto] object AgrupadorUrn {
                   currNumeracao = Some(MultiplosNumeros(multiplos.dropRight(1) :+ IntervaloContinuo(ini, nInt)))
                 )
                 case IntervaloContinuo(_, _) => v.copy(
-                  currNumeracao = Some(UmNumero(IntNumero(nInt))),
-                  accNumeracoes = v.accNumeracoes :+ curr
+                  currNumeracao = Some(MultiplosNumeros(multiplos :+ Numeros(List(nInt))))
+                  // accNumeracoes = v.accNumeracoes :+ curr
                 )
                 case n@Numeros(values) if values.last + 1 == nInt => v.copy(
-                  currNumeracao = Some(MultiplosNumeros(List(IntervaloContinuo(values.last, nInt)))),
-                  accNumeracoes = v.accNumeracoes :+ MultiplosNumeros(multiplos.dropRight(1) :+ Numeros(n.values.dropRight(1)))
+                  currNumeracao = Some(MultiplosNumeros(  multiplos.dropRight(1) :+ Numeros(n.values.dropRight(1)) :+  IntervaloContinuo(values.last, nInt)))
+                  // accNumeracoes = v.accNumeracoes :+ MultiplosNumeros())
                 )
                 case n@Numeros(values) => v.copy(
                   currNumeracao = Some(MultiplosNumeros(List(Numeros(n.values :+ nInt))))
@@ -139,8 +137,8 @@ private[compacto] object AgrupadorUrn {
       }
     }
 //          accValue.numeracoes ++ List(numeracaoRestante).flatten
-      val restante = accValue.currNumeracao.fold(List.empty[Numeracao])(List(_))
-      accValue.accNumeracoes ++ restante
+      // val restante = accValue.currNumeracao.fold(List.empty[Numeracao])(List(_))
+      List(accValue.currNumeracao).flatten
 //
 //
 //

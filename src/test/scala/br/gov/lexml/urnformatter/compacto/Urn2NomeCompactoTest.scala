@@ -957,6 +957,42 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("art. 56, I a III e V", Urn2NomeCompacto.format(List("art56_cpt_inc1", "art56_cpt_inc2", "art56_cpt_inc3", "art56_cpt_inc5")));
   }
 
+  def test_art56_incII_e_IV_e_VII_a_XI(){
+    assertEquals("art. 56, II, IV e VIII a XI", Urn2NomeCompacto.format(List("art56_cpt_inc2", "art56_cpt_inc4", "art56_cpt_inc8", "art56_cpt_inc9", "art56_cpt_inc10", "art56_cpt_inc11")));
+  }
+
+  def test_art56_incIaliA(){
+    assertEquals("art. 56, I, a", Urn2NomeCompacto.format(List("art56_cpt_inc1_ali1")));
+  }
+
+  def test_art56_incIaliA_e_B(){
+    assertEquals("art. 56, I, a e b", Urn2NomeCompacto.format(List("art56_cpt_inc1_ali1", "art56_cpt_inc1_ali2")));
+  }
+
+  def test_art56_incIaliA_a_C(){
+    assertEquals("art. 56, I, a a c", Urn2NomeCompacto.format(List("art56_cpt_inc1_ali1", "art56_cpt_inc1_ali2", "art56_cpt_inc1_ali3")));
+  }
+
+  def test_art56_incIaliA_a_C_e_E(){
+    assertEquals("art. 56, I, a a c e e", Urn2NomeCompacto.format(List("art56_cpt_inc1_ali1", "art56_cpt_inc1_ali2", "art56_cpt_inc1_ali3", "art56_cpt_inc1_ali5")));
+  }
+
+  def test_art56_incIaliAite1(){
+    assertEquals("art. 56, I, a, 1", Urn2NomeCompacto.format(List("art56_cpt_inc1_ali1_ite1")));
+  }
+
+  def test_art56_incIaliAite1_e_2(){
+    assertEquals("art. 56, I, a, 1 e 2", Urn2NomeCompacto.format(List("art56_cpt_inc1_ali1_ite1", "art56_cpt_inc1_ali1_ite2")));
+  }
+
+  def test_art56_incIaliAite1_a_3(){
+    assertEquals("art. 56, I, a, 1 a 3", Urn2NomeCompacto.format(List("art56_cpt_inc1_ali1_ite1", "art56_cpt_inc1_ali1_ite2", "art56_cpt_inc1_ali1_ite3")));
+  }
+
+  def test_art56_incIaliAite1_a_3_e_5(){
+    assertEquals("art. 56, I, a, 1 a 3 e 5", Urn2NomeCompacto.format(List("art56_cpt_inc1_ali1_ite1", "art56_cpt_inc1_ali1_ite2", "art56_cpt_inc1_ali1_ite3", "art56_cpt_inc1_ali1_ite5")));
+  }
+
   def testLabel_anx1_art25_27_anx1_art30() {
     assertEquals("arts. 25 a 27 do Anexo I e art. 30 do Anexo I", Urn2NomeCompacto.format(List("anx1_art25", "anx1_art26", "anx1_art27", "anx1_art30")))
   }
