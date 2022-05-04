@@ -109,14 +109,21 @@ private[compacto] object Nomeador {
       case _: SemNumero.type => singular
       case multiplos: MultiplosNumeros =>
         val sMultiplos = multiplos.values.zipWithIndex.map {
-          case (NumeracaoMultipla.IntervaloContinuo(inicio, fim), _) =>
-            if (inicio + 1 == fim) {
-              s"${fmt(inicio)} e ${fmt(fim)}"
+          case (NumeracaoMultipla.IntervaloContinuo(inicio, fim), idx) =>
+            val connectorAntes = if (idx == 0) {
+              ""
+            } else if(idx < multiplos.values.size - 1) {
+              ", "
             } else {
-              s"${fmt(inicio)} $conector ${fmt(fim)}"
+              " e "
+            }
+            if (inicio + 1 == fim) {
+              s"${connectorAntes}${fmt(inicio)} e ${fmt(fim)}"
+            } else {
+              s"${connectorAntes}${fmt(inicio)} $conector ${fmt(fim)}"
             }
           case (NumeracaoMultipla.Numeros(values), idx) =>
-            val sNumeros = values.take(values.size - 1).map(fmt).mkString(", ")
+            val sNumeros = values.dropRight(1).map(fmt).mkString(", ")
             val connectorNumeros = if (idx < multiplos.values.size - 1) ", " else " e "
             s"${sNumeros}${connectorNumeros}${fmt(values.last)}"
         }.mkString("") //TODO:
@@ -146,6 +153,28 @@ private[compacto] object Nomeador {
     case UmNumero(Numero.StrNumero(n)) =>
       s"Anexo ${n.split(";").last}"
     // case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
+    case multiplos: MultiplosNumeros =>
+      val sMultiplos = multiplos.values.zipWithIndex.map {
+        case (NumeracaoMultipla.IntervaloContinuo(inicio, fim), idx) =>
+          val connectorAntes = if (idx == 0) {
+            ""
+          } else if(idx < multiplos.values.size - 1) {
+            ", "
+          } else {
+            " e "
+          }
+          if (inicio + 1 == fim) {
+            s"${connectorAntes}${formatRomano(inicio)} e ${formatRomano(fim)}"
+          } else {
+            s"${connectorAntes}${formatRomano(inicio)} a ${formatRomano(fim)}"
+          }
+        case (NumeracaoMultipla.Numeros(values), idx) =>
+          val sNumeros = values.dropRight(1).map(formatRomano).mkString(", ")
+          val connectorNumeros = if (idx < multiplos.values.size - 1) ", " else " e "
+          s"${sNumeros}${connectorNumeros}${formatRomano(values.last)}"
+      }.mkString("") //TODO:
+      s"Anexos ${sMultiplos}"
+
     case ns: DoisNumeros => s"Anexos ${formatRomano(ns.n1)} e ${formatRomano(ns.n2)}"
     case SemNumero => "Anexo"
     case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: ${a.numeracao}")

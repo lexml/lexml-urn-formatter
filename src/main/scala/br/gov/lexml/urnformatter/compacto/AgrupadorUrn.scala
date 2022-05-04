@@ -79,7 +79,10 @@ private[compacto] object AgrupadorUrn {
       n match {
         case u@Numero.Unico => v.copy(currNumeracao = Some(UmNumero(u)))
         // numero str transforma o que tem no buffer em Numeracao e cria uma nova com o numero str
-//        case s: Numero.StrNumero =>
+        case s: Numero.StrNumero =>
+          v.copy(
+            currNumeracao = Some(UmNumero(s))
+          )
 //          val numeracoes = v.numeros.size match {
 //            case 0 => Option.empty
 //            case 1 => Some(UmNumero(Numero.IntNumero(v.numeros.head)))
@@ -108,6 +111,9 @@ private[compacto] object AgrupadorUrn {
               case UmNumero(IntNumero(n)) => v.copy(
                 currNumeracao = Some(MultiplosNumeros(List(Numeros(List(n, nInt)))))
               )
+//              case UmNumero(n) => v.copy(
+//                currNumeracao = Some(MultiplosNumeros(List(IntervaloContinuo(n, nInt))))
+//              )
               case MultiplosNumeros(multiplos) => multiplos.last match {
                 case IntervaloContinuo(ini, fim) if fim + 1 == nInt => v.copy(
                   currNumeracao = Some(MultiplosNumeros(multiplos.dropRight(1) :+ IntervaloContinuo(ini, nInt)))
@@ -117,7 +123,7 @@ private[compacto] object AgrupadorUrn {
                   // accNumeracoes = v.accNumeracoes :+ curr
                 )
                 case n@Numeros(values) if values.last + 1 == nInt => v.copy(
-                  currNumeracao = Some(MultiplosNumeros(  multiplos.dropRight(1) :+ Numeros(n.values.dropRight(1)) :+  IntervaloContinuo(values.last, nInt)))
+                  currNumeracao = Some(MultiplosNumeros(multiplos.dropRight(1) :+ Numeros(n.values.dropRight(1)) :+  IntervaloContinuo(values.last, nInt)))
                   // accNumeracoes = v.accNumeracoes :+ MultiplosNumeros())
                 )
                 case n@Numeros(values) => v.copy(
