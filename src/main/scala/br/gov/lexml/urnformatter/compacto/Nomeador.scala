@@ -66,141 +66,166 @@ private[compacto] object Nomeador {
   }
 
   private def nomear(grupo: GrupoUrns): String = grupo.dispPrincipal match {
-    case TipoUrnFragmento.Artigo => nomearNaoAgrupador(grupo, Artigo(grupo.numeracao))
+    case TipoUrnFragmento.Artigo => nomearNaoAgrupador(grupo, Artigo(grupo.numeracoes))
     case TipoUrnFragmento.Caput => nomearNaoAgrupador(grupo, Caput)
     case TipoUrnFragmento.ParagrafoUnico => nomearNaoAgrupador(grupo, ParagrafoUnico)
-    case TipoUrnFragmento.Inciso => nomearNaoAgrupador(grupo, Inciso(grupo.numeracao))
-    case TipoUrnFragmento.Alinea => nomearNaoAgrupador(grupo, Alinea(grupo.numeracao))
-    case TipoUrnFragmento.Paragrafo => nomearNaoAgrupador(grupo, Paragrafo(grupo.numeracao))
-    case TipoUrnFragmento.Item => nomearNaoAgrupador(grupo, Item(grupo.numeracao))
-    case TipoUrnFragmento.Parte => nomear(Parte(grupo.numeracao) :: grupo.fragmentosComum)
-    case TipoUrnFragmento.Titulo => nomear(Titulo(grupo.numeracao) :: grupo.fragmentosComum)
-    case TipoUrnFragmento.Capitulo => nomear(Capitulo(grupo.numeracao) :: grupo.fragmentosComum)
-    case TipoUrnFragmento.Secao => nomear(Secao(grupo.numeracao) :: grupo.fragmentosComum)
-    case TipoUrnFragmento.SubSecao => nomear(SubSecao(grupo.numeracao) :: grupo.fragmentosComum)
-    case TipoUrnFragmento.Livro => nomear(Livro(grupo.numeracao) :: grupo.fragmentosComum)
+    case TipoUrnFragmento.Inciso => nomearNaoAgrupador(grupo, Inciso(grupo.numeracoes))
+    case TipoUrnFragmento.Alinea => nomearNaoAgrupador(grupo, Alinea(grupo.numeracoes))
+    case TipoUrnFragmento.Paragrafo => nomearNaoAgrupador(grupo, Paragrafo(grupo.numeracoes))
+    case TipoUrnFragmento.Item => nomearNaoAgrupador(grupo, Item(grupo.numeracoes))
+    case TipoUrnFragmento.Parte => nomear(Parte(grupo.numeracoes) :: grupo.fragmentosComum)
+    case TipoUrnFragmento.Titulo => nomear(Titulo(grupo.numeracoes) :: grupo.fragmentosComum)
+    case TipoUrnFragmento.Capitulo => nomear(Capitulo(grupo.numeracoes) :: grupo.fragmentosComum)
+    case TipoUrnFragmento.Secao => nomear(Secao(grupo.numeracoes) :: grupo.fragmentosComum)
+    case TipoUrnFragmento.SubSecao => nomear(SubSecao(grupo.numeracoes) :: grupo.fragmentosComum)
+    case TipoUrnFragmento.Livro => nomear(Livro(grupo.numeracoes) :: grupo.fragmentosComum)
     case TipoUrnFragmento.Anexo =>
       val maxNivel = Try(grupo.fragmentosComum.map {
         case a: Anexo => a.nivel
         case _ => 0
       }.max).getOrElse(0)
-      nomear(Anexo(grupo.numeracao, maxNivel + 1) :: grupo.fragmentosComum)
+      nomear(Anexo(grupo.numeracoes, maxNivel + 1) :: grupo.fragmentosComum)
   }
 
-  private def nomear(n: Numeracao, singular: String, plural: String, conector: String, fmt: Int => String): String =
-    nomearComOption(n, Some(singular), Some(plural), conector, fmt)
+  private def nomear(numeracoes: List[Numeracao], singular: String, plural: String, conector: String, fmt: Int => String): String =
+    nomearComOption(numeracoes, Some(singular), Some(plural), conector, fmt)
 
-  private def nomear(n: Numeracao, conector: String, fmt: Int => String): String =
-    nomearComOption(n, None, None, conector, fmt)
+  private def nomear(numeracoes: List[Numeracao], conector: String, fmt: Int => String): String =
+    nomearComOption(numeracoes, None, None, conector, fmt)
 
-  private def nomearComOption(n: Numeracao, maybeSingular: Option[String], maybePlural: Option[String], conector: String, fmt: (Int) => String): String = {
+  private def nomearComOption(numeracoes: List[Numeracao], maybeSingular: Option[String], maybePlural: Option[String], conector: String, fmt: (Int) => String): String = {
     val singular = maybeSingular.map(s => s"$s ").getOrElse("")
     val plural = maybePlural.map(s => s"$s ").getOrElse("")
-    n match {
-      case UmNumero(Numero.IntNumero(i)) => s"${singular}${fmt(i)}"
-      case UmNumero(Numero.StrNumero(s)) => {
+    val sNumeracoesList = numeracoes.zipWithIndex.map {
+      case (UmNumero(Numero.IntNumero(i)), _) => fmt(i)
+      case (UmNumero(Numero.StrNumero(s)), _) =>
         val partesNumero = s.split("-")
         val primeiraParte = fmt(partesNumero(0).toInt)
         val segundaParte = Try(partesNumero(1).toInt).map(formatAlfa).getOrElse(partesNumero(1)).toUpperCase
-        s"${singular}${primeiraParte}-${segundaParte}"
-      }
+        s"${primeiraParte}-${segundaParte}"
       // case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
-      case ns: DoisNumeros => s"${plural}${fmt(ns.n1)} e ${fmt(ns.n2)}"
-      case _: SemNumero.type => singular
-      case multiplos: MultiplosNumeros =>
-        val sMultiplos = multiplos.values.zipWithIndex.map {
-          case (NumeracaoMultipla.IntervaloContinuo(inicio, fim), idx) =>
-            val connectorAntes = if (idx == 0) {
-              ""
-            } else if(idx < multiplos.values.size - 1) {
-              ", "
-            } else {
-              " e "
-            }
-            if (inicio + 1 == fim) {
-              s"${connectorAntes}${fmt(inicio)} e ${fmt(fim)}"
-            } else {
-              s"${connectorAntes}${fmt(inicio)} $conector ${fmt(fim)}"
-            }
-          case (NumeracaoMultipla.Numeros(values), idx) =>
-            val sNumeros = values.dropRight(1).map(fmt).mkString(", ")
-            val connectorNumeros = if (idx < multiplos.values.size - 1) ", " else " e "
-            s"${sNumeros}${connectorNumeros}${fmt(values.last)}"
-        }.mkString("") //TODO:
-        s"${plural}$sMultiplos"
+      // case ns: DoisNumeros => s"${plural}${fmt(ns.n1)} e ${fmt(ns.n2)}"
+      case (_: SemNumero.type, _) => ""
+      case (IntervaloContinuo(inicio, fim), idx) =>
+        if (inicio + 1 == fim) {
+          s"${fmt(inicio)} e ${fmt(fim)}"
+        } else {
+          s"${fmt(inicio)} $conector ${fmt(fim)}"
+        }
+      case (Numeros(values), idx) =>
+        val sNumeros = values.dropRight(1).map(fmt).mkString(", ")
+        val connectorNumeros = if (idx < numeracoes.size - 1) ", " else " e "
+        s"${sNumeros}${connectorNumeros}${fmt(values.last)}"
+      case n@_ => throw new IllegalArgumentException(s"Tipo numeração não esperada: $n")
+    }
 
-        //TODO: better way?
-
-//        def a(nInts: List[Int]) = {
-//          nInts.
-//        }
-
-//        val sNumeros = numeros.ns.take(numeros.ns.size - 1).map(fmt).mkString(", ")
-//        s"${plural}${sNumeros} e ${fmt(numeros.ns.last)}"
-      case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: $n")
+    val sNumeracoes =
+      if (sNumeracoesList.size > 1) {
+        sNumeracoesList.dropRight(1).mkString(", ") + " e " + sNumeracoesList.last
+      } else {
+        sNumeracoesList.mkString("")
+      }
+    if (numeracoes.size > 1 || numeracoes(0).isInstanceOf[IntervaloContinuo] || numeracoes(0).isInstanceOf[Numeros]) {
+      s"${plural}${sNumeracoes}"
+    } else {
+      s"${singular}${sNumeracoes}"
     }
   }
 
-  private def nomearAnexo(a: Anexo): String = a.numeracao match {
-    case UmNumero(Numero.IntNumero(n)) =>
-      if (a.nivel == 1) {
-        s"Anexo ${formatRomano(n)}"
-      } else if (a.nivel == 2) {
-        s"Anexo $n"
+  private def nomearAnexo(a: Anexo): String =  {
+    val sNumeracoesList = a.numeracoes.zipWithIndex.map {
+      case (UmNumero(Numero.IntNumero(n)), _) =>
+        if (a.nivel == 1) {
+          formatRomano(n)
+        } else if (a.nivel == 2) {
+          n
+        } else {
+          formatAlfa(n).toUpperCase
+        }
+      case (UmNumero(Numero.StrNumero(n)), _) => n.split(";").last
+      case (IntervaloContinuo(inicio, fim), _) =>
+        if (inicio + 1 == fim) {
+          s"${formatRomano(inicio)} e ${formatRomano(fim)}"
+        } else {
+          s"${formatRomano(inicio)} a ${formatRomano(fim)}"
+        }
+      case (Numeros(values), idx) =>
+        val sNumeros = values.dropRight(1).map(formatRomano).mkString(", ")
+        val connectorNumeros = if (idx < a.numeracoes.size - 1) ", " else " e "
+        s"${sNumeros}${connectorNumeros}${formatRomano(values.last)}"
+    }
+    val sNumeracoes =
+      if (sNumeracoesList.size > 1) {
+        sNumeracoesList.dropRight(1).mkString(", ") + " e " + sNumeracoesList.last
       } else {
-        s"Anexo ${formatAlfa(n).toUpperCase}"
+        sNumeracoesList.mkString("")
       }
-    case UmNumero(Numero.StrNumero(n)) =>
-      s"Anexo ${n.split(";").last}"
-    // case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
-    case multiplos: MultiplosNumeros =>
-      val sMultiplos = multiplos.values.zipWithIndex.map {
-        case (NumeracaoMultipla.IntervaloContinuo(inicio, fim), idx) =>
-          val connectorAntes = if (idx == 0) {
-            ""
-          } else if(idx < multiplos.values.size - 1) {
-            ", "
-          } else {
-            " e "
-          }
-          if (inicio + 1 == fim) {
-            s"${connectorAntes}${formatRomano(inicio)} e ${formatRomano(fim)}"
-          } else {
-            s"${connectorAntes}${formatRomano(inicio)} a ${formatRomano(fim)}"
-          }
-        case (NumeracaoMultipla.Numeros(values), idx) =>
-          val sNumeros = values.dropRight(1).map(formatRomano).mkString(", ")
-          val connectorNumeros = if (idx < multiplos.values.size - 1) ", " else " e "
-          s"${sNumeros}${connectorNumeros}${formatRomano(values.last)}"
-      }.mkString("") //TODO:
-      s"Anexos ${sMultiplos}"
-
-    case ns: DoisNumeros => s"Anexos ${formatRomano(ns.n1)} e ${formatRomano(ns.n2)}"
-    case SemNumero => "Anexo"
-    case _ => throw new IllegalArgumentException(s"Tipo numeração não esperada: ${a.numeracao}")
+    if (a.numeracoes.size > 1 || a.numeracoes(0).isInstanceOf[IntervaloContinuo] || a.numeracoes(0).isInstanceOf[Numeros]) {
+      s"Anexos ${sNumeracoes}"
+    } else {
+      s"Anexo ${sNumeracoes}"
+    }
+    // a.numeracoes match {
+      //    case UmNumero(Numero.IntNumero(n)) =>
+      //      if (a.nivel == 1) {
+      //        s"Anexo ${formatRomano(n)}"
+      //      } else if (a.nivel == 2) {
+      //        s"Anexo $n"
+      //      } else {
+      //        s"Anexo ${formatAlfa(n).toUpperCase}"
+      //      }
+      //    case UmNumero(Numero.StrNumero(n)) =>
+      //      s"Anexo ${n.split(";").last}"
+      //    // case IntervaloContinuo(i, f) => s"Anexos ${formatRomano(i)} a ${formatRomano(f)}"
+      //    case multiplos: MultiplosNumeros =>
+      //      val sMultiplos = multiplos.values.zipWithIndex.map {
+      //        case (NumeracaoMultipla.IntervaloContinuo(inicio, fim), idx) =>
+      //          val connectorAntes = if (idx == 0) {
+      //            ""
+      //          } else if(idx < multiplos.values.size - 1) {
+      //            ", "
+      //          } else {
+      //            " e "
+      //          }
+      //          if (inicio + 1 == fim) {
+      //            s"${connectorAntes}${formatRomano(inicio)} e ${formatRomano(fim)}"
+      //          } else {
+      //            s"${connectorAntes}${formatRomano(inicio)} a ${formatRomano(fim)}"
+      //          }
+      //        case (NumeracaoMultipla.Numeros(values), idx) =>
+      //          val sNumeros = values.dropRight(1).map(formatRomano).mkString(", ")
+      //          val connectorNumeros = if (idx < multiplos.values.size - 1) ", " else " e "
+      //          s"${sNumeros}${connectorNumeros}${formatRomano(values.last)}"
+      //      }.mkString("") //TODO:
+      //      s"Anexos ${sMultiplos}"
+      //
+      //    case ns: DoisNumeros => s"Anexos ${formatRomano(ns.n1)} e ${formatRomano(ns.n2)}"
+      //    case SemNumero => "Anexo"
+//      case n@_ => throw new IllegalArgumentException(s"Tipo numeração não esperada: ${a}")
+//    }
   }
 
   private def nomear(urnFragmento: UrnFragmento, fragmentos: List[UrnFragmento]): String = urnFragmento match {
-    case a: Artigo => nomear(a.numeracao, "art.", "arts.", "a", formatOrdinal)
+    case a: Artigo => nomear(a.numeracoes, "art.", "arts.", "a", formatOrdinal)
     case Caput => "caput"
     case ParagrafoUnico => "parágrafo único"
     case i: Inciso =>
       val compacto = fragmentos.size > 1
-      if (compacto) nomear(i.numeracao, "a", formatRomano)
-      else nomear(i.numeracao, "inciso", "incisos", "a", formatRomano).trim
-    case a: Alinea => nomear(a.numeracao, "a", formatAlfa)
+      if (compacto) nomear(i.numeracoes, "a", formatRomano)
+      else nomear(i.numeracoes, "inciso", "incisos", "a", formatRomano).trim
+    case a: Alinea => nomear(a.numeracoes, "a", formatAlfa)
     case p: Paragrafo =>
       val compacto = fragmentos.size > 1
-      if (compacto) nomear(p.numeracao, "§", "§§", "ao", formatOrdinal)
-      else nomear(p.numeracao, "§", "§§", "ao", formatOrdinal)
-    case i: Item => nomear(i.numeracao, "a", _.toString)
-    case c: Capitulo => nomear(c.numeracao, "Capítulo", "Capítulos", "a", formatRomano)
-    case s: Secao => nomear(s.numeracao, "Seção", "Seções", "a", formatRomano)
-    case sb: SubSecao => nomear(sb.numeracao, "Subseção", "Subseções", "a", formatRomano)
-    case l: Livro => nomear(l.numeracao, "Livro", "Livros", "a", formatRomano)
+      if (compacto) nomear(p.numeracoes, "§", "§§", "ao", formatOrdinal)
+      else nomear(p.numeracoes, "§", "§§", "ao", formatOrdinal)
+    case i: Item => nomear(i.numeracoes, "a", _.toString)
+    case c: Capitulo => nomear(c.numeracoes, "Capítulo", "Capítulos", "a", formatRomano)
+    case s: Secao => nomear(s.numeracoes, "Seção", "Seções", "a", formatRomano)
+    case sb: SubSecao => nomear(sb.numeracoes, "Subseção", "Subseções", "a", formatRomano)
+    case l: Livro => nomear(l.numeracoes, "Livro", "Livros", "a", formatRomano)
     case a: Anexo => nomearAnexo(a)
-    case t: Titulo => nomear(t.numeracao, "Título", "Títulos", "a", formatRomano)
-    case p: Parte => nomear(p.numeracao, "Parte", "Partes", "a", formatRomano)
+    case t: Titulo => nomear(t.numeracoes, "Título", "Títulos", "a", formatRomano)
+    case p: Parte => nomear(p.numeracoes, "Parte", "Partes", "a", formatRomano)
   }
 
   private def nomear(urnFragmentos: List[UrnFragmento]): String = {

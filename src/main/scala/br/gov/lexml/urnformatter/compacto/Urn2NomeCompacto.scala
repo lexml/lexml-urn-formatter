@@ -32,7 +32,10 @@ object Urn2NomeCompacto {
         (UrnParser.parse _ andThen AgrupadorUrn.agrupar andThen Nomeador.nomearGrupos) (urns)
       }.recover {
         case t: Throwable =>
-          logger.warn(s"Erro ao gerar urn compacta: $urns - ${t.getMessage}")
+          //TODO
+          // logger.warn(s"Erro ao gerar urn compacta: $urns - ${t.getMessage}")
+          println(s"Erro ao gerar urn compacta: $urns")
+          t.printStackTrace()
           ""
       }.get
     }

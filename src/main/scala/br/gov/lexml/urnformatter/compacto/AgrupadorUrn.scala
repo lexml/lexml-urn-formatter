@@ -1,7 +1,6 @@
 package br.gov.lexml.urnformatter.compacto
 
 import br.gov.lexml.urnformatter.compacto.Numeracao._
-import br.gov.lexml.urnformatter.compacto.NumeracaoMultipla._
 import br.gov.lexml.urnformatter.compacto.Numero.IntNumero
 import br.gov.lexml.urnformatter.compacto.TipoUrnFragmento.DispositivoAgrupador
 import br.gov.lexml.urnformatter.compacto.UrnFragmento._
@@ -62,26 +61,33 @@ private[compacto] object AgrupadorUrn {
     println(s"==> fragmentosComum: ${fragmentosComum.mkString(",")}")
     println(s"==> fragmentos: ${fragmentos.mkString(",")}")
 
-    criaNumeracoes(iniComum, numeros).map { num =>
-      println(s"==> num: $num")
-      GrupoUrns(fragmentosComum.last.tipo, fragmentos, num)
-    }
+
+    val numeracoes = criaNumeracoes(iniComum, numeros)
+    println(s"==> numeracoes: $numeracoes")
+    List(GrupoUrns(fragmentosComum.last.tipo, fragmentos, numeracoes)) //TODO:
+//    criaNumeracoes(iniComum, numeros).map { num =>
+//      println(s"==> num: $num")
+//      GrupoUrns(fragmentosComum.last.tipo, fragmentos, num)
+//    }
   }
 
   //TODO: Rename?? volta só um
   private def criaNumeracoes(iniComum: String, numeros: List[Numero]): List[Numeracao] = {
     //case class ValueAux(numeros: List[Int], numeracoes: List[Numeracao])
-    case class ValueAux(currNumeracao: Option[Numeracao])
+    case class ValueAux(currNumeracao: Option[Numeracao], numeracoes: List[Numeracao])
     // val currNumeracao = Option[Numeracao]
 
-    val accValue: ValueAux = numeros.zipWithIndex.foldLeft(ValueAux(None)) { case (v, (n, idx)) =>
+    val accValue: ValueAux = numeros.zipWithIndex.foldLeft(ValueAux(None, Nil)) { case (v, (n, idx)) =>
       println(s"==> v: $v - n: $n - idx: $idx")
+      // assertEquals("arts. 1º a 3º, art. 3º-A e arts. 4º a 6º", Urn2NomeCompacto.format(List("art1", "art2", "art3", "art3-A", "art4", "art5", "art6")))
+      // art56_cpt_inc2", "art56_cpt_inc4", "art56_cpt_inc8", "art56_cpt_inc9", "art56_cpt_inc10", "art56_cpt_inc11
       n match {
         case u@Numero.Unico => v.copy(currNumeracao = Some(UmNumero(u)))
         // numero str transforma o que tem no buffer em Numeracao e cria uma nova com o numero str
         case s: Numero.StrNumero =>
           v.copy(
-            currNumeracao = Some(UmNumero(s))
+            currNumeracao = Some(UmNumero(s)),
+            numeracoes = v.numeracoes ++ v.currNumeracao.fold(List.empty[Numeracao])(List(_))
           )
 //          val numeracoes = v.numeros.size match {
 //            case 0 => Option.empty
@@ -106,29 +112,49 @@ private[compacto] object AgrupadorUrn {
             )
             case Some(curr) => curr match {
               case UmNumero(IntNumero(n)) if n + 1 == nInt => v.copy(
-                currNumeracao = Some(MultiplosNumeros(List(IntervaloContinuo(n, nInt))))
+                currNumeracao = Some(IntervaloContinuo(n, nInt))
               )
               case UmNumero(IntNumero(n)) => v.copy(
-                currNumeracao = Some(MultiplosNumeros(List(Numeros(List(n, nInt)))))
+                currNumeracao = Some(Numeros(List(n, nInt)))
+
+                // currNumeracao = Some(MultiplosNumeros(List(Numeros(List(n, nInt)))))
               )
-//              case UmNumero(n) => v.copy(
-//                currNumeracao = Some(MultiplosNumeros(List(IntervaloContinuo(n, nInt))))
-//              )
-              case MultiplosNumeros(multiplos) => multiplos.last match {
-                case IntervaloContinuo(ini, fim) if fim + 1 == nInt => v.copy(
-                  currNumeracao = Some(MultiplosNumeros(multiplos.dropRight(1) :+ IntervaloContinuo(ini, nInt)))
-                )
-                case IntervaloContinuo(_, _) => v.copy(
-                  currNumeracao = Some(MultiplosNumeros(multiplos :+ Numeros(List(nInt))))
-                  // accNumeracoes = v.accNumeracoes :+ curr
-                )
-                case n@Numeros(values) if values.last + 1 == nInt => v.copy(
-                  currNumeracao = Some(MultiplosNumeros(multiplos.dropRight(1) :+ Numeros(n.values.dropRight(1)) :+  IntervaloContinuo(values.last, nInt)))
-                  // accNumeracoes = v.accNumeracoes :+ MultiplosNumeros())
-                )
-                case n@Numeros(values) => v.copy(
-                  currNumeracao = Some(MultiplosNumeros(List(Numeros(n.values :+ nInt))))
-                )
+              case UmNumero(_) => v.copy(
+                currNumeracao = Some(UmNumero(IntNumero(nInt))),
+                numeracoes = v.numeracoes :+ curr
+
+                // currNumeracao = Some(MultiplosNumeros(List(IntervaloContinuo(n, nInt))))
+              )
+              case IntervaloContinuo(ini, fim) if fim + 1 == nInt => v.copy(
+                currNumeracao = Some(IntervaloContinuo(ini,  nInt))
+              )
+              case IntervaloContinuo(_, _) => v.copy(
+                currNumeracao = Some(UmNumero(IntNumero(nInt))),
+                numeracoes = v.numeracoes :+ curr
+              )
+              case n@Numeros(values) if values.last + 1 == nInt => v.copy(
+                currNumeracao = Some(IntervaloContinuo(values.last, nInt)), //multiplos.dropRight(1) :+ Numeros(n.values.dropRight(1)) :+  IntervaloContinuo(values.last, nInt)))
+                numeracoes = v.numeracoes :+ Numeros(values.dropRight(1))
+              )
+              case Numeros(values) => v.copy(
+                currNumeracao = Some(Numeros(values :+ nInt))
+              )
+
+//              case MultiplosNumeros(multiplos) => multiplos.last match {
+//                case IntervaloContinuo(ini, fim) if fim + 1 == nInt => v.copy(
+//                  currNumeracao = Some(MultiplosNumeros(multiplos.dropRight(1) :+ IntervaloContinuo(ini, nInt)))
+//                )
+//                case IntervaloContinuo(_, _) => v.copy(
+//                  currNumeracao = Some(MultiplosNumeros(multiplos :+ Numeros(List(nInt))))
+//                  // accNumeracoes = v.accNumeracoes :+ curr
+//                )
+//                case n@Numeros(values) if values.last + 1 == nInt => v.copy(
+//                  currNumeracao = Some(MultiplosNumeros(multiplos.dropRight(1) :+ Numeros(n.values.dropRight(1)) :+  IntervaloContinuo(values.last, nInt)))
+//                  // accNumeracoes = v.accNumeracoes :+ MultiplosNumeros())
+//                )
+//                case n@Numeros(values) => v.copy(
+//                  currNumeracao = Some(MultiplosNumeros(List(Numeros(n.values :+ nInt))))
+//                )
               }
 
             }
@@ -141,10 +167,12 @@ private[compacto] object AgrupadorUrn {
         //            //      case 2 => Some(DoisNumeros(accValue.numeros.head, accValue.numeros.last))
         //            //      case _ => Some(IntervaloContinuo(accValue.numeros.head, accValue.numeros.last))
       }
+    //          accValue.numeracoes ++ List(numeracaoRestante).flatten
+      val restante = accValue.currNumeracao.fold(List.empty[Numeracao])(List(_))
+      println(s"==> numeracoes: ${accValue.numeracoes}")
+      println(s"==> restante: ${restante}")
+      accValue.numeracoes ++ List(restante).flatten
     }
-//          accValue.numeracoes ++ List(numeracaoRestante).flatten
-      // val restante = accValue.currNumeracao.fold(List.empty[Numeracao])(List(_))
-      List(accValue.currNumeracao).flatten
 //
 //
 //
@@ -199,7 +227,7 @@ private[compacto] object AgrupadorUrn {
 ////      case _ => Some(IntervaloContinuo(accValue.numeros.head, accValue.numeros.last))
 //    }
 //    accValue.numeracoes ++ List(numeracaoRestante).flatten
-  }
+  // }
 
   private def removeUltimoFragmento: List[UrnFragmento] => List[UrnFragmento] = _.dropRight(1)
 
@@ -232,20 +260,20 @@ private[compacto] object AgrupadorUrn {
     case "art" =>
       val numStr = fragmentoUrn.substring(3)
       val num = Try(numStr.toInt).map(Numero.IntNumero).getOrElse(Numero.StrNumero(numStr))
-      Artigo(UmNumero(num))
+      Artigo(List(UmNumero(num)))
     case "cpt" => Caput
     case "par" if fragmentoUrn.contains("par1u") => ParagrafoUnico
-    case "par" => Paragrafo(unicoIntNumero(fragmentoUrn))
-    case "inc" => Inciso(unicoIntNumero(fragmentoUrn))
-    case "ali" => Alinea(unicoIntNumero(fragmentoUrn))
-    case "ite" => Item(unicoIntNumero(fragmentoUrn))
-    case "tit" => Titulo(unicoIntNumero(fragmentoUrn))
-    case "cap" => Capitulo(unicoIntNumero(fragmentoUrn))
-    case "sec" => Secao(unicoIntNumero(fragmentoUrn))
-    case "sub" => SubSecao(unicoIntNumero(fragmentoUrn))
-    case "liv" => Livro(unicoIntNumero(fragmentoUrn))
-    case "anx" => Anexo((unicoIntNumero(fragmentoUrn)), getEAlteraNivel("anx"))
-    case "prt" => Parte(unicoIntNumero(fragmentoUrn))
+    case "par" => Paragrafo(List(unicoIntNumero(fragmentoUrn)))
+    case "inc" => Inciso(List(unicoIntNumero(fragmentoUrn)))
+    case "ali" => Alinea(List(unicoIntNumero(fragmentoUrn)))
+    case "ite" => Item(List(unicoIntNumero(fragmentoUrn)))
+    case "tit" => Titulo(List(unicoIntNumero(fragmentoUrn)))
+    case "cap" => Capitulo(List(unicoIntNumero(fragmentoUrn)))
+    case "sec" => Secao(List(unicoIntNumero(fragmentoUrn)))
+    case "sub" => SubSecao(List(unicoIntNumero(fragmentoUrn)))
+    case "liv" => Livro(List(unicoIntNumero(fragmentoUrn)))
+    case "anx" => Anexo(List(unicoIntNumero(fragmentoUrn)), getEAlteraNivel("anx"))
+    case "prt" => Parte(List(unicoIntNumero(fragmentoUrn)))
     case _ => throw new IllegalArgumentException(s"Urn Invalida: $fragmentoUrn")
   }
 
