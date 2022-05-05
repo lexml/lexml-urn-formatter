@@ -94,6 +94,7 @@ private[compacto] object Nomeador {
     nomearComOption(numeracoes, None, None, conector, fmt)
 
   private def nomearComOption(numeracoes: List[Numeracao], maybeSingular: Option[String], maybePlural: Option[String], conector: String, fmt: (Int) => String): String = {
+    println(s"==> numeracoes: ${numeracoes.mkString(",")} - singular: ${maybeSingular} - plural: ${maybePlural} - conector: ${conector}")
     val singular = maybeSingular.map(s => s"$s ").getOrElse("")
     val plural = maybePlural.map(s => s"$s ").getOrElse("")
     val sNumeracoesList = numeracoes.zipWithIndex.map {

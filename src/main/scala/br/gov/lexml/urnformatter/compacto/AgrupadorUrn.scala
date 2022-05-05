@@ -134,7 +134,7 @@ private[compacto] object AgrupadorUrn {
               )
               case n@Numeros(values) if values.last + 1 == nInt => v.copy(
                 currNumeracao = Some(IntervaloContinuo(values.last, nInt)), //multiplos.dropRight(1) :+ Numeros(n.values.dropRight(1)) :+  IntervaloContinuo(values.last, nInt)))
-                numeracoes = v.numeracoes :+ Numeros(values.dropRight(1))
+                numeracoes = v.numeracoes :+ (if (values.size == 2) UmNumero(IntNumero(values.head)) else Numeros(values.dropRight(1)))
               )
               case Numeros(values) => v.copy(
                 currNumeracao = Some(Numeros(values :+ nInt))
