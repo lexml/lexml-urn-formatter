@@ -930,7 +930,7 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def testLabel_tit1_sec1_2_sec3_art1_2_art4() {
-    assertEquals("Seções I a III do Título I e arts. 1º e 2º e 4º", Urn2NomeCompacto.format(List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4")))
+    assertEquals("Seções I a III do Título I e arts. 1º, 2º e 4º", Urn2NomeCompacto.format(List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4")))
   }
 
   def testLabel_tit1_sec1_sec2_art1() {
@@ -938,11 +938,11 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def testLabel_tit1_sec1_2_sec3_art1_2_art4_art6_10() {
-    assertEquals("Seções I a III do Título I e arts. 1º e 2º, 4º e 6º a 10", Urn2NomeCompacto.format(List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4", "tit1_sec3_art6", "tit1_sec3_art7", "tit1_sec3_art8", "tit1_sec3_art9", "tit1_sec3_art10")))
+    assertEquals("Seções I a III do Título I e arts. 1º, 2º, 4º e 6º a 10", Urn2NomeCompacto.format(List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4", "tit1_sec3_art6", "tit1_sec3_art7", "tit1_sec3_art8", "tit1_sec3_art9", "tit1_sec3_art10")))
   }
 
   def testLabel_tit1_sec1_2_sec3_art1_2_art4_art6_10_tit2_sec1_5() {
-    assertEquals("Seções I a III do Título I e arts. 1º e 2º, 4º e 6º a 10 e Seções I a V do Título II", Urn2NomeCompacto.format(List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4", "tit1_sec3_art6", "tit1_sec3_art7", "tit1_sec3_art8", "tit1_sec3_art9", "tit1_sec3_art10", "tit2_sec1", "tit2_sec2", "tit2_sec3", "tit2_sec4", "tit2_sec5")))
+    assertEquals("Seções I a III do Título I e arts. 1º, 2º, 4º e 6º a 10 e Seções I a V do Título II", Urn2NomeCompacto.format(List("tit1_sec1", "tit1_sec2", "tit1_sec3", "tit1_sec3_art1", "tit1_sec3_art2", "tit1_sec3_art4", "tit1_sec3_art6", "tit1_sec3_art7", "tit1_sec3_art8", "tit1_sec3_art9", "tit1_sec3_art10", "tit2_sec1", "tit2_sec2", "tit2_sec3", "tit2_sec4", "tit2_sec5")))
   }
 
   def testLabel_art9_inc1_4() {
@@ -1158,23 +1158,23 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def testLabel_partes() {
-    assertEquals("Partes I a III, V e VI e VIII", Urn2NomeCompacto.format(List("prt1", "prt2", "prt3", "prt5", "prt6", "prt8")))
+    assertEquals("Partes I a III, V, VI e VIII", Urn2NomeCompacto.format(List("prt1", "prt2", "prt3", "prt5", "prt6", "prt8")))
   }
 
   def testLabel_titulos() {
-    assertEquals("Títulos I a III, V e VI e VIII", Urn2NomeCompacto.format(List("tit1", "tit2", "tit3", "tit5", "tit6", "tit8")))
+    assertEquals("Títulos I a III, V, VI e VIII", Urn2NomeCompacto.format(List("tit1", "tit2", "tit3", "tit5", "tit6", "tit8")))
   }
 
   def testLabel_capitulos() {
-    assertEquals("Capítulos I a III, V e VI e VIII", Urn2NomeCompacto.format(List("cap1", "cap2", "cap3", "cap5", "cap6", "cap8")))
+    assertEquals("Capítulos I a III, V, VI e VIII", Urn2NomeCompacto.format(List("cap1", "cap2", "cap3", "cap5", "cap6", "cap8")))
   }
 
   def testLabel_subsecoes() {
-    assertEquals("Subseções I a III, V e VI e VIII", Urn2NomeCompacto.format(List("sub1", "sub2", "sub3", "sub5", "sub6", "sub8")))
+    assertEquals("Subseções I a III, V, VI e VIII", Urn2NomeCompacto.format(List("sub1", "sub2", "sub3", "sub5", "sub6", "sub8")))
   }
 
   def testLabel_livros() {
-    assertEquals("Livros I a III, V e VI e VIII", Urn2NomeCompacto.format(List("liv1", "liv2", "liv3", "liv5", "liv6", "liv8")))
+    assertEquals("Livros I a III, V, VI e VIII", Urn2NomeCompacto.format(List("liv1", "liv2", "liv3", "liv5", "liv6", "liv8")))
   }
 
   def testLabel_anx1_tit1_art1200_1201() = {
@@ -1252,6 +1252,19 @@ class Urn2NomeCompactoTest extends TestCase {
   def testLabel_anx2_art1_with_context_anx2_prt1_cap7_art15_cpt_inc2() = {
     assertEquals("art. 1º deste anexo", Urn2NomeCompacto.format(List("anx2_art1"), "anx2_prt1_cap7_art15_cpt_inc2"))
   }
+
+  def testLabel_liv2_tit1_cap2_with_context_liv2_tit1_cap3() = {
+    assertEquals("Capítulo II deste título", Urn2NomeCompacto.format(List("liv2_tit1_cap2"), "liv2_tit1_cap3"))
+  }  
+
+  def testLabel_liv2_tit1_cap2_with_context_liv2_tit5_cap4_sec1() = {
+    assertEquals("Capítulo II do Título I deste livro", Urn2NomeCompacto.format(List("liv2_tit1_cap2"), "liv2_tit5_cap4_sec1"))
+  }    
+
+  def testLabel_liv2_tit1_cap2_with_context_liv3_tit5_cap4_sec1() = {
+    assertEquals("Capítulo II do Título I do Livro II", Urn2NomeCompacto.format(List("liv2_tit1_cap2"), "liv3_tit5_cap4_sec1"))
+  }    
+
 
   /*
    *
@@ -1343,7 +1356,11 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def testLabel_cap4_art72_par124_context_art72_cpt() {
-    assertEquals("§§ 1º e 2º e 4º", Urn2NomeCompacto.format(List("art72_par1", "art72_par2", "art72_par4"), "art72_cpt"))
+    assertEquals("§§ 1º, 2º e 4º", Urn2NomeCompacto.format(List("art72_par1", "art72_par2", "art72_par4"), "art72_cpt"))
+  }
+
+  def testLabel_cap4_art72_par124_context_art75_cpt() {
+    assertEquals("art. 72, §§ 1º, 2º e 4º", Urn2NomeCompacto.format(List("art72_par1", "art72_par2", "art72_par4"), "art75_cpt"))
   }
 
   def testLabel_cap4_art72_par1235_context_art72_cpt() {
@@ -1391,7 +1408,7 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   def test_clausula_revogacao_enorme() = {
-    assertEquals("arts. 1º e 2º e art. 2º, caput e arts. 3º e 4º e 6º e 7º e art. 7º, § 3º e Capítulo III e arts. 9º a 16 e art. 16, caput e arts. 17 e 18 e Anexos 3, 4 e 5",
+    assertEquals("arts. 1º e 2º e art. 2º, caput e arts. 3º, 4º, 6º, 7º e art. 7º, § 3º e Capítulo III e arts. 9º a 16 e art. 16, caput e arts. 17 e 18 e Anexos 3, 4 e 5",
       Urn2NomeCompacto.format(List("cpp_atc_art1", "cpp_atc_art2", "cpp_atc_art2_cpt", "cpp_atc_cap1_art3",
         "cpp_atc_cap1_art4", "cpp_atc_cap2_art6", "cpp_atc_cap2_art7", "cpp_atc_cap2_art7_par3", "cpp_atc_cap3", "cpp_atc_cap3_art9",
         "cpp_atc_cap4_art10", "cpp_atc_cap4_art11", "cpp_atc_cap4_art12", "cpp_atc_cap4_art13", "cpp_atc_cap4_art14", "cpp_atc_cap4_art15",
