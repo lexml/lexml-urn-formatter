@@ -17,12 +17,12 @@ private[compacto] object Numeracao {
   // case class IntervaloContinuo(inicio: Int, fim: Int) extends Numeracao
 
   //TODO: Remove
-  case class DoisNumeros(n1: Int, n2: Int) extends Numeracao
+  // case class DoisNumeros(n1: Int, n2: Int) extends Numeracao
 
   // precisa ser continuo???
   // case class MultiplosNumeros(values: List[NumeracaoMultipla]) extends Numeracao
 
-  case class IntervaloContinuo(inicio: Int, fim: Int) extends Numeracao
+  // case class IntervaloContinuo(inicio: Int, fim: Int) extends Numeracao
 
   case class Numeros(values: List[Int]) extends Numeracao
 

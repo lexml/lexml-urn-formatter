@@ -4,7 +4,7 @@ import br.gov.lexml.urnformatter.compacto.UrnFragmento._
 
 private[compacto] case class ParsedUrn(inicioComum: String, disPrincipal: String, numero: Numero)
 
-private[compacto] case class GrupoUrns(dispPrincipal: TipoUrnFragmento, fragmentosComum: List[UrnFragmento], numeracoes: List[Numeracao]) {
+private[compacto] case class GrupoUrns(dispPrincipal: TipoUrnFragmento, fragmentosComum: List[UrnFragmento], numeros: List[Numero]) {
 
   def posAnexo: Int = fragmentosComum.indexWhere {
     case _: Anexo => true
@@ -93,33 +93,33 @@ private[compacto] object UrnFragmento {
 
   sealed abstract class UrnFragmento(val tipo: TipoUrnFragmento)
 
-  case class Artigo(numeracoes: List[Numeracao]) extends UrnFragmento(TipoUrnFragmento.Artigo)
+  case class Artigo(numeracoes: List[Numero]) extends UrnFragmento(TipoUrnFragmento.Artigo)
 
   case object Caput extends UrnFragmento(TipoUrnFragmento.Caput)
 
   case object ParagrafoUnico extends UrnFragmento(TipoUrnFragmento.ParagrafoUnico)
 
-  case class Inciso(numeracoes: List[Numeracao]) extends UrnFragmento(TipoUrnFragmento.Inciso)
+  case class Inciso(numeracoes: List[Numero]) extends UrnFragmento(TipoUrnFragmento.Inciso)
 
-  case class Alinea(numeracoes: List[Numeracao]) extends UrnFragmento(TipoUrnFragmento.Alinea)
+  case class Alinea(numeracoes: List[Numero]) extends UrnFragmento(TipoUrnFragmento.Alinea)
 
-  case class Paragrafo(numeracoes: List[Numeracao]) extends UrnFragmento(TipoUrnFragmento.Paragrafo)
+  case class Paragrafo(numeracoes: List[Numero]) extends UrnFragmento(TipoUrnFragmento.Paragrafo)
 
-  case class Item(numeracoes: List[Numeracao]) extends UrnFragmento(TipoUrnFragmento.Item)
+  case class Item(numeracoes: List[Numero]) extends UrnFragmento(TipoUrnFragmento.Item)
 
-  case class Parte(numeracoes: List[Numeracao]) extends UrnFragmento(TipoUrnFragmento.Parte)
+  case class Parte(numeracoes: List[Numero]) extends UrnFragmento(TipoUrnFragmento.Parte)
 
-  case class Titulo(numeracoes: List[Numeracao]) extends UrnFragmento(TipoUrnFragmento.Titulo)
+  case class Titulo(numeracoes: List[Numero]) extends UrnFragmento(TipoUrnFragmento.Titulo)
 
-  case class Capitulo(numeracoes: List[Numeracao]) extends UrnFragmento(TipoUrnFragmento.Capitulo)
+  case class Capitulo(numeracoes: List[Numero]) extends UrnFragmento(TipoUrnFragmento.Capitulo)
 
-  case class Secao(numeracoes: List[Numeracao]) extends UrnFragmento(TipoUrnFragmento.Secao)
+  case class Secao(numeracoes: List[Numero]) extends UrnFragmento(TipoUrnFragmento.Secao)
 
-  case class SubSecao(numeracoes: List[Numeracao]) extends UrnFragmento(TipoUrnFragmento.SubSecao)
+  case class SubSecao(numeracoes: List[Numero]) extends UrnFragmento(TipoUrnFragmento.SubSecao)
 
-  case class Livro(numeracoes: List[Numeracao]) extends UrnFragmento(TipoUrnFragmento.Livro)
+  case class Livro(numeracoes: List[Numero]) extends UrnFragmento(TipoUrnFragmento.Livro)
 
-  case class Anexo(numeracoes: List[Numeracao], nivel: Int) extends UrnFragmento(TipoUrnFragmento.Anexo)
+  case class Anexo(numeracoes: List[Numero], nivel: Int) extends UrnFragmento(TipoUrnFragmento.Anexo)
 
 //  case class Artigo(numeracao: Numeracao) extends UrnFragmento(TipoUrnFragmento.Artigo)
 //

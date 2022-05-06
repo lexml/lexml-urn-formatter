@@ -61,16 +61,18 @@ private[compacto] object AgrupadorUrn {
     println(s"==> fragmentosComum: ${fragmentosComum.mkString(",")}")
     println(s"==> fragmentos: ${fragmentos.mkString(",")}")
 
+    println(s"==> numeros: $numeros")
 
-    val numeracoes = criaNumeracoes(iniComum, numeros)
-    println(s"==> numeracoes: $numeracoes")
-    List(GrupoUrns(fragmentosComum.last.tipo, fragmentos, numeracoes)) //TODO:
+    // val numeracoes = criaNumeracoes(iniComum, numeros)
+    // println(s"==> numeracoes: $numeracoes")
+    List(GrupoUrns(fragmentosComum.last.tipo, fragmentos, numeros)) //TODO:
 //    criaNumeracoes(iniComum, numeros).map { num =>
 //      println(s"==> num: $num")
 //      GrupoUrns(fragmentosComum.last.tipo, fragmentos, num)
 //    }
   }
 
+  /*
   //TODO: Rename?? volta só um
   private def criaNumeracoes(iniComum: String, numeros: List[Numero]): List[Numeracao] = {
     //case class ValueAux(numeros: List[Int], numeracoes: List[Numeracao])
@@ -111,9 +113,9 @@ private[compacto] object AgrupadorUrn {
               currNumeracao = Some(UmNumero(IntNumero(nInt)))
             )
             case Some(curr) => curr match {
-              case UmNumero(IntNumero(n)) if n + 1 == nInt => v.copy(
-                currNumeracao = Some(IntervaloContinuo(n, nInt))
-              )
+//              case UmNumero(IntNumero(n)) if n + 1 == nInt => v.copy(
+//                currNumeracao = Some(IntervaloContinuo(n, nInt))
+//              )
               case UmNumero(IntNumero(n)) => v.copy(
                 currNumeracao = Some(Numeros(List(n, nInt)))
 
@@ -125,17 +127,17 @@ private[compacto] object AgrupadorUrn {
 
                 // currNumeracao = Some(MultiplosNumeros(List(IntervaloContinuo(n, nInt))))
               )
-              case IntervaloContinuo(ini, fim) if fim + 1 == nInt => v.copy(
-                currNumeracao = Some(IntervaloContinuo(ini,  nInt))
-              )
-              case IntervaloContinuo(_, _) => v.copy(
-                currNumeracao = Some(UmNumero(IntNumero(nInt))),
-                numeracoes = v.numeracoes :+ curr
-              )
-              case n@Numeros(values) if values.last + 1 == nInt => v.copy(
-                currNumeracao = Some(IntervaloContinuo(values.last, nInt)), //multiplos.dropRight(1) :+ Numeros(n.values.dropRight(1)) :+  IntervaloContinuo(values.last, nInt)))
-                numeracoes = v.numeracoes :+ (if (values.size == 2) UmNumero(IntNumero(values.head)) else Numeros(values.dropRight(1)))
-              )
+//              case IntervaloContinuo(ini, fim) if fim + 1 == nInt => v.copy(
+//                currNumeracao = Some(IntervaloContinuo(ini,  nInt))
+//              )
+//              case IntervaloContinuo(_, _) => v.copy(
+//                currNumeracao = Some(UmNumero(IntNumero(nInt))),
+//                numeracoes = v.numeracoes :+ curr
+//              )
+//              case n@Numeros(values) if values.last + 1 == nInt => v.copy(
+//                currNumeracao = Some(IntervaloContinuo(values.last, nInt)), //multiplos.dropRight(1) :+ Numeros(n.values.dropRight(1)) :+  IntervaloContinuo(values.last, nInt)))
+//                numeracoes = v.numeracoes :+ (if (values.size == 2) UmNumero(IntNumero(values.head)) else Numeros(values.dropRight(1)))
+//              )
               case Numeros(values) => v.copy(
                 currNumeracao = Some(Numeros(values :+ nInt))
               )
@@ -228,7 +230,7 @@ private[compacto] object AgrupadorUrn {
 //    }
 //    accValue.numeracoes ++ List(numeracaoRestante).flatten
   // }
-
+*/
   private def removeUltimoFragmento: List[UrnFragmento] => List[UrnFragmento] = _.dropRight(1)
 
   // fragmentos agrupadores sao lidos ao contrario
@@ -260,7 +262,7 @@ private[compacto] object AgrupadorUrn {
     case "art" =>
       val numStr = fragmentoUrn.substring(3)
       val num = Try(numStr.toInt).map(Numero.IntNumero).getOrElse(Numero.StrNumero(numStr))
-      Artigo(List(UmNumero(num)))
+      Artigo(List(num))
     case "cpt" => Caput
     case "par" if fragmentoUrn.contains("par1u") => ParagrafoUnico
     case "par" => Paragrafo(List(unicoIntNumero(fragmentoUrn)))
@@ -279,11 +281,11 @@ private[compacto] object AgrupadorUrn {
 
   private def unicoIntNumero(fragmento: String) = {
     val numero = fragmento.substring(3)
-    Try(UmNumero(Numero.IntNumero(numero.toInt))).getOrElse {
+    Try(Numero.IntNumero(numero.toInt)).getOrElse {
       if (fragmento.contains("anx")) {
-        UmNumero(Numero.StrNumero(numero))
+        Numero.StrNumero(numero)
       } else {
-        Numeracao.SemNumero
+        Numero.SemNumero
       }
     }
   }
