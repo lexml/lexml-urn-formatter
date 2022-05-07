@@ -1,24 +1,18 @@
 package br.gov.lexml.urnformatter.compacto
 
 import br.gov.lexml.urnformatter.Urn2Format.{formatAlfa, formatOrdinal, formatRomano}
-import br.gov.lexml.urnformatter.compacto.Numeracao._
-import br.gov.lexml.urnformatter.compacto.Numero.IntNumero
 import br.gov.lexml.urnformatter.compacto.TipoUrnFragmento.DispositivoAgrupador
 import br.gov.lexml.urnformatter.compacto.UrnFragmento._
+import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
 import scala.util.Try
-import org.slf4j.LoggerFactory
 
 private[compacto] object Nomeador {
 
   val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.Nomeador")
 
   def nomearGrupos(grupos: List[GrupoUrns]): String = {
-    println(s"==> grupos: ${grupos.mkString(",")}")
-//    val nGrupos = List(GrupoUrns(TipoUrnFragmento.Inciso, List(Artigo(UmNumero(IntNumero(56)))), NumerosNaoContinuos(List(1, 3, 5))))
-//    println(s"==> nGrupos: ${nGrupos.mkString(",")}")
-
     @tailrec
     def go(acc: String, grupos: List[GrupoUrns]): String = grupos match {
       case Nil => acc
@@ -40,13 +34,13 @@ private[compacto] object Nomeador {
         val nomeDispositivoFmt = nomeDispositivo.map(_ + " " + d.pronomeDemostrativo + " ").getOrElse("")
         s"${nomeDispositivoFmt}${nomear(List(AgrupadorUrn.urnFragmento(urnAgrupador))).toLowerCase.trim}"
 
-      case d@TipoUrnFragmento.Artigo =>
+      case _@TipoUrnFragmento.Artigo =>
         nomeDispositivo.getOrElse("artigo")
 
-      case d@TipoUrnFragmento.Caput =>
+      case _@TipoUrnFragmento.Caput =>
         nomeDispositivo.getOrElse("caput")
 
-      case d@TipoUrnFragmento.Paragrafo =>
+      case _@TipoUrnFragmento.Paragrafo =>
         nomeDispositivo.getOrElse("parágrafo")
 
       case _ =>
@@ -87,16 +81,13 @@ private[compacto] object Nomeador {
       nomear(Anexo(grupo.numeros, maxNivel + 1) :: grupo.fragmentosComum)
   }
 
-  private def nomear(numeros: List[Numero], singular: String, plural: String, conector: String, fmt: Int => String): String =
-    nomearComOption(numeros, Some(singular), Some(plural), conector, fmt)
+  private def nomear(numeros: List[Numero], singular: String, plural: String, fmt: Int => String): String =
+    nomearComOption(numeros, Some(singular), Some(plural), fmt)
 
-  private def nomear(numeros: List[Numero], conector: String, fmt: Int => String): String =
-    nomearComOption(numeros, None, None, conector, fmt)
+  private def nomear(numeros: List[Numero], fmt: Int => String): String =
+    nomearComOption(numeros, None, None, fmt)
 
-  private def nomearComOption(numeros: List[Numero], maybeSingular: Option[String], maybePlural: Option[String], conector: String, fmt: (Int) => String): String = {
-    println(s"==> numeracoes: ${numeros.mkString(",")} - singular: ${maybeSingular} - plural: ${maybePlural} - conector: ${conector}")
-    val singular = maybeSingular.map(s => s"$s ").getOrElse("")
-    val plural = maybePlural.map(s => s"$s ").getOrElse("")
+  private def nomearComOption(numeros: List[Numero], maybeSingular: Option[String], maybePlural: Option[String], fmt: Int => String): String = {
     val sNumeracoesList = numeros.zipWithIndex.map {
       case (Numero.IntNumero(i), _) => fmt(i)
       case (Numero.StrNumero(s), _) =>
@@ -104,91 +95,60 @@ private[compacto] object Nomeador {
         val primeiraParte = fmt(partesNumero(0).toInt)
         val segundaParte = Try(partesNumero(1).toInt).map(formatAlfa).getOrElse(partesNumero(1)).toUpperCase
         s"${primeiraParte}-${segundaParte}"
-      // case IntervaloContinuo(i, f) => s"${plural}${fmt(i)} $conector ${fmt(f)}"
-      // case ns: DoisNumeros => s"${plural}${fmt(ns.n1)} e ${fmt(ns.n2)}"
       case (_: Numero.SemNumero.type, _) => ""
-//      case (IntervaloContinuo(inicio, fim), idx) =>
-//        if (inicio + 1 == fim) {
-//          s"${fmt(inicio)} e ${fmt(fim)}"
-//        } else {
-//          s"${fmt(inicio)} $conector ${fmt(fim)}"
-//        }
-//      case (Numeros(values), idx) =>
-//        val sNumeros = values.dropRight(1).map(fmt).mkString(", ")
-//        val connectorNumeros = if (idx < numeros.size - 1) ", " else " e "
-//        s"${sNumeros}${connectorNumeros}${fmt(values.last)}"
       case n@_ => throw new IllegalArgumentException(s"Tipo numeração não esperada: $n")
     }
-
-    val sNumeracoes =
-      if (sNumeracoesList.size > 1) {
-        sNumeracoesList.dropRight(1).mkString(", ") + " e " + sNumeracoesList.last
-      } else {
-        sNumeracoesList.mkString("")
-      }
-    if (numeros.size > 1 || numeros(0).isInstanceOf[Numeros]) {
-      s"${plural}${sNumeracoes}"
-    } else {
-      s"${singular}${sNumeracoes}"
-    }
+    val singular = maybeSingular.map(s => s"$s ").getOrElse("")
+    val plural = maybePlural.map(s => s"$s ").getOrElse("")
+    pluralOuSingular(numeros.size, singular, plural) + concatNumerosStr(sNumeracoesList)
   }
 
-  private def nomearAnexo(a: Anexo): String =  {
-    val sNumeracoesList = a.numeracoes.zipWithIndex.map {
+  private def nomearAnexo(a: Anexo): String = {
+    val sNumeracoesList = a.numeros.zipWithIndex.map {
       case (Numero.IntNumero(n), _) =>
         if (a.nivel == 1) {
           formatRomano(n)
         } else if (a.nivel == 2) {
-          n
+          n.toString
         } else {
           formatAlfa(n).toUpperCase
         }
       case (Numero.StrNumero(n), _) => n.split(";").last
-//      case (IntervaloContinuo(inicio, fim), _) =>
-//        if (inicio + 1 == fim) {
-//          s"${formatRomano(inicio)} e ${formatRomano(fim)}"
-//        } else {
-//          s"${formatRomano(inicio)} a ${formatRomano(fim)}"
-//        }
-//      case (Numeros(values), idx) =>
-//        val sNumeros = values.dropRight(1).map(formatRomano).mkString(", ")
-//        val connectorNumeros = if (idx < a.numeracoes.size - 1) ", " else " e "
-//        s"${sNumeros}${connectorNumeros}${formatRomano(values.last)}"
+      case n@_ => throw new IllegalArgumentException(s"Tipo numeração não esperada: $n")
     }
-    val sNumeracoes =
-      if (sNumeracoesList.size > 1) {
-        sNumeracoesList.dropRight(1).mkString(", ") + " e " + sNumeracoesList.last
-      } else {
-        sNumeracoesList.mkString("")
-      }
-    if (a.numeracoes.size > 1 || a.numeracoes(0).isInstanceOf[Numeros]) {
-      s"Anexos ${sNumeracoes}"
-    } else {
-      s"Anexo ${sNumeracoes}"
-    }
+    pluralOuSingular(a.numeros.size, "Anexo", "Anexos") + " " + concatNumerosStr(sNumeracoesList)
   }
 
+  private def pluralOuSingular(sizeNumeros: Int, singular: String, plural: String): String = if (sizeNumeros > 1) plural else singular
+
+  private def concatNumerosStr(numerosStr: List[String]): String =
+    if (numerosStr.size > 1) {
+      numerosStr.dropRight(1).mkString(", ") + " e " + numerosStr.last
+    } else {
+      numerosStr.mkString("")
+    }
+
   private def nomear(urnFragmento: UrnFragmento, fragmentos: List[UrnFragmento]): String = urnFragmento match {
-    case a: Artigo => nomear(a.numeracoes, "art.", "arts.", "a", formatOrdinal)
+    case a: Artigo => nomear(a.numeros, "art.", "arts.", formatOrdinal)
     case Caput => "caput"
     case ParagrafoUnico => "parágrafo único"
     case i: Inciso =>
       val compacto = fragmentos.size > 1
-      if (compacto) nomear(i.numeracoes, "a", formatRomano)
-      else nomear(i.numeracoes, "inciso", "incisos", "a", formatRomano).trim
-    case a: Alinea => nomear(a.numeracoes, "a", formatAlfa)
+      if (compacto) nomear(i.numeros, formatRomano(_))
+      else nomear(i.numeros, "inciso", "incisos", formatRomano).trim
+    case a: Alinea => nomear(a.numeros, formatAlfa(_))
     case p: Paragrafo =>
       val compacto = fragmentos.size > 1
-      if (compacto) nomear(p.numeracoes, "§", "§§", "ao", formatOrdinal)
-      else nomear(p.numeracoes, "§", "§§", "ao", formatOrdinal)
-    case i: Item => nomear(i.numeracoes, "a", _.toString)
-    case c: Capitulo => nomear(c.numeracoes, "Capítulo", "Capítulos", "a", formatRomano)
-    case s: Secao => nomear(s.numeracoes, "Seção", "Seções", "a", formatRomano)
-    case sb: SubSecao => nomear(sb.numeracoes, "Subseção", "Subseções", "a", formatRomano)
-    case l: Livro => nomear(l.numeracoes, "Livro", "Livros", "a", formatRomano)
+      if (compacto) nomear(p.numeros, "§", "§§", formatOrdinal)
+      else nomear(p.numeros, "§", "§§", formatOrdinal)
+    case i: Item => nomear(i.numeros, _.toString)
+    case c: Capitulo => nomear(c.numeros, "Capítulo", "Capítulos", formatRomano)
+    case s: Secao => nomear(s.numeros, "Seção", "Seções", formatRomano)
+    case sb: SubSecao => nomear(sb.numeros, "Subseção", "Subseções", formatRomano)
+    case l: Livro => nomear(l.numeros, "Livro", "Livros", formatRomano)
     case a: Anexo => nomearAnexo(a)
-    case t: Titulo => nomear(t.numeracoes, "Título", "Títulos", "a", formatRomano)
-    case p: Parte => nomear(p.numeracoes, "Parte", "Partes", "a", formatRomano)
+    case t: Titulo => nomear(t.numeros, "Título", "Títulos", formatRomano)
+    case p: Parte => nomear(p.numeros, "Parte", "Partes", formatRomano)
   }
 
   private def nomear(urnFragmentos: List[UrnFragmento]): String = {
