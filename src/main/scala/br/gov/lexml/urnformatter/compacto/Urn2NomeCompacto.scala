@@ -1,7 +1,8 @@
 package br.gov.lexml.urnformatter.compacto
 
-import scala.util.Try
-import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory
+
+import scala.util.Try;
 
 object Urn2NomeCompacto {
 
