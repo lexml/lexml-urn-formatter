@@ -55,12 +55,11 @@ private[compacto] object UrnParser {
 
     val urnSpplited = urn.split("_")
     val isArt = urnSpplited.last.startsWith("art")
-    val isFilhoDeAnx = urnSpplited.head.startsWith("anx")
 
     if (isArt) {
-      if (commonContext == urn) (None, "art") else (Some(urnSpplited.last), if (isFilhoDeAnx) "anx" else "")
+      if (commonContext == urn) (None, "art") else (Some(urnSpplited.last), "")
     } else if (urnSpplited.exists(_.startsWith("art"))) {
-      (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), if (isFilhoDeAnx) "anx" else "")
+      (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "")
     } else {
       val extractContextRegex = s"""^($urn)(_(.*)|$$)""".r
       val maybePrefix = extractContextRegex.findFirstIn(context)
@@ -69,13 +68,7 @@ private[compacto] object UrnParser {
         case Some(_) => (None, urnSpplited.last.take(3))
         case None => (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), commonContextSpplited.last.take(3))
       }
-
-      val isAnexoSameContext = isFilhoDeAnx && urnSpplited.head == commonContextSpplited.head
-      if (isAnexoSameContext) {
-        (Some(urnSpplited.last), commonContextSpplited.head.take(3))
-      } else {
-        (urnWithoutContext, agrupador)
-      }
+      (urnWithoutContext, agrupador)
     }
   }
 
