@@ -1221,9 +1221,21 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("art. 3º deste anexo", Urn2NomeCompacto.format(List("anx1_prt1_cap2_art3"), "anx1_prt1_cap7_art15_cpt_inc"))
   }
 
-  // esse e o teste abaixo são bem parecidos, o que é o correto? apenas "capítulo" ou "Capítulo IV"/"Capítulo VII"
+  // TODO: aque poderia ter mantido o "deste título"
   def testLabel_cpp_tit1_cap4_with_context_cpp_tit1_cap4_art35_par1() = {
-    assertEquals("capítulo", Urn2NomeCompacto.format(List("cpp_tit1_cap4"), "cpp_tit1_cap4_art35_par1"))
+    assertEquals("Capítulo IV", Urn2NomeCompacto.format(List("cpp_tit1_cap4"), "cpp_tit1_cap4_art35_par1"))
+  }
+
+  def testLabel_cpp_tit1_cap4_with_context_cpp_tit2_cap5_art35_par1() = {
+    assertEquals("Capítulo IV do Título I", Urn2NomeCompacto.format(List("cpp_tit1_cap4"), "cpp_tit2_cap5_art35_par1"))
+  }
+
+  def testLabel_cpp_tit1_cap4_with_context_cpp_tit1_cap5_art36_par1() = {
+    assertEquals("Capítulo IV deste título", Urn2NomeCompacto.format(List("cpp_tit1_cap4"), "cpp_tit1_cap5_art36_par1"))
+  }
+
+  def testLabel_cpp_cap4_with_context_cpp_cap5_art36_par1() = {
+    assertEquals("Capítulo IV", Urn2NomeCompacto.format(List("cpp_cap4"), "cpp_cap5_art36_par1"))
   }
 
   def testLabel_anx1_prt1_cap7_with_context_anx1_prt1_cap7_art15_cpt_inc2() = {
@@ -1325,17 +1337,51 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("art. 9º, caput", Urn2NomeCompacto.format(List("art9_cpt"), "anx8_art9_cpt"));
   }
 
-  //TODO: Esse não funciona
+  //TODO: Esse não funciona (caso de identidade do caput)
 //  def test_anx8_art9_cpt_anx8_art9_cpt() {
 //    assertEquals("caput", Urn2NomeCompacto.format(List("anx8_art9_cpt"), "anx8_art9_cpt"));
 //  }
+
+//TODO: caso de identidade do artigo
+//  def test_anx8_art9_cpt_anx8_art9_cpt() {
+//    assertEquals("caput", Urn2NomeCompacto.format(List("anx8_art9"), "anx8_art9_cpt"));
+//  }
+
 
   def test_anx8_art9_cpt_anx8_art9_inc1() {
     assertEquals("caput", Urn2NomeCompacto.format(List("anx8_art9_cpt"), "anx8_art9_inc1"));
   }
 
+//TODO: remissao interna ao artigo
+  // def test_anx8_art9_anx8_art9_inc1() {
+  //   assertEquals("caput", Urn2NomeCompacto.format(List("anx8_art9")), "anx8_art9_inc1");
+  // }
+
+//TODO: remissao interna ao artigo
+  // def test_anx8_art9_anx8_art9_inc1_ali20_ite3020() {
+  //   assertEquals("caput", Urn2NomeCompacto.format(List("anx8_art9")), "anx8_art9_inc1_ali20_ite30-20");
+  // }  
+
+  def test_anxXPTO_art9_inc1_sem_contexto() {
+    assertEquals("art. 9º, I do Anexo XPTO", Urn2NomeCompacto.format(List("anx;XPTO_art9_inc1")));
+  }
+
+  //TODO: caso de nome do anexo com contexto diferente
+  // def test_anxXPTO_art9_inc1_anx8_art9_cpt() {
+  //   assertEquals("art. 9º, I do Anexo XPTO", Urn2NomeCompacto.format(List("anx;XPTO_art9_inc1")), "anx8_art9_cpt");
+  // }
+
+  //TODO: caso de nome do anexo com mesmo contexto
+  // def test_anxXPTO_art9_inc1_anxXPTO_art9_cpt() {
+  //   assertEquals("art. 9º deste anexo", Urn2NomeCompacto.format(List("anx;XPTO_art9_inc1")), "anx;XPTO_art9_cpt");
+  // }
+
   def test_anx8_art9_inc1_anx8_art9_inc2() {
     assertEquals("inciso I", Urn2NomeCompacto.format(List("anx8_art9_inc1"), "anx8_art9_inc2"));
+  }
+
+  def test_anxXPTO_art9_inc1_anxXPTO_art9_inc2() {
+    assertEquals("inciso I", Urn2NomeCompacto.format(List("anx;XPTO_art9_inc1"), "anx;XPTO_art9_inc2"));
   }
 
   def test_anx8_art10_cpt_context_anx8_art9_cpt() {
