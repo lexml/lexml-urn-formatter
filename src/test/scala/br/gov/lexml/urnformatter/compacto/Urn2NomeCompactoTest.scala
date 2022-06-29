@@ -1213,16 +1213,21 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("Anexo I", Urn2NomeCompacto.format(List("anx1"), "cpp_prt1_liv1_art2_cpt"))
   }
 
-  def testLabel_cpp_tit1_cap4_with_context_cpp_tit1_cap4_art35_par1() = {
-    assertEquals("capítulo", Urn2NomeCompacto.format(List("cpp_tit1_cap4"), "cpp_tit1_cap4_art35_par1"))
-  }
-
   def testLabel_cpp_tit3_cap4_art72_with_context_cpp_tit3_cap4_sec3_art80_cpt() = {
     assertEquals("art. 72", Urn2NomeCompacto.format(List("cpp_tit3_cap4_art72"), "cpp_tit3_cap4_sec3_art80_cpt"))
   }
 
   def testLabel_anx1_prt1_cap2_art3_with_context_anx1_prt1_cap7_art15_cpt_inc() = {
     assertEquals("art. 3º deste anexo", Urn2NomeCompacto.format(List("anx1_prt1_cap2_art3"), "anx1_prt1_cap7_art15_cpt_inc"))
+  }
+
+  // esse e o teste abaixo são bem parecidos, o que é o correto? apenas "capítulo" ou "Capítulo IV"/"Capítulo VII"
+  def testLabel_cpp_tit1_cap4_with_context_cpp_tit1_cap4_art35_par1() = {
+    assertEquals("capítulo", Urn2NomeCompacto.format(List("cpp_tit1_cap4"), "cpp_tit1_cap4_art35_par1"))
+  }
+
+  def testLabel_anx1_prt1_cap7_with_context_anx1_prt1_cap7_art15_cpt_inc2() = {
+    assertEquals("Capítulo VII", Urn2NomeCompacto.format(List("anx1_prt1_cap7"), "anx1_prt1_cap7_art15_cpt_inc2"))
   }
 
   def testLabel_anx2_prt1_cap7_with_context_anx1_prt1_cap7_art15_cpt_inc2() = {
