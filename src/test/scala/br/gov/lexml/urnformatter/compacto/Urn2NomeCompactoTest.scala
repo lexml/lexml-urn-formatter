@@ -1222,9 +1222,9 @@ class Urn2NomeCompactoTest extends TestCase {
   }
 
   // TODO: aque poderia ter mantido o "deste título"
-  def testLabel_cpp_tit1_cap4_with_context_cpp_tit1_cap4_art35_par1() = {
-    assertEquals("Capítulo IV", Urn2NomeCompacto.format(List("cpp_tit1_cap4"), "cpp_tit1_cap4_art35_par1"))
-  }
+  // def testLabel_cpp_tit1_cap4_with_context_cpp_tit1_cap4_art35_par1() = {
+  //   assertEquals("Capítulo IV deste título", Urn2NomeCompacto.format(List("cpp_tit1_cap4"), "cpp_tit1_cap4_art35_par1"))
+  // }
 
   def testLabel_cpp_tit1_cap4_with_context_cpp_tit2_cap5_art35_par1() = {
     assertEquals("Capítulo IV do Título I", Urn2NomeCompacto.format(List("cpp_tit1_cap4"), "cpp_tit2_cap5_art35_par1"))
