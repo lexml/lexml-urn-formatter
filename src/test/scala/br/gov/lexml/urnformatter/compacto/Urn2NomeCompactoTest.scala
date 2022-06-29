@@ -1329,9 +1329,10 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("inciso IV", Urn2NomeCompacto.format(List("anx8_tit3_cap1_sec1_art29_cpt_inc4"), "anx8_tit3_cap1_sec1_art29_par3"))
   }
 
-  def testLabel_cpp_tit3_cap1_sec1_art29_cpt_inc4_context_cpp_tit3_cap1_sec1_art29_par3() = {
-    assertEquals("inciso IV", Urn2NomeCompacto.format(List("cpp_tit3_cap1_sec1_art29_cpt_inc4"), "cpp_tit3_cap1_sec1_art29_par3"))
-  }
+  //TODO: contexto do caput do artigo
+  // def testLabel_cpp_tit3_cap1_sec1_art29_cpt_inc4_context_cpp_tit3_cap1_sec1_art29_par3() = {
+  //   assertEquals("inciso IV do caput", Urn2NomeCompacto.format(List("cpp_tit3_cap1_sec1_art29_cpt_inc4"), "cpp_tit3_cap1_sec1_art29_par3"))
+  // }
 
   def test_art9_cpt_anx8_art9_cpt() {
     assertEquals("art. 9º, caput", Urn2NomeCompacto.format(List("art9_cpt"), "anx8_art9_cpt"));
@@ -1380,6 +1381,15 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("inciso I", Urn2NomeCompacto.format(List("anx8_art9_inc1"), "anx8_art9_inc2"));
   }
 
+  def test_anx8_art9_cpt_inc1_anx8_art9_cpt_inc2() {
+    assertEquals("inciso I", Urn2NomeCompacto.format(List("anx8_art9_cpt_inc1"), "anx8_art9_cpt_inc2"));
+  }
+
+//TODO: menciona filho do caput fora do caput 
+  // def test_anx8_art9_cpt_inc1_anx8_art9_par1() {
+  //   assertEquals("inciso I do caput", Urn2NomeCompacto.format(List("anx8_art9_cpt_inc1"), "anx8_art9_par1"));
+  // }
+
   def test_anxXPTO_art9_inc1_anxXPTO_art9_inc2() {
     assertEquals("inciso I", Urn2NomeCompacto.format(List("anx;XPTO_art9_inc1"), "anx;XPTO_art9_inc2"));
   }
@@ -1392,13 +1402,24 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("art. 5º, § 1º", Urn2NomeCompacto.format(List("cpp_tit2_art5_par1"), "cpp_tit2_art6_par4"))
   }
 
-  def test_anx8_art9_inc1_context_anx8_art9_cpt() {
-    assertEquals("inciso I", Urn2NomeCompacto.format(List("anx8_art9_inc1"), "anx8_art9_cpt"));
+  def test_anx8_art9_cpt_inc1_context_anx8_art9_cpt() {
+    assertEquals("inciso I", Urn2NomeCompacto.format(List("anx8_art9_cpt_inc1"), "anx8_art9_cpt"));
   }
 
-  def test_anx9_art9_inc1_context_anx8_art9_cpt() {
-    assertEquals("art. 9º, I do Anexo IX", Urn2NomeCompacto.format(List("anx9_art9_inc1"), "anx8_art9_cpt"));
-  }
+  // // TODO: contexto do caput no inciso do anexo
+  // def test_anx8_art9_cpt_inc1_context_anx8_art9_par1() {
+  //   assertEquals("inciso I do caput", Urn2NomeCompacto.format(List("anx8_art9_cpt_inc1"), "anx8_art9_par1"));
+  // }
+
+  // TODO: conexto do caput no inciso do anexo
+  // def test_anxXPTO_art9_cpt_inc1_context_anx8_art9_par1() {
+  //   assertEquals("inciso I do caput", Urn2NomeCompacto.format(List("anx;XPTO_art9_cpt_inc1"), "anx;XPTO_art9_par1"));
+  // }
+
+  // TODO: contexto do parágrafo
+  // def test_anx9_art9_par2_inc2_context_anx8_art9_par1() {
+  //   assertEquals("inciso II do § 2º", Urn2NomeCompacto.format(List("anx9_art9_par2_inc2"), "anx8_art9_par1"));
+  // }
 
   //TODO: não funciona
 //  def test_anx8_art9_cpt_context_anx8_art9_cpt() {
