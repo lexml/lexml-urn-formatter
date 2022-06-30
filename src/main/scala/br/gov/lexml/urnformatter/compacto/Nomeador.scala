@@ -187,19 +187,12 @@ private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo:
       if (fragmentos.isEmpty) {
         acc
       } else {
-        if (!referenciaMesmoArtigo) {
-          (fragmentos.head, fragmentos.head.tipo) match {
-            case (h, _: DispositivoAgrupador) if acc.isEmpty => criarString(nomear(h, urnFragmentos), fragmentos.tail) //TODO: Parece ser o mesmo de dois pra baixo
-            case (h, d: DispositivoAgrupador) => criarString(s"${acc} ${d.conector} ${nomear(h, urnFragmentos)}", fragmentos.tail)
-            case (h, _) if acc.isEmpty => criarString(nomear(h, urnFragmentos), fragmentos.tail)
-            case (h, _) => criarString(s"${acc}, ${nomear(h, urnFragmentos)}", fragmentos.tail)
-          }
-        } else {
-          (fragmentos.head, fragmentos.head.tipo) match {
-            case (h, _) if acc.isEmpty => criarString(nomear(h, urnFragmentos), fragmentos.tail)
-            case (h, _) if (fragmentos.tail.isEmpty && (h.tipo == TipoUrnFragmento.Caput || h.tipo == TipoUrnFragmento.Paragrafo)) => criarString(s"${acc} do ${nomear(h, urnFragmentos)}", fragmentos.tail) // TODO: e esse do? //TODO: e esse tail?
-            case (h, _) => criarString(s"${acc}, ${nomear(h, urnFragmentos)}", fragmentos.tail)
-          }
+        (fragmentos.head, fragmentos.head.tipo) match {
+          case (h, _) if acc.isEmpty => criarString(nomear(h, urnFragmentos), fragmentos.tail)
+          case (h, d: DispositivoAgrupador) => criarString(s"${acc} ${d.conector} ${nomear(h, urnFragmentos)}", fragmentos.tail)
+          case (h, d) if (referenciaMesmoArtigo && fragmentos.tail.isEmpty && (h.tipo == TipoUrnFragmento.Caput || h.tipo == TipoUrnFragmento.Paragrafo)) =>
+            criarString(s"${acc} ${d.conector} ${nomear(h, urnFragmentos)}", fragmentos.tail)
+          case (h, _) => criarString(s"${acc}, ${nomear(h, urnFragmentos)}", fragmentos.tail)
         }
       }
     }

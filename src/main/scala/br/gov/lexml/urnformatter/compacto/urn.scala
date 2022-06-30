@@ -15,39 +15,45 @@ private[compacto] case class GrupoUrns(dispPrincipal: TipoUrnFragmento, fragment
 
 private[compacto] sealed abstract class TipoUrnFragmento {
   val pronomeDemostrativo: String
+  val conector: String
 }
 
 private[compacto] object TipoUrnFragmento {
 
-  trait DispositivoAgrupador {
-    val conector: String
-  }
+  trait DispositivoAgrupador
 
   case object Artigo extends TipoUrnFragmento {
+    override val conector: String = "do"
     override val pronomeDemostrativo: String = "deste"
   }
 
   case object Caput extends TipoUrnFragmento {
+    override val conector: String = "do"
     override val pronomeDemostrativo: String = "deste"
   }
 
   case object ParagrafoUnico extends TipoUrnFragmento {
+    override val conector: String = "do"
     override val pronomeDemostrativo: String = "deste"
   }
 
   case object Inciso extends TipoUrnFragmento {
+    override val conector: String = "do"
     override val pronomeDemostrativo: String = "deste"
   }
 
   case object Alinea extends TipoUrnFragmento {
+    override val conector: String = "da"
     override val pronomeDemostrativo: String = "desta"
   }
 
   case object Paragrafo extends TipoUrnFragmento {
+    override val conector: String = "do"
     override val pronomeDemostrativo: String = "deste"
   }
 
   case object Item extends TipoUrnFragmento {
+    override val conector: String = "do"
     override val pronomeDemostrativo: String = "deste"
   }
 
