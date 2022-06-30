@@ -9,7 +9,11 @@ import scala.util.Try
 private[compacto] object AgrupadorUrn {
 
   def agrupar(parsedUrns: List[ParsedUrn]): List[GrupoUrns] = {
+    println(s"agrupar: ${parsedUrns.mkString(",")}")
     case class ValueAux(iniComum: String, dispPrincipal: String, numeros: List[Numero], grupos: List[GrupoUrns])
+
+//    val parsedUrns1 = parsedUrns.reverse
+//    println(s"parsedUrns1: $parsedUrns1")
 
     val v = parsedUrns.tail.foldLeft(
       ValueAux(parsedUrns.head.inicioComum, parsedUrns.head.disPrincipal, List(parsedUrns.head.numero), Nil)
@@ -22,11 +26,11 @@ private[compacto] object AgrupadorUrn {
             iniComum = parsedUrn.inicioComum,
             dispPrincipal = parsedUrn.disPrincipal,
             numeros = List(parsedUrn.numero),
-            grupos = value.grupos :+ criaGrupo(value.iniComum, value.dispPrincipal, value.numeros)
+            grupos = value.grupos :+ criaGrupo(value.iniComum, value.numeros)
           )
         }
     }
-    v.grupos :+ criaGrupo(v.iniComum, v.dispPrincipal, v.numeros)
+    v.grupos :+ criaGrupo(v.iniComum, v.numeros)
   }
 
   def urnFragmento(fragmentoUrn: String): UrnFragmento =
@@ -34,7 +38,7 @@ private[compacto] object AgrupadorUrn {
       0
     })
 
-  private def criaGrupo(iniComum: String, dispPrincipal: String, numeros: List[Numero]): GrupoUrns = {
+  private def criaGrupo(iniComum: String, numeros: List[Numero]): GrupoUrns = {
     val nivelAtualAnexoPorFragmento = mutable.Map[String, Int]()
 
     val getEAlteraNivel = { p: String =>
@@ -55,6 +59,7 @@ private[compacto] object AgrupadorUrn {
 
   // fragmentos agrupadores sao lidos ao contrario
   private def inverteFragmentosAgrupadores: List[UrnFragmento] => List[UrnFragmento] = { fragmentos =>
+    println(s"inverteFragmentosAgrupadores: $fragmentos")
     var posInicio = Option.empty[Int]
     var posFim = Option.empty[Int]
     fragmentos.zipWithIndex.foreach { case (fragmento, idx) =>
