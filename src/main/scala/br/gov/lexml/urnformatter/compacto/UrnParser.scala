@@ -55,7 +55,7 @@ private[compacto] object UrnParser {
     println(s"urn: $urn - commonContext: $commonContext")
 
     if (urn == commonContext) {
-      if (urnSpplited.last.startsWith("art")) { //TODO: monte de check the art
+      if (ehArtigo(urnSpplited.last)) {
         (Some("cpt"), "", false)
       } else {
         (Some(urnSpplited.last), "", false)
@@ -64,18 +64,18 @@ private[compacto] object UrnParser {
       val commonContextSpplited = commonContext.split("_")
       val commonContextSize = commonContextSpplited.size
 
-      val posArt = urnSpplited.indexWhere(_.startsWith("art"))
+      val posArt = urnSpplited.indexWhere(ehArtigo)
       val isArt = posArt == (urnSpplited.length - 1)
       val isFilhoDeAnx = urnSpplited.head.startsWith("anx")
       println(s"urn: $urn - context: $context - common: $commonContext - isArt: $isArt - isFilhoDeAnx: $isFilhoDeAnx")
 
       if (isArt) {
         if (commonContext == urn) (None, "art", false) else (Some(urnSpplited.last), if (isFilhoDeAnx) "anx" else "", false) //TODO: correct flag
-      } else if (urnSpplited.exists(_.startsWith("art"))) {
+      } else if (urnSpplited.exists(ehArtigo)) {
         println("esse caso")
 
         val artUrn = urnSpplited(posArt)
-        val artContext = context.split("_").find(_.startsWith("art"))
+        val artContext = context.split("_").find(ehArtigo)
         val referenciaMesmoArtigo = artContext.map(_ == artUrn).contains(true)
         println(s"artUrn: $artUrn - artContext: $artContext - referenciaMesmoArtigo: $referenciaMesmoArtigo")
 
@@ -144,10 +144,10 @@ private[compacto] object UrnParser {
    * Se existir um artigo, remove todos fragmentos antecessores à ele, exceto se for anexo.
    */
   private def trataArtigo: List[String] => List[String] = { fragmentos =>
-    val posArtigo = fragmentos.indexWhere(_.startsWith("art"))
+    val posArtigo = fragmentos.indexWhere(ehArtigo)
 
     if (posArtigo != -1) {
-      fragmentos.filter(p => p.startsWith("art") || p.startsWith("anx")) ++
+      fragmentos.filter(p => ehArtigo(p) || p.startsWith("anx")) ++
         fragmentos.takeRight(fragmentos.size - posArtigo - 1)
     } else {
       fragmentos
@@ -159,7 +159,7 @@ private[compacto] object UrnParser {
    */
   private def trataCaputNoMeio: List[String] => List[String] = { fragmentos =>
     val contemCaputAntesDoFim = fragmentos.dropRight(1).exists(_.startsWith("cpt"))
-    val posArtigo = fragmentos.exists(_.startsWith("art"))
+    val posArtigo = fragmentos.exists(ehArtigo)
 
     if (contemCaputAntesDoFim && posArtigo) {
       fragmentos.filter(!_.startsWith("cpt"))
@@ -167,6 +167,8 @@ private[compacto] object UrnParser {
       fragmentos
     }
   }
+
+  private def ehArtigo(fragmento: String): Boolean = fragmento.startsWith("art")
 
   private[compacto] def removeRaizECppEAtc: List[String] => List[String] = { fragmentos =>
     fragmentos.filterNot(p => p.startsWith("lex") || p.startsWith("cpp") || p.startsWith("atc"))

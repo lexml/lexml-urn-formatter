@@ -25,7 +25,7 @@ object Urn2NomeCompacto {
         println(s"formating with context. urnsWithoutContext: $urnsWithoutContext - agrupador: $agrupador")
         val nome = if (urnsWithoutContext.isEmpty) None else Some(format(urnsWithoutContext, referenciaMesmoArtigo))
         println(s"nome: $nome")
-        new Nomeador(Nil, referenciaMesmoArtigo).nomearDispositivo(nome, agrupador) //TOOD: Why Nil?
+        new Nomeador(Nil, referenciaMesmoArtigo).nomearDispositivo(nome, agrupador)
       } else {
         format(urns, false)
       }
