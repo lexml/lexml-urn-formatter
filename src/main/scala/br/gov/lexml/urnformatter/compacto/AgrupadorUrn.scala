@@ -1,6 +1,7 @@
 package br.gov.lexml.urnformatter.compacto
 
 import br.gov.lexml.urnformatter.compacto.TipoUrnFragmento.DispositivoAgrupador
+import br.gov.lexml.urnformatter.compacto.TipoUrnFragmento
 import br.gov.lexml.urnformatter.compacto.UrnFragmento._
 
 import scala.collection.mutable
@@ -11,9 +12,6 @@ private[compacto] object AgrupadorUrn {
   def agrupar(parsedUrns: List[ParsedUrn]): List[GrupoUrns] = {
     println(s"agrupar: ${parsedUrns.mkString(",")}")
     case class ValueAux(iniComum: String, dispPrincipal: String, numeros: List[Numero], grupos: List[GrupoUrns])
-
-//    val parsedUrns1 = parsedUrns.reverse
-//    println(s"parsedUrns1: $parsedUrns1")
 
     val v = parsedUrns.tail.foldLeft(
       ValueAux(parsedUrns.head.inicioComum, parsedUrns.head.disPrincipal, List(parsedUrns.head.numero), Nil)
@@ -84,30 +82,30 @@ private[compacto] object AgrupadorUrn {
   }
 
   private def parse(fragmentoUrn: String, getEAlteraNivel: String => Int): UrnFragmento = fragmentoUrn.take(3) match {
-    case "art" =>
+    case TipoUrnFragmento.Artigo.sigla =>
       val numStr = fragmentoUrn.substring(3)
       val num = Try(numStr.toInt).map(Numero.IntNumero).getOrElse(Numero.StrNumero(numStr))
       Artigo(List(num))
-    case "cpt" => Caput
-    case "par" if fragmentoUrn.contains("par1u") => ParagrafoUnico
-    case "par" => Paragrafo(List(parseNumero(fragmentoUrn)))
-    case "inc" => Inciso(List(parseNumero(fragmentoUrn)))
-    case "ali" => Alinea(List(parseNumero(fragmentoUrn)))
-    case "ite" => Item(List(parseNumero(fragmentoUrn)))
-    case "tit" => Titulo(List(parseNumero(fragmentoUrn)))
-    case "cap" => Capitulo(List(parseNumero(fragmentoUrn)))
-    case "sec" => Secao(List(parseNumero(fragmentoUrn)))
-    case "sub" => SubSecao(List(parseNumero(fragmentoUrn)))
-    case "liv" => Livro(List(parseNumero(fragmentoUrn)))
-    case "anx" => Anexo(List(parseNumero(fragmentoUrn)), getEAlteraNivel("anx"))
-    case "prt" => Parte(List(parseNumero(fragmentoUrn)))
+    case TipoUrnFragmento.Caput.sigla => Caput
+    case TipoUrnFragmento.Paragrafo.sigla if fragmentoUrn.contains("par1u") => ParagrafoUnico
+    case TipoUrnFragmento.Paragrafo.sigla => Paragrafo(List(parseNumero(fragmentoUrn)))
+    case TipoUrnFragmento.Inciso.sigla => Inciso(List(parseNumero(fragmentoUrn)))
+    case TipoUrnFragmento.Alinea.sigla => Alinea(List(parseNumero(fragmentoUrn)))
+    case TipoUrnFragmento.Item.sigla => Item(List(parseNumero(fragmentoUrn)))
+    case TipoUrnFragmento.Titulo.sigla => Titulo(List(parseNumero(fragmentoUrn)))
+    case TipoUrnFragmento.Capitulo.sigla => Capitulo(List(parseNumero(fragmentoUrn)))
+    case TipoUrnFragmento.Secao.sigla => Secao(List(parseNumero(fragmentoUrn)))
+    case TipoUrnFragmento.SubSecao.sigla => SubSecao(List(parseNumero(fragmentoUrn)))
+    case TipoUrnFragmento.Livro.sigla => Livro(List(parseNumero(fragmentoUrn)))
+    case TipoUrnFragmento.Anexo.sigla => Anexo(List(parseNumero(fragmentoUrn)), getEAlteraNivel(TipoUrnFragmento.Anexo.sigla))
+    case TipoUrnFragmento.Parte.sigla => Parte(List(parseNumero(fragmentoUrn)))
     case _ => throw new IllegalArgumentException(s"Urn Invalida: $fragmentoUrn")
   }
 
   private def parseNumero(fragmento: String): Numero = {
     val numero = fragmento.substring(3)
     Try(Numero.IntNumero(numero.toInt)).getOrElse {
-      if (fragmento.contains("anx")) {
+      if (fragmento.contains(TipoUrnFragmento.Anexo.sigla)) {
         Numero.StrNumero(numero)
       } else {
         Numero.SemNumero
