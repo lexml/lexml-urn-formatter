@@ -53,20 +53,15 @@ private[compacto] object UrnParser {
   private def extractContext(urn: String, context: String): ContextReponseOpt = {
     if (!hasCommonContext(urn, context)) throw new IllegalArgumentException("Sem contexto em comum.")
     val urnSpplited = urn.split("_")
-
     val commonContext = extractCommonContext(urn, context)
 
     println(s"urn: $urn - commonContext: $commonContext")
 
     if (urn == commonContext) {
-      if (ehArtigo(urnSpplited.last)) {
-        ContextReponseOpt(Some(Caput.sigla), "", false)
-      } else {
-        ContextReponseOpt(Some(urnSpplited.last), "", false)
-      }
+      ContextReponseOpt(if (ehArtigo(urnSpplited.last)) Some(Caput.sigla) else Some(urnSpplited.last), "", false)
     } else {
-      val commonContextSpplited = commonContext.split("_")
-      val commonContextSize = commonContextSpplited.size
+      val commonContextSplit = commonContext.split("_")
+      val commonContextSize = commonContextSplit.size
 
       val posArt = urnSpplited.indexWhere(ehArtigo)
       val isArt = posArt == (urnSpplited.length - 1)
@@ -88,8 +83,8 @@ private[compacto] object UrnParser {
         println(s"artUrn: $artUrn - artContext: $artContext - referenciaMesmoArtigo: $referenciaMesmoArtigo")
 
         if (isFilhoDeAnx) {
-          if (urnSpplited.head == commonContextSpplited.head && referenciaMesmoArtigo) {
-            print("==1")
+          if (urnSpplited.head == commonContextSplit.head && referenciaMesmoArtigo) {
+            print(s"==1: ${urnSpplited.head} - ${commonContextSplit.head}")
             ContextReponseOpt(Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "", referenciaMesmoArtigo)
           } else {
             print("==2")
@@ -106,15 +101,15 @@ private[compacto] object UrnParser {
 
         val (urnWithoutContext, agrupador) = maybePrefix match {
           case Some(_) => (None, urnSpplited.last.take(3))
-          case None => (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), commonContextSpplited.last.take(3))
+          case None => (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), commonContextSplit.last.take(3))
         }
         println(s"urnWithoutContext: $urnWithoutContext - agrupador: $agrupador")
-        val isAnexoSameContext = isFilhoDeAnx && urnSpplited.head == commonContextSpplited.head
+        val isAnexoSameContext = isFilhoDeAnx && urnSpplited.head == commonContextSplit.head
         if (commonContext == urn) {
           ContextReponseOpt(Some(urnSpplited.last), "", false)
         } else {
           if (isAnexoSameContext) {
-            ContextReponseOpt(Some(urnSpplited.last), commonContextSpplited.head.take(3), false)
+            ContextReponseOpt(Some(urnSpplited.last), commonContextSplit.head.take(3), false)
           } else {
             ContextReponseOpt(urnWithoutContext, agrupador, false)
           }
