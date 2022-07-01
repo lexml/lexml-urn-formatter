@@ -11,7 +11,9 @@ object Urn2NomeCompacto {
   def format(urn: String): String = format(List(urn), false)
 
   /**
-   * Nomeia uma ou mais normas representadas por URN a partir de um norma contexto
+   * Nomeia uma ou mais normas representadas por URN a partir de um norma contexto.
+   *
+   * Padrão de nomeação muda dependendo se existe uma referência ao próprio artigo ou não.
    *
    * urns: uma ou mais normas nomeadas
    * context: uma norma que menciona ou nomeia a lista em urns
@@ -31,11 +33,13 @@ object Urn2NomeCompacto {
       }
     }
 
-  def format(urns: List[String], referenciaMesmoArtigo: Boolean): String =
+  def format(urns: List[String]): String = format(urns, false)
+
+  private def format(urns: List[String], referenciaMesmoArtigo: Boolean): String =
     if (urns.isEmpty) ""
     else {
       Try {
-        val grupos = (UrnParser.parse _ andThen AgrupadorUrn.agrupar)(urns)
+        val grupos = (UrnParser.parse _ andThen AgrupadorUrn.agrupar) (urns)
         new Nomeador(grupos, referenciaMesmoArtigo).nomearGrupos
       }.recover {
         case t: Throwable =>
