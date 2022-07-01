@@ -22,9 +22,9 @@ object Urn2NomeCompacto {
     } else {
       if (UrnParser.hasCommonContext(urns.head, context)) {
         val contextResponse = UrnParser.extractContext(urns, context)
-        println(s"formating with context. urnsWithoutContext: ${contextResponse.urns} - agrupador: ${contextResponse.agrupador}")
+        logger.info(s"formating with context. urnsWithoutContext: ${contextResponse.urns} - agrupador: ${contextResponse.agrupador}")
         val nome = if (contextResponse.urns.isEmpty) None else Some(format(contextResponse.urns, contextResponse.referenciaMesmoArtigo))
-        println(s"nome: $nome")
+        logger.info(s"nome: $nome")
         new Nomeador(Nil, contextResponse.referenciaMesmoArtigo).nomearDispositivo(nome, contextResponse.agrupador)
       } else {
         format(urns, false)

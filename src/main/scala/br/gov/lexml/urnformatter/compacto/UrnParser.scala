@@ -55,8 +55,6 @@ private[compacto] object UrnParser {
     val urnSpplited = urn.split("_")
     val commonContext = extractCommonContext(urn, context)
 
-    println(s"urn: $urn - commonContext: $commonContext")
-
     if (urn == commonContext) {
       ContextReponseOpt(if (ehArtigo(urnSpplited.last)) Some(Caput.sigla) else Some(urnSpplited.last), "", false)
     } else {
@@ -66,36 +64,28 @@ private[compacto] object UrnParser {
       val posArt = urnSpplited.indexWhere(ehArtigo)
       val isArt = posArt == (urnSpplited.length - 1)
       val isFilhoDeAnx = urnSpplited.head.startsWith(Anexo.sigla)
-      println(s"urn: $urn - context: $context - common: $commonContext - isArt: $isArt - isFilhoDeAnx: $isFilhoDeAnx")
 
       if (isArt) {
         if (commonContext == urn) {
           ContextReponseOpt(None, Artigo.sigla, false)
         } else {
           ContextReponseOpt(Some(urnSpplited.last), if (isFilhoDeAnx) Anexo.sigla else "", false)
-        } //TODO: correct flag
+        }
       } else if (urnSpplited.exists(ehArtigo)) {
-        println("esse caso")
-
         val artUrn = urnSpplited(posArt)
         val artContext = context.split("_").find(ehArtigo)
         val referenciaMesmoArtigo = artContext.map(_ == artUrn).contains(true)
-        println(s"artUrn: $artUrn - artContext: $artContext - referenciaMesmoArtigo: $referenciaMesmoArtigo")
 
         if (isFilhoDeAnx) {
           if (urnSpplited.head == commonContextSplit.head && referenciaMesmoArtigo) {
-            print(s"==1: ${urnSpplited.head} - ${commonContextSplit.head}")
             ContextReponseOpt(Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "", referenciaMesmoArtigo)
           } else {
-            print("==2")
             ContextReponseOpt(Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), Anexo.sigla, referenciaMesmoArtigo)
           }
         } else {
-          print("==3")
           ContextReponseOpt(Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "", referenciaMesmoArtigo)
         }
       } else {
-        println("else")
         val extractContextRegex = s"""^($urn)(_(.*)|$$)""".r
         val maybePrefix = extractContextRegex.findFirstIn(context)
 
@@ -103,11 +93,10 @@ private[compacto] object UrnParser {
           case Some(_) => (None, urnSpplited.last.take(3))
           case None => (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), commonContextSplit.last.take(3))
         }
-        println(s"urnWithoutContext: $urnWithoutContext - agrupador: $agrupador")
-        val isAnexoSameContext = isFilhoDeAnx && urnSpplited.head == commonContextSplit.head
         if (commonContext == urn) {
           ContextReponseOpt(Some(urnSpplited.last), "", false)
         } else {
+          val isAnexoSameContext = isFilhoDeAnx && urnSpplited.head == commonContextSplit.head
           if (isAnexoSameContext) {
             ContextReponseOpt(Some(urnSpplited.last), commonContextSplit.head.take(3), false)
           } else {

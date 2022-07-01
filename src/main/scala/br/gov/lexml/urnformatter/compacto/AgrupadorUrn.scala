@@ -10,7 +10,6 @@ import scala.util.Try
 private[compacto] object AgrupadorUrn {
 
   def agrupar(parsedUrns: List[ParsedUrn]): List[GrupoUrns] = {
-    println(s"agrupar: ${parsedUrns.mkString(",")}")
     case class ValueAux(iniComum: String, dispPrincipal: String, numeros: List[Numero], grupos: List[GrupoUrns])
 
     val v = parsedUrns.tail.foldLeft(
@@ -57,7 +56,6 @@ private[compacto] object AgrupadorUrn {
 
   // fragmentos agrupadores sao lidos ao contrario
   private def inverteFragmentosAgrupadores: List[UrnFragmento] => List[UrnFragmento] = { fragmentos =>
-    println(s"inverteFragmentosAgrupadores: $fragmentos")
     var posInicio = Option.empty[Int]
     var posFim = Option.empty[Int]
     fragmentos.zipWithIndex.foreach { case (fragmento, idx) =>
