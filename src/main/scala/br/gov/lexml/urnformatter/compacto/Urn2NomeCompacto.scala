@@ -21,11 +21,11 @@ object Urn2NomeCompacto {
       ""
     } else {
       if (UrnParser.hasCommonContext(urns.head, context)) {
-        val (urnsWithoutContext, agrupador, referenciaMesmoArtigo) = UrnParser.extractContext(urns, context)
-        println(s"formating with context. urnsWithoutContext: $urnsWithoutContext - agrupador: $agrupador")
-        val nome = if (urnsWithoutContext.isEmpty) None else Some(format(urnsWithoutContext, referenciaMesmoArtigo))
+        val contextResponse = UrnParser.extractContext(urns, context)
+        println(s"formating with context. urnsWithoutContext: ${contextResponse.urns} - agrupador: ${contextResponse.agrupador}")
+        val nome = if (contextResponse.urns.isEmpty) None else Some(format(contextResponse.urns, contextResponse.referenciaMesmoArtigo))
         println(s"nome: $nome")
-        new Nomeador(Nil, referenciaMesmoArtigo).nomearDispositivo(nome, agrupador)
+        new Nomeador(Nil, contextResponse.referenciaMesmoArtigo).nomearDispositivo(nome, contextResponse.agrupador)
       } else {
         format(urns, false)
       }
