@@ -8,18 +8,22 @@ import org.slf4j.LoggerFactory
 import scala.annotation.tailrec
 import scala.util.Try
 
-private[compacto] object Nomeador {
+private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo: Boolean) {
 
-  val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.Nomeador")
+  private val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.Nomeador")
+  private var groupPosicao = -1
 
-  def nomearGrupos(grupos: List[GrupoUrns]): String = {
+  def nomearGrupos: String = {
     @tailrec
-    def go(acc: String, grupos: List[GrupoUrns]): String = grupos match {
-      case Nil => acc
-      case g1 :: g2 :: g3 :: _ if g1.dispPrincipal == g2.dispPrincipal && g2.dispPrincipal == g3.dispPrincipal =>
-        go(s"${acc}${nomear(g1)}, ", grupos.tail)
-      case g1 :: Nil => go(s"${acc}${nomear(g1)}", Nil)
-      case g1 :: _ => go(s"${acc}${nomear(g1)} e ", grupos.tail)
+    def go(acc: String, grupos: List[GrupoUrns]): String = {
+      groupPosicao = groupPosicao + 1
+      grupos match {
+        case Nil => acc
+        case g1 :: g2 :: g3 :: _ if g1.dispPrincipal == g2.dispPrincipal && g2.dispPrincipal == g3.dispPrincipal =>
+          go(s"${acc}${nomear(g1)}, ", grupos.tail)
+        case g1 :: Nil => go(s"${acc}${nomear(g1)}", Nil)
+        case g1 :: _ => go(s"${acc}${nomear(g1)} e ", grupos.tail)
+      }
     }
 
     go("", grupos)
@@ -52,7 +56,11 @@ private[compacto] object Nomeador {
   private def nomearNaoAgrupador(grupo: GrupoUrns, principal: UrnFragmento): String = {
     val idxAnx = grupo.posAnexo
     if (idxAnx == -1) {
-      nomear(grupo.fragmentosComum :+ principal)
+      if (grupo.fragmentosComum.exists(_.tipo == TipoUrnFragmento.Caput)) {
+        nomear(grupo.fragmentosComum.tail :+ principal :+ grupo.fragmentosComum.head)
+      } else {
+        nomear(grupo.fragmentosComum :+ principal)
+      }
     } else {
       val todosMenosAnx = grupo.fragmentosComum.zipWithIndex.filter(_._2 != idxAnx).map(_._1)
       nomear(todosMenosAnx :+ principal :+ grupo.fragmentosComum(idxAnx))
@@ -63,8 +71,18 @@ private[compacto] object Nomeador {
     case TipoUrnFragmento.Artigo => nomearNaoAgrupador(grupo, Artigo(grupo.numeros))
     case TipoUrnFragmento.Caput => nomearNaoAgrupador(grupo, Caput)
     case TipoUrnFragmento.ParagrafoUnico => nomearNaoAgrupador(grupo, ParagrafoUnico)
-    case TipoUrnFragmento.Inciso => nomearNaoAgrupador(grupo, Inciso(grupo.numeros))
-    case TipoUrnFragmento.Alinea => nomearNaoAgrupador(grupo, Alinea(grupo.numeros))
+    case TipoUrnFragmento.Inciso =>
+      if (referenciaMesmoArtigo) {
+        nomear(Inciso(grupo.numeros) :: grupo.fragmentosComum)
+      } else {
+        nomearNaoAgrupador(grupo, Inciso(grupo.numeros))
+      }
+    case TipoUrnFragmento.Alinea =>
+      if (referenciaMesmoArtigo && groupPosicao == 0) {
+        nomear(Alinea(grupo.numeros) :: grupo.fragmentosComum)
+      } else {
+        nomearNaoAgrupador(grupo, Alinea(grupo.numeros))
+      }
     case TipoUrnFragmento.Paragrafo => nomearNaoAgrupador(grupo, Paragrafo(grupo.numeros))
     case TipoUrnFragmento.Item => nomearNaoAgrupador(grupo, Item(grupo.numeros))
     case TipoUrnFragmento.Parte => nomear(Parte(grupo.numeros) :: grupo.fragmentosComum)
@@ -134,8 +152,11 @@ private[compacto] object Nomeador {
     case ParagrafoUnico => "parágrafo único"
     case i: Inciso =>
       val compacto = fragmentos.size > 1
-      if (compacto) nomear(i.numeros, formatRomano(_))
-      else nomear(i.numeros, "inciso", "incisos", formatRomano).trim
+      if (compacto && (!referenciaMesmoArtigo || groupPosicao > 0)) {
+        nomear(i.numeros, formatRomano(_))
+      } else {
+        nomear(i.numeros, "inciso", "incisos", formatRomano).trim
+      }
     case a: Alinea => nomear(a.numeros, formatAlfa(_))
     case p: Paragrafo =>
       val compacto = fragmentos.size > 1
@@ -153,15 +174,16 @@ private[compacto] object Nomeador {
 
   private def nomear(urnFragmentos: List[UrnFragmento]): String = {
     @tailrec
-    def criarString(acc: String, fragmentoes: List[UrnFragmento]): String = {
-      if (fragmentoes.isEmpty) {
+    def criarString(acc: String, fragmentos: List[UrnFragmento]): String = {
+      if (fragmentos.isEmpty) {
         acc
       } else {
-        (fragmentoes.head, fragmentoes.head.tipo) match {
-          case (h, _: DispositivoAgrupador) if acc.isEmpty => criarString(nomear(h, urnFragmentos), fragmentoes.tail)
-          case (h, d: DispositivoAgrupador) => criarString(s"${acc} ${d.conector} ${nomear(h, urnFragmentos)}", fragmentoes.tail)
-          case (h, _) if acc.isEmpty => criarString(nomear(h, urnFragmentos), fragmentoes.tail)
-          case (h, _) => criarString(s"${acc}, ${nomear(h, urnFragmentos)}", fragmentoes.tail)
+        (fragmentos.head, fragmentos.head.tipo) match {
+          case (h, _) if acc.isEmpty => criarString(nomear(h, urnFragmentos), fragmentos.tail)
+          case (h, d: DispositivoAgrupador) => criarString(s"${acc} ${d.conector} ${nomear(h, urnFragmentos)}", fragmentos.tail)
+          case (h, d) if (referenciaMesmoArtigo && fragmentos.tail.isEmpty && (h.tipo == TipoUrnFragmento.Caput || h.tipo == TipoUrnFragmento.Paragrafo)) =>
+            criarString(s"${acc} ${d.conector} ${nomear(h, urnFragmentos)}", fragmentos.tail)
+          case (h, _) => criarString(s"${acc}, ${nomear(h, urnFragmentos)}", fragmentos.tail)
         }
       }
     }

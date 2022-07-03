@@ -3,10 +3,17 @@ package br.gov.lexml.urnformatter.compacto
 import scala.util.{Success, Try}
 import org.slf4j.LoggerFactory
 import scala.annotation.tailrec
+import br.gov.lexml.urnformatter.compacto.TipoUrnFragmento._
 
 private[compacto] object UrnParser {
 
-  val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.UrnParser")
+  type Urn = String
+  type Agrupador = String
+  private case class ContextReponseListOpt(urns: List[Option[Urn]], agrupador: Agrupador, referenciaMesmoArtigo: Boolean)
+  private case class ContextReponseOpt(urn: Option[Urn], agrupador: Agrupador, referenciaMesmoArtigo: Boolean)
+  case class ContextReponse(urns: List[Urn], agrupador: Agrupador, referenciaMesmoArtigo: Boolean)
+
+  private val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.UrnParser")
 
   def parse(urns: List[String]): List[ParsedUrn] = urns.map { urn =>
     val fragmentos = (trataArtigo andThen trataCaputNoMeio andThen removeRaizECppEAtc) (urn.split("_").toList)
@@ -18,96 +25,83 @@ private[compacto] object UrnParser {
     ParsedUrn(inicioComum.mkString("_"), dispPrincipal, numero)
   }
 
-  def hasCommonContext(urn: String, context: String): Boolean = {
+  private[compacto] def hasCommonContext(urn: String, context: String): Boolean = {
     val urnSpplited = urn.split("_")
     val commonContext = extractCommonContext(urn, context)
     logger.info(s"hasCommonContext: urn $urn - context $context - commonContext $commonContext")
     urnSpplited.size > 1 && commonContext != ""
   }
 
-  type Urn = String
-  type Agrupador = String
-
-  def extractContext(urns: List[String], context: String): (List[Urn], Agrupador) = {
+  def extractContext(urns: List[String], context: String): ContextReponse = {
     @tailrec
-    def extract(urns: List[String], acc: List[Option[Urn]]): (List[Option[Urn]], Agrupador) = urns match {
+    def extract(urns: List[String], acc: List[Option[Urn]]): ContextReponseListOpt = urns match {
       case head :: Nil =>
-        val result: (Option[Urn], Agrupador) = extractContext(head, context)
-        (acc :+ result._1, result._2)
+        val result = extractContext(head, context)
+        ContextReponseListOpt(acc :+ result.urn, result.agrupador, result.referenciaMesmoArtigo)
 
       case head :: tail =>
-        val result: (Option[Urn], Agrupador) = extractContext(head, context)
-        extract(tail, acc :+ result._1)
+        val result = extractContext(head, context)
+        extract(tail, acc :+ result.urn)
 
-      case Nil => (acc, "")
+      case Nil => ContextReponseListOpt(acc, "", false)
     }
 
     val result = extract(urns, List())
-    (result._1.flatten, result._2)
+    ContextReponse(result.urns.flatten, result.agrupador, result.referenciaMesmoArtigo)
   }
 
-  def extractContext(urn: String, context: String): (Option[Urn], Agrupador) = {
+  private def extractContext(urn: String, context: String): ContextReponseOpt = {
     if (!hasCommonContext(urn, context)) throw new IllegalArgumentException("Sem contexto em comum.")
-
-    val commonContext = extractCommonContext(urn, context)
-    val commonContextSpplited = commonContext.split("_")
-    val commonContextSize = commonContextSpplited.size
-
     val urnSpplited = urn.split("_")
-    val posArt = urnSpplited.indexWhere(_.startsWith("art"))
-    val isArt = posArt == (urnSpplited.length - 1)
-    val isFilhoDeAnx = urnSpplited.head.startsWith("anx")
-    println(s"urn: $urn - context: $context - common: $commonContext - isArt: $isArt - isFilhoDeAnx: $isFilhoDeAnx")
+    val commonContext = extractCommonContext(urn, context)
 
-    if (isArt) {
-      if (commonContext == urn) (None, "art") else (Some(urnSpplited.last), if (isFilhoDeAnx) "anx" else "")
-    } else if (urnSpplited.exists(_.startsWith("art"))) {
-      println("esse caso")
+    if (urn == commonContext) {
+      ContextReponseOpt(if (ehArtigo(urnSpplited.last)) Some(Caput.sigla) else Some(urnSpplited.last), "", false)
+    } else {
+      val commonContextSplit = commonContext.split("_")
+      val commonContextSize = commonContextSplit.size
 
-      val artUrn = urnSpplited(posArt)
-      val artContext = context.split("_").find(_.startsWith("art"))
-      val trocouDeArtigo = artContext.map(_ != artUrn)
-      println(s"artUrn: $artUrn - artContext: $artContext - trocouDeArtigo: $trocouDeArtigo")
+      val posArt = urnSpplited.indexWhere(ehArtigo)
+      val isArt = posArt == (urnSpplited.length - 1)
+      val isFilhoDeAnx = urnSpplited.head.startsWith(Anexo.sigla)
 
-      if (isFilhoDeAnx) {
-        if (urnSpplited.head == commonContextSpplited.head && trocouDeArtigo.forall(_ == false)) {
-          print("==1")
-          (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "")
+      if (isArt) {
+        if (commonContext == urn) {
+          ContextReponseOpt(None, Artigo.sigla, false)
         } else {
-          print("==2")
-          (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "anx")
+          ContextReponseOpt(Some(urnSpplited.last), if (isFilhoDeAnx) Anexo.sigla else "", false)
+        }
+      } else if (urnSpplited.exists(ehArtigo)) {
+        val artUrn = urnSpplited(posArt)
+        val artContext = context.split("_").find(ehArtigo)
+        val referenciaMesmoArtigo = artContext.map(_ == artUrn).contains(true)
+
+        if (isFilhoDeAnx) {
+          if (urnSpplited.head == commonContextSplit.head && referenciaMesmoArtigo) {
+            ContextReponseOpt(Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "", referenciaMesmoArtigo)
+          } else {
+            ContextReponseOpt(Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), Anexo.sigla, referenciaMesmoArtigo)
+          }
+        } else {
+          ContextReponseOpt(Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "", referenciaMesmoArtigo)
         }
       } else {
-        print("==3")
-        (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "")
-      }
+        val extractContextRegex = s"""^($urn)(_(.*)|$$)""".r
+        val maybePrefix = extractContextRegex.findFirstIn(context)
 
-//      val isAnexoSameContext = isFilhoDeAnx && urnSpplited.head == commonContextSpplited.head
-//      if (isAnexoSameContext) {
-//        (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "anx")
-//      } else {
-//        (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), "")
-//      }
-
-      // (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), if (isFilhoDeAnx) "anx" else "")
-    } else {
-      println("else")
-      val extractContextRegex = s"""^($urn)(_(.*)|$$)""".r
-      val maybePrefix = extractContextRegex.findFirstIn(context)
-
-      val (urnWithoutContext, agrupador) = maybePrefix match {
-        case Some(_) => (None, urnSpplited.last.take(3))
-        case None => (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), commonContextSpplited.last.take(3))
-      }
-      println(s"urnWithoutContext: $urnWithoutContext - agrupador: $agrupador")
-      val isAnexoSameContext = isFilhoDeAnx && urnSpplited.head == commonContextSpplited.head
-      if (commonContext == urn) {
-        (Some(urnSpplited.last), "")
-      } else {
-        if (isAnexoSameContext) {
-          (Some(urnSpplited.last), commonContextSpplited.head.take(3))
+        val (urnWithoutContext, agrupador) = maybePrefix match {
+          case Some(_) => (None, urnSpplited.last.take(3))
+          case None => (Some(urnSpplited.takeRight(urnSpplited.size - commonContextSize).mkString("_")), commonContextSplit.last.take(3))
+        }
+        if (commonContext == urn) {
+          ContextReponseOpt(Some(urnSpplited.last), "", false)
         } else {
-          (urnWithoutContext, agrupador)
+          val isAnexoSameContext = isFilhoDeAnx && urnSpplited.head == commonContextSplit.head
+          if (isAnexoSameContext) {
+            ContextReponseOpt(Some(urnSpplited.last), commonContextSplit.head.take(3), false)
+          } else {
+            ContextReponseOpt(urnWithoutContext, agrupador, false)
+          }
         }
       }
     }
@@ -133,10 +127,10 @@ private[compacto] object UrnParser {
    * Se existir um artigo, remove todos fragmentos antecessores à ele, exceto se for anexo.
    */
   private def trataArtigo: List[String] => List[String] = { fragmentos =>
-    val posArtigo = fragmentos.indexWhere(_.startsWith("art"))
+    val posArtigo = fragmentos.indexWhere(ehArtigo)
 
     if (posArtigo != -1) {
-      fragmentos.filter(p => p.startsWith("art") || p.startsWith("anx")) ++
+      fragmentos.filter(p => ehArtigo(p) || p.startsWith(Anexo.sigla)) ++
         fragmentos.takeRight(fragmentos.size - posArtigo - 1)
     } else {
       fragmentos
@@ -144,24 +138,27 @@ private[compacto] object UrnParser {
   }
 
   /**
-   * Se existe um caput e esse não é o último fragmento da urn, o mesmo é removido.
+   * Se existe um caput E esse não é o último fragmento da urn E existe um artigo, o mesmo é removido.
    */
   private def trataCaputNoMeio: List[String] => List[String] = { fragmentos =>
-    val contemCaputAntesDoFim = fragmentos.dropRight(1).exists(_.startsWith("cpt"))
+    val contemCaputAntesDoFim = fragmentos.dropRight(1).exists(_.startsWith(Caput.sigla))
+    val posArtigo = fragmentos.exists(ehArtigo)
 
-    if (contemCaputAntesDoFim) {
-      fragmentos.filter(!_.startsWith("cpt"))
+    if (contemCaputAntesDoFim && posArtigo) {
+      fragmentos.filter(!_.startsWith(Caput.sigla))
     } else {
       fragmentos
     }
   }
 
+  private def ehArtigo(fragmento: String): Boolean = fragmento.startsWith(Artigo.sigla)
+
   private[compacto] def removeRaizECppEAtc: List[String] => List[String] = { fragmentos =>
-    fragmentos.filterNot(p => p.startsWith("lex") || p.startsWith("cpp") || p.startsWith("atc"))
+    fragmentos.filterNot(p => p.startsWith(Raiz.sigla) || p.startsWith(Cpp.sigla) || p.startsWith(Articulacao.sigla))
   }
 
   private def parseTipoDispositivo(fragmento: String): String =
-    if (!fragmento.contains("par1u")) fragmento.take(3) else "par1u"
+    if (!fragmento.contains(ParagrafoUnico.sigla)) fragmento.take(3) else ParagrafoUnico.sigla
 
   private def parseNumeroFragmento(fragmento: String): Numero =
     if (fragmento.size == 3) {

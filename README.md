@@ -151,8 +151,8 @@ no maven. Insira o snippet abaixo - com o correto user_name e api_key - no `~/.m
 Depois execute o comando abaixo para fazer o release do projeto:
 
 ```
-    mvn -Prelease release:prepare
-    mvn -Prelease release:perform
+    ./mvnw -Prelease release:prepare
+    ./mvnw -Prelease release:perform
 ```
 
 O repositório será:
