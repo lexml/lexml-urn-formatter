@@ -1364,6 +1364,10 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("inciso I", Urn2NomeCompacto.format(List("anx;XPTO_art9_inc1"), "anx;XPTO_art9_cpt"));
   }
 
+  def test_anxXPTO_art9_cpt_inc1_anxXPTO_art9_par1() {
+    assertEquals("inciso I do caput", Urn2NomeCompacto.format(List("anx;XPTO_art9_cpt_inc1"), "anx;XPTO_art9_par1"));
+  }
+
   def test_anxXPTO_art9_cpt_inc1_anxXPTO_art9_cpt() {
     assertEquals("inciso I", Urn2NomeCompacto.format(List("anx;XPTO_art9_cpt_inc1"), "anx;XPTO_art9_cpt"))
   }
