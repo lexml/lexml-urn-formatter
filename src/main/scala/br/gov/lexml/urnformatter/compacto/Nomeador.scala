@@ -150,13 +150,7 @@ private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo:
     case a: Artigo => nomear(a.numeros, "art.", "arts.", formatOrdinal)
     case Caput => "caput"
     case ParagrafoUnico => "parágrafo único"
-    case i: Inciso =>
-      val compacto = fragmentos.size > 1
-      if (compacto && (!referenciaMesmoArtigo || groupPosicao > 0)) {
-        nomear(i.numeros, formatRomano(_))
-      } else {
-        nomear(i.numeros, "inciso", "incisos", formatRomano).trim
-      }
+    case i: Inciso => nomear(i.numeros, "inciso", "incisos", formatRomano).trim
     case a: Alinea => nomear(a.numeros, formatAlfa(_))
     case p: Paragrafo =>
       val compacto = fragmentos.size > 1
