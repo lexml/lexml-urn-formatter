@@ -111,7 +111,7 @@ private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo:
       case (Numero.StrNumero(s), _) =>
         val partesNumero = s.split("-")
         val primeiraParte = fmt(partesNumero(0).toInt)
-        val segundaParte = Try(partesNumero(1).toInt).map(formatAlfa).getOrElse(partesNumero(1)).toUpperCase
+        val segundaParte = Try(partesNumero(1).toInt).map(formatAlfa(_)).getOrElse(partesNumero(1)).toUpperCase
         s"${primeiraParte}-${segundaParte}"
       case (_: Numero.SemNumero.type, _) => ""
       case n@_ => throw new IllegalArgumentException(s"Tipo numeração não esperada: $n")
@@ -151,7 +151,7 @@ private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo:
     case Caput => "caput"
     case ParagrafoUnico => "parágrafo único"
     case i: Inciso => nomear(i.numeros, "inciso", "incisos", formatRomano).trim
-    case a: Alinea => nomear(a.numeros, formatAlfa(_))
+    case a: Alinea => nomear(a.numeros, "alínea", "alíneas", formatAlfa(_, "'"))
     case p: Paragrafo =>
       val compacto = fragmentos.size > 1
       if (compacto) nomear(p.numeros, "§", "§§", formatOrdinal)
