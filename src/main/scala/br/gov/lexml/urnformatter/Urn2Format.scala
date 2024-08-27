@@ -21,7 +21,7 @@ object Urn2Format {
     case x => Algum(x.toInt)
   }
 
-  def formatOrdinal(num: Int): String = 
+  def formatOrdinal(num: Int): String =
     renderNumeral(num) + (if (num < 10) "º" else "")
 
   def renderNumeral(num : Int) : String = {
@@ -40,7 +40,7 @@ object Urn2Format {
      ("M" * (num / 1000)) + rom("M", "D", "C", (num / 100) % 10) + rom("C", "L", "X", (num / 10) % 10) + rom("X", "V", "I", num % 10)
   }
 
-  def formatAlfa(num: Int): String = {
+  def formatAlfa(num: Int, fmt: String = ""): String = {
      def rend(n: Int): String = n match {
          case 0 ⇒ ""
          case _ ⇒ {
@@ -48,7 +48,7 @@ object Urn2Format {
            rend(nn / 26) + ('a' + (nn % 26)).asInstanceOf[Char]
          }
      }
-     rend(num)
+      fmt + rend(num) + fmt
   }
 
   def formatComplementos(cs: List[Numero]): String = cs.map(c => formatComplemento(c.n + 1)).map("-" + _).mkString("")
