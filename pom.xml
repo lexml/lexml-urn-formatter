@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.gov.lexml</groupId>
 	<artifactId>lexml-urn-formatter</artifactId>
@@ -8,19 +9,19 @@
 	<url>https://github.com/lexml/lexml-urn-formatter</url>
 
 	<licenses>
-	    <license>
-		<name>GPLv3</name>
-		<url>https://www.gnu.org/licenses/gpl-3.0.html</url>
-	    </license>
+		<license>
+			<name>GPLv3</name>
+			<url>https://www.gnu.org/licenses/gpl-3.0.html</url>
+		</license>
 	</licenses>
- 
+
 	<developers>
-	      <developer>
-		<id>jrafael</id>
-		<name>João Nicola</name>
-		<email>jrafael@senado.leg.br</email>
-	      </developer>
-	 </developers>
+		<developer>
+			<id>jrafael</id>
+			<name>João Nicola</name>
+			<email>jrafael@senado.leg.br</email>
+		</developer>
+	</developers>
 
 	<distributionManagement>
 		<repository>
@@ -82,7 +83,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
+				<version>3.13.0</version>
 				<configuration>
 					<release>${java.version}</release>
 				</configuration>
@@ -95,29 +96,29 @@
 					</execution>
 				</executions>
 			</plugin>
-	    		<plugin>
-			   <groupId>net.alchim31.maven</groupId>
-			   <artifactId>scala-maven-plugin</artifactId>
-			   <version>4.3.1</version>
-			   <executions>
-			       <execution>
-				   <goals>
-				       <goal>compile</goal>
-				       <goal>testCompile</goal>
-				   </goals>
-			       </execution>
-			   </executions>
-			   <configuration>
-			       <!--                    <sourceDir>src/main/scala</sourceDir> -->
-			       <fork>true</fork>
-			       <scalaVersion>${scala.lib.version}</scalaVersion>
-			       <scalaCompatVersion>${scala.lib.version}</scalaCompatVersion>
-			       <jvmArgs>
-				   <jvmArg>-Xms1024m</jvmArg>
-				   <jvmArg>-Xmx4096m</jvmArg>
-				   <jvmArg>-Xss16m</jvmArg>
-			       </jvmArgs>
-			   </configuration>
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<version>4.3.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<!--                    <sourceDir>src/main/scala</sourceDir> -->
+					<fork>true</fork>
+					<scalaVersion>${scala.lib.version}</scalaVersion>
+					<scalaCompatVersion>${scala.lib.version}</scalaCompatVersion>
+					<jvmArgs>
+						<jvmArg>-Xms1024m</jvmArg>
+						<jvmArg>-Xmx4096m</jvmArg>
+						<jvmArg>-Xss16m</jvmArg>
+					</jvmArgs>
+				</configuration>
 			</plugin>
 
 			<plugin>
@@ -152,97 +153,62 @@
 			</plugin>
 		</plugins>
 	</build>
-    <profiles>
-      <profile>
-	<id>release</id>
-	<activation>
-	  <activeByDefault>false</activeByDefault>
-	</activation>
-	<build>
-	  <plugins>
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-release-plugin</artifactId>
-		<version>3.1.1</version>
-		<configuration>
-		    <detail>true</detail>
-		    <tagNameFormat>@{project.version}</tagNameFormat>
-			<goals>deploy</goals>
-			<scm>
-			  <connection>scm:git:git@github.com:lexml/lexml-urn-formatter.git</connection>
-			  <developerConnection>scm:git:git@github.com:lexml/lexml-urn-formatter.git</developerConnection>
-			  <url>https://github.com/lexml/lexml-urn-formatter</url>
-			  <tag>HEAD</tag>
-			</scm>
-  		</configuration>
-	    </plugin>
-	      <plugin>
-		  <groupId>org.sonatype.plugins</groupId>
-		  <artifactId>nexus-staging-maven-plugin</artifactId>
-		  <version>1.6.7</version>
-		  <extensions>true</extensions>
-		  <configuration>
-		      <serverId>ossrh</serverId>
-		      <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-		      <autoReleaseAfterClose>true</autoReleaseAfterClose>
-		  </configuration>
-	      </plugin>
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-source-plugin</artifactId>
-		<version>3.0.1</version>
-		<executions>
-		    <execution>
-			<id>attach-sources</id>
-			<goals>
-			    <goal>jar-no-fork</goal>
-			</goals>
-		    </execution>
-		</executions>
-	      </plugin>
-	  <plugin>
-	    <groupId>org.apache.maven.plugins</groupId>
-	    <artifactId>maven-jar-plugin</artifactId>
-	    <executions>
-		<execution>
-		    <id>empty-javadoc-jar</id>
-		    <phase>package</phase>
-		    <goals>
-			<goal>jar</goal>
-		    </goals>
-		    <configuration>
-			<classifier>javadoc</classifier>
-			<classesDirectory>${basedir}/javadoc</classesDirectory>
-		    </configuration>
-		</execution>
-	     </executions>
-	   </plugin>
-	      <plugin>
-		  <groupId>org.apache.maven.plugins</groupId>
-		  <artifactId>maven-gpg-plugin</artifactId>
-		  <version>3.0.1</version>
-		  <executions>
-		      <execution>
-			  <id>sign-artifacts</id>
-			  <phase>verify</phase>
-			  <goals>
-			      <goal>sign</goal>
-			  </goals>
-			  <configuration>
-			      <!-- Prevent gpg from using pinentry programs. Fixes: gpg: signing
-				  failed: Inappropriate ioctl for device -->
-			      <gpgArguments>
-				  <arg>--pinentry-mode</arg>
-				  <arg>loopback</arg>
-			      </gpgArguments>
-			  </configuration>
-		      </execution>
-		  </executions>
-	      </plugin>
-	 </plugins>
-       </build>
+	<profiles>
+		<profile>
+			<id>release</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-release-plugin</artifactId>
+						<version>3.1.1</version>
+						<configuration>
+							<detail>true</detail>
+							<tagNameFormat>@{project.version}</tagNameFormat>
+							<goals>deploy</goals>
+							<scm>
+								<connection>scm:git:git@github.com:lexml/lexml-urn-formatter.git</connection>
+								<developerConnection>scm:git:git@github.com:lexml/lexml-urn-formatter.git</developerConnection>
+								<url>https://github.com/lexml/lexml-urn-formatter</url>
+								<tag>HEAD</tag>
+							</scm>
+						</configuration>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>3.3.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jar-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>empty-javadoc-jar</id>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<configuration>
+									<classifier>javadoc</classifier>
+									<classesDirectory>${basedir}/javadoc</classesDirectory>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 
-       </profile>
-    </profiles>
+		</profile>
+	</profiles>
 
 </project>
