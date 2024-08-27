@@ -23,10 +23,6 @@
 	 </developers>
 
 	<distributionManagement>
-	    <snapshotRepository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-	    </snapshotRepository>
 		<repository>
 			<id>github</id>
 			<url>https://maven.pkg.github.com/seu-usuario/seu-repositorio</url>
