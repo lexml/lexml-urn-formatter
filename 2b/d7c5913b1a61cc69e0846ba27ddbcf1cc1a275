@@ -1,0 +1,23 @@
+README.md
+  s_36c6692c94cd46::t_e246f913aae830 205-206
+src/main/scala/br/gov/lexml/urnformatter/compacto/Urn2NomeCompacto.scala
+  s_36c6692c94cd46::t_49f5abd454580d 4,53,62,68-77
+src/test/scala/br/gov/lexml/urnformatter/compacto/Urn2NomeCompactoTest.scala
+  s_36c6692c94cd46::t_7c955e8793966d 8-24,1726-1737
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "2bd7c5913b1a61cc69e0846ba27ddbcf1cc1a275",
+  "prompts": {},
+  "sessions": {
+    "s_36c6692c94cd46": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0e951-c6b8-74c2-8269-65eaddd81b43",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Luciano Molinari <lucmolinari@gmail.com>"
+    }
+  }
+}
