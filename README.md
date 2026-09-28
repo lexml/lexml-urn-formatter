@@ -202,3 +202,5 @@ O repositório será:
 ```
 https://repo1.maven.org/maven2/br/gov/lexml/lexml-urn-formatter/
 ```
+
+O gênero e o plural de cada `GrupoNomeCompacto` concordam com o dispositivo que inicia o texto. Por exemplo, uma referência iniciada por `art. 202` é masculina e singular mesmo quando o destino é uma alínea ou várias alíneas desse artigo.

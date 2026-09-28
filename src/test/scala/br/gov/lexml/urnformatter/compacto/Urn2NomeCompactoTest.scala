@@ -5,6 +5,23 @@ import junit.framework.TestCase
 
 class Urn2NomeCompactoTest extends TestCase {
 
+  def test_generoEPluralConcordamComArtigoQueIniciaReferencia() {
+    val resultado = Urn2NomeCompacto.formatarGrupos(
+      List("art202_cpt_inc4_ali1_ite1", "art202_cpt_inc4_ali8"), "art203_cpt")
+    assertEquals(List(Genero.Masculino, Genero.Masculino), resultado.grupos.map(_.genero))
+    assertEquals(List(false, false), resultado.grupos.map(_.plural))
+    assertEquals("no art. 202, inciso IV, alínea 'a', 1 e no art. 202, inciso IV, alínea 'h'",
+      resultado.formatar(g => if (g.genero == Genero.Masculino) "no" else "na"))
+  }
+
+  def test_alineasAgrupadasMantemArtigoSingular() {
+    val resultado = Urn2NomeCompacto.formatarGrupos(
+      List("art202_cpt_inc4_ali1", "art202_cpt_inc4_ali8"), "art203_cpt")
+    assertEquals(Genero.Masculino, resultado.grupos.head.genero)
+    assertEquals(false, resultado.grupos.head.plural)
+  }
+
+
   def test_referenciasEntreAnexosUsamNomesCompletos() {
     val urns = List("anx65_tit8_cap3_art40", "anx64_anx2", "anx64_tit1_cap2_sec2_art9")
     val contexto = "anx65_tit9_cap3_art62_cpt"
@@ -1704,6 +1721,18 @@ class Urn2NomeCompactoTest extends TestCase {
 
   def test_cpp_anx_ZZZZZZ_anx_TTTTT() {
     assertEquals("Anexo TTTTT do Anexo ZZZZZZ", Urn2NomeCompacto.format(List("cpp_anx;ZZZZZZ_anx;TTTTT")));
+  }
+
+  def test_anx64_anx2_art1() = {
+    assertEquals("art. 1º do Anexo 2 do Anexo LXIV", Urn2NomeCompacto.format("anx64_anx2_art1"))
+  }
+
+  def test_anx64_anx2_art1_cpt() = {
+    assertEquals("art. 1º caput do Anexo 2 do Anexo LXIV", Urn2NomeCompacto.format("anx64_anx2_art1_cpt"))
+  }
+
+  def test_anx1_anx2_art1_cpt() = {
+    assertEquals("art. 1º caput do Anexo 2 do Anexo I", Urn2NomeCompacto.format("anx1_anx2_art1_cpt"))
   }
 
 }

@@ -1,6 +1,7 @@
 package br.gov.lexml.urnformatter.compacto
 
 import org.slf4j.LoggerFactory
+import br.gov.lexml.urnformatter.compacto.UrnFragmento.Artigo
 
 import scala.util.Try;
 
@@ -49,7 +50,7 @@ object Urn2NomeCompacto {
       val grupos = AgrupadorUrn.agrupar(UrnParser.parse(contextResponse.urns))
       val nomes = grupos.map { grupo =>
         val texto = new Nomeador(List(grupo), false).nomearGrupos
-        GrupoNomeCompacto(texto, grupo.dispPrincipal.genero, grupo.numeros.size > 1)
+        criarGrupoNomeCompacto(grupo, texto)
       }
       val complemento = if (contextResponse.agrupador.isEmpty) "" else {
         new Nomeador(Nil, false).nomearDispositivo(Some(""), contextResponse.agrupador).trim
@@ -58,9 +59,19 @@ object Urn2NomeCompacto {
     } else {
       val nomes = AgrupadorUrn.agrupar(UrnParser.parse(urns)).map { grupo =>
         val texto = new Nomeador(List(grupo), false).nomearGrupos
-        GrupoNomeCompacto(texto, grupo.dispPrincipal.genero, grupo.numeros.size > 1)
+        criarGrupoNomeCompacto(grupo, texto)
       }
       ResultadoNomeCompacto(nomes, "")
+    }
+  }
+
+  private def criarGrupoNomeCompacto(grupo: GrupoUrns, texto: String): GrupoNomeCompacto = {
+    // O prefixo concorda com o artigo que inicia a referência, mesmo quando
+    // o destino é uma alínea ou um conjunto de dispositivos desse artigo.
+    val artigo = grupo.fragmentosComum.collectFirst { case a: Artigo => a }
+    artigo match {
+      case Some(a) => GrupoNomeCompacto(texto, a.tipo.genero, a.numeros.size > 1)
+      case None => GrupoNomeCompacto(texto, grupo.dispPrincipal.genero, grupo.numeros.size > 1)
     }
   }
 

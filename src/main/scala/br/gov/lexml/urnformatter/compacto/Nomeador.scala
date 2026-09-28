@@ -54,16 +54,24 @@ private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo:
   }
 
   private def nomearNaoAgrupador(grupo: GrupoUrns, principal: UrnFragmento): String = {
-    val idxAnx = grupo.posAnexo
-    if (idxAnx == -1) {
+    if (grupo.posAnexo == -1) {
       if (grupo.fragmentosComum.exists(_.tipo == TipoUrnFragmento.Caput)) {
         nomear(grupo.fragmentosComum.tail :+ principal :+ grupo.fragmentosComum.head)
       } else {
         nomear(grupo.fragmentosComum :+ principal)
       }
     } else {
-      val todosMenosAnx = grupo.fragmentosComum.zipWithIndex.filter(_._2 != idxAnx).map(_._1)
-      nomear(todosMenosAnx :+ principal :+ grupo.fragmentosComum(idxAnx))
+      val (anexos, demaisFragmentos) = grupo.fragmentosComum.partition {
+        case _: Anexo => true
+        case _ => false
+      }
+      // A URN de um dispositivo em anexo de anexo começa pelo anexo mais
+      // externo. Na forma compacta, porém, o dispositivo vem antes e os
+      // anexos são encadeados do mais interno para o mais externo.
+      val anexosNomeados = anexos.zipWithIndex.map {
+        case (anexo: Anexo, indice) => anexo.copy(nivel = anexos.size - indice)
+      }
+      nomear((demaisFragmentos :+ principal) ++ anexosNomeados)
     }
   }
 
@@ -177,6 +185,8 @@ private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo:
           case (h, d: DispositivoAgrupador) => criarString(s"${acc} ${d.conector} ${nomear(h, urnFragmentos)}", fragmentos.tail)
           case (h, d) if (referenciaMesmoArtigo && fragmentos.tail.isEmpty && (h.tipo == TipoUrnFragmento.Caput || h.tipo == TipoUrnFragmento.Paragrafo)) =>
             criarString(s"${acc} ${d.conector} ${nomear(h, urnFragmentos)}", fragmentos.tail)
+          case (h, _) if h == Caput && urnFragmentos.headOption.exists(_.isInstanceOf[Artigo]) && urnFragmentos.count(_.isInstanceOf[Anexo]) > 1 =>
+            criarString(s"${acc} ${nomear(h, urnFragmentos)}", fragmentos.tail)
           case (h, _) => criarString(s"${acc}, ${nomear(h, urnFragmentos)}", fragmentos.tail)
         }
       }
