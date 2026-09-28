@@ -52,9 +52,13 @@ Para mudanças apenas de documentação, confira os caminhos, os comandos e
 
 Preserve as assinaturas públicas dos métodos `format` e os comportamentos
 existentes fora do escopo da mudança. Mantenha o estilo do arquivo editado e
-os termos de domínio em português. Atualize a documentação quando mudar os
+os termos de domínio e documentação em português. Atualize a documentação quando mudar os
 requisitos de compilação ou as regras documentadas de formatação.
 
 Use o ciclo normal de Maven para validar localmente. O perfil `release` e
 os comandos da seção de release do `README.md` são destinados à publicação,
 quando ela fizer parte da tarefa.
+
+Em Java/Scala, importe as classes no início do arquivo e use seus nomes simples no código
+(ex.: `Arrays` com `import java.util.Arrays;`). Use nomes qualificados apenas
+quando necessário para resolver conflitos de nomes.

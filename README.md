@@ -119,6 +119,34 @@ Se a urn for de um bloco de alteração, vale as regras acima de acordo com o ú
 - Ex: `art3_cpt_alt1_art4_par2` = "§ 2º"
 - Ex: `art3_cpt_alt1_tit3` =  "TÍTULO III"
 
+## Referências compactas agrupadas
+
+Além de `format`, o objeto `Urn2NomeCompacto` oferece `formatarGrupos` para
+consumidores que precisam aplicar um conectivo a cada grupo de dispositivos.
+O resultado preserva o texto de cada grupo, seu gênero, pluralidade e o
+complemento compartilhado, como `deste anexo`.
+
+O gênero é representado por `Genero.Masculino` ou `Genero.Feminino`, evitando
+que consumidores dependam de códigos textuais para escolher a concordância.
+
+```scala
+val resultado = Urn2NomeCompacto.formatarGrupos(
+  List("anx60_tit2_cap1", "anx60_tit3_cap1"),
+  "anx60_tit8_art87_par5"
+)
+```
+
+Os grupos são formados por dispositivos do mesmo tipo e do mesmo caminho
+hierárquico. Assim, os capítulos de títulos diferentes permanecem separados,
+enquanto capítulos do mesmo título podem compartilhar a forma plural. A API
+`format` continua sendo a forma recomendada quando não há necessidade de
+prefixos independentes.
+
+Em `format` e `formatarGrupos`, a abreviação pelo contexto só é aplicada quando
+todos os destinos compartilham contexto com a origem. Se a lista combinar
+destinos de anexos diferentes, os nomes completos dos anexos são preservados,
+na ordem recebida, sem um complemento demonstrativo comum.
+
 ## Release
 
 Importar chave

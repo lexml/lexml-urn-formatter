@@ -17,6 +17,8 @@ private[urnformatter] sealed abstract class TipoUrnFragmento {
   val pronomeDemostrativo: String
   val conector: String
   val sigla: String
+
+  def genero: Genero = if (conector == "da") Genero.Feminino else Genero.Masculino
 }
 
 private[urnformatter] object TipoUrnFragmento {
@@ -171,4 +173,3 @@ private[compacto] object UrnFragmento {
 
   case class Anexo(numeros: List[Numero], nivel: Int) extends UrnFragmento(TipoUrnFragmento.Anexo)
 }
-

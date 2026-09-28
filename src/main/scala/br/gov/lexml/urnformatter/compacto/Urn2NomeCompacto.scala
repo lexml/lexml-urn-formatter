@@ -22,7 +22,7 @@ object Urn2NomeCompacto {
     if (urns.isEmpty) {
       ""
     } else {
-      if (UrnParser.hasCommonContext(urns.head, context)) {
+      if (urns.forall(UrnParser.hasCommonContext(_, context))) {
         val contextResponse = UrnParser.extractContext(urns, context)
         logger.info(s"formating with context. urnsWithoutContext: ${contextResponse.urns} - agrupador: ${contextResponse.agrupador}")
         val nome = if (contextResponse.urns.isEmpty) None else Some(format(contextResponse.urns, contextResponse.referenciaMesmoArtigo))
@@ -32,6 +32,37 @@ object Urn2NomeCompacto {
         format(urns, false)
       }
     }
+
+  /**
+    * Retorna a mesma referência compacta de [[format]], preservando os grupos
+    * que precisam de um prefixo gramatical independente (por exemplo, `no`
+    * antes de cada capítulo cujo título é diferente).
+    *
+    * Esta entrada expõe nomes e propriedades gramaticais, mantendo o parsing
+    * e o agrupamento das URNs privados ao formatador.
+    */
+  def formatarGrupos(urns: List[String], context: String): ResultadoNomeCompacto = {
+    if (urns.isEmpty) {
+      ResultadoNomeCompacto(Nil, "")
+    } else if (urns.forall(UrnParser.hasCommonContext(_, context))) {
+      val contextResponse = UrnParser.extractContext(urns, context)
+      val grupos = AgrupadorUrn.agrupar(UrnParser.parse(contextResponse.urns))
+      val nomes = grupos.map { grupo =>
+        val texto = new Nomeador(List(grupo), false).nomearGrupos
+        GrupoNomeCompacto(texto, grupo.dispPrincipal.genero, grupo.numeros.size > 1)
+      }
+      val complemento = if (contextResponse.agrupador.isEmpty) "" else {
+        new Nomeador(Nil, false).nomearDispositivo(Some(""), contextResponse.agrupador).trim
+      }
+      ResultadoNomeCompacto(nomes, complemento)
+    } else {
+      val nomes = AgrupadorUrn.agrupar(UrnParser.parse(urns)).map { grupo =>
+        val texto = new Nomeador(List(grupo), false).nomearGrupos
+        GrupoNomeCompacto(texto, grupo.dispPrincipal.genero, grupo.numeros.size > 1)
+      }
+      ResultadoNomeCompacto(nomes, "")
+    }
+  }
 
   def format(urns: List[String]): String = format(urns, false)
 

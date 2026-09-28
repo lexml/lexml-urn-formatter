@@ -5,6 +5,27 @@ import junit.framework.TestCase
 
 class Urn2NomeCompactoTest extends TestCase {
 
+  def test_referenciasEntreAnexosUsamNomesCompletos() {
+    val urns = List("anx65_tit8_cap3_art40", "anx64_anx2", "anx64_tit1_cap2_sec2_art9")
+    val contexto = "anx65_tit9_cap3_art62_cpt"
+    val esperado = "art. 40 do Anexo LXV e Anexo 2 do Anexo LXIV e art. 9º do Anexo LXIV"
+
+    assertEquals(esperado, Urn2NomeCompacto.format(urns, contexto))
+    assertEquals(esperado, Urn2NomeCompacto.formatarGrupos(urns, contexto).formatar(_ => ""))
+    assertEquals(
+      "no art. 40 do Anexo LXV e no Anexo 2 do Anexo LXIV e no art. 9º do Anexo LXIV",
+      Urn2NomeCompacto.formatarGrupos(urns, contexto).formatar(_ => "no"))
+  }
+
+  def test_referenciasEntreAnexosPreservamOrdemComDestinoExternoPrimeiro() {
+    val urns = List("anx64_tit1_cap2_sec2_art9", "anx64_anx2", "anx65_tit8_cap3_art40")
+    val contexto = "anx65_tit9_cap3_art62_cpt"
+    val esperado = "art. 9º do Anexo LXIV e Anexo 2 do Anexo LXIV e art. 40 do Anexo LXV"
+
+    assertEquals(esperado, Urn2NomeCompacto.format(urns, contexto))
+    assertEquals(esperado, Urn2NomeCompacto.formatarGrupos(urns, contexto).formatar(_ => ""))
+  }
+
   def test_anexo_destinoCapituloPreservaTituloContextual() {
     assertEquals(
       "Capítulo I do Título III deste anexo",
@@ -26,6 +47,61 @@ class Urn2NomeCompactoTest extends TestCase {
       Urn2NomeCompacto.format(
         List("anx60_tit2_cap1", "anx60_tit3_cap1"),
         "anx60_tit8_art87_par5"))
+  }
+
+  def test_formatoEstruturadoMantemPluralPorGrupo() {
+    val resultado = Urn2NomeCompacto.formatarGrupos(
+      List("anx60_tit2_cap1", "anx60_tit2_cap2", "anx60_tit3_cap1"),
+      "anx60_tit8_art87_par5")
+
+    assertEquals(2, resultado.grupos.size)
+    assertEquals("Capítulos I e II do Título II", resultado.grupos.head.texto)
+    assertEquals(true, resultado.grupos.head.plural)
+    assertEquals("Capítulo I do Título III", resultado.grupos.tail.head.texto)
+    assertEquals(false, resultado.grupos.tail.head.plural)
+    assertEquals("deste anexo", resultado.complemento)
+  }
+
+  def test_resultadoNomeCompactoFormataUmPrefixoPorGrupo() {
+    val resultado = ResultadoNomeCompacto(
+      List(
+        GrupoNomeCompacto("Capítulos I e II do Título II", Genero.Masculino, plural = true),
+        GrupoNomeCompacto("Capítulo I do Título III", Genero.Masculino, plural = false)
+      ),
+      "deste anexo"
+    )
+
+    val texto = resultado.formatar { grupo => if (grupo.plural) "nos" else "no" }
+
+    assertEquals("nos Capítulos I e II do Título II e no Capítulo I do Título III deste anexo", texto)
+  }
+
+  def test_resultadoNomeCompactoFormataSemPrefixo() {
+    val resultado = ResultadoNomeCompacto(
+      List(GrupoNomeCompacto("Capítulo I", Genero.Masculino, plural = false)),
+      "deste anexo"
+    )
+
+    assertEquals("Capítulo I deste anexo", resultado.formatar(_ => ""))
+  }
+
+  def test_resultadoNomeCompactoFormataResultadoVazio() {
+    assertEquals("", ResultadoNomeCompacto(Nil, "").formatar(_ => "no"))
+    assertEquals("deste anexo", ResultadoNomeCompacto(Nil, "deste anexo").formatar(_ => "no"))
+  }
+
+  def test_formatoEstruturadoInformaGeneroFeminino() {
+    val resultado = Urn2NomeCompacto.formatarGrupos(
+      List("anx49_cap3_sec2"),
+      "anx49_cap3_sec1_art8_cpt"
+    )
+
+    assertEquals(Genero.Feminino, resultado.grupos.head.genero)
+  }
+
+  def test_tipoDispositivoDerivaGeneroDoConector() {
+    assertEquals(Genero.Masculino, TipoUrnFragmento.Capitulo.genero)
+    assertEquals(Genero.Feminino, TipoUrnFragmento.Secao.genero)
   }
 
   def test_listaDeSubsecoesPreservaSecaoCapituloETitulo() {
