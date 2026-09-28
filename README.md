@@ -12,24 +12,38 @@ A URN dos dispositivos contém informação suficiente para gerar os rótulos de
 
 ## Compilação Scala
 
-Scala precisa ser compilado com Java 8.
+Use o JDK 17 para compilar o projeto. O `pom.xml` define Scala 2.13.18.
+A compilação foi validada com OpenJDK 17.0.18 e Maven Wrapper 3.9.9,
+incluindo os 442 testes, sem falhas.
+O `pom.xml` configura o compilador Java com `release` 11; Java 8 não atende
+a essa configuração.
 
-First run `/usr/libexec/java_home -V` which will output something like the following:
-
-```sh
-% /usr/libexec/java_home -V
-Matching Java Virtual Machines (2):
-    11.0.4, x86_64:	"AdoptOpenJDK 11"	/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home
-    1.8.0_232, x86_64:	"AdoptOpenJDK 8"	/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
-```
-
-Then, use 
+Configure `JAVA_HOME` com o diretório de instalação do JDK 17 e adicione seu
+diretório `bin` ao `PATH`. No macOS, se o JDK estiver registrado no sistema:
 
 ```sh
-export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+export JAVA_HOME="$(/usr/libexec/java_home -v 17)"
+export PATH="$JAVA_HOME/bin:$PATH"
 ```
 
-Now when you run `java -version` you will see the version 1.8.
+Se o JDK não estiver registrado (por exemplo, em algumas instalações via
+Homebrew), defina `JAVA_HOME` diretamente com o caminho do JDK 17.
+
+Confira se o Maven está usando Java 17 e execute a compilação e os testes:
+
+```sh
+./mvnw -version
+./mvnw clean verify
+```
+
+No IntelliJ, recarregue o projeto Maven após atualizar o `pom.xml`, para que
+o compilador e a biblioteca Scala usem a versão 2.13.18. Configure o SDK do
+projeto e o JDK do compilador Scala para Java 17.
+
+Scala 2.13.18 também é compatível com JDK 21, conforme a
+[tabela oficial de compatibilidade](https://docs.scala-lang.org/overviews/jdk-compatibility/overview.html#scala-2-compatibility).
+A validação local acima foi realizada com JDK 17; a execução pelo IntelliJ
+não foi validada.
 
 
 ## Rótulo de Artigo
