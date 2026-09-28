@@ -5,6 +5,37 @@ import junit.framework.TestCase
 
 class Urn2NomeCompactoTest extends TestCase {
 
+  def test_anexo_destinoCapituloPreservaTituloContextual() {
+    assertEquals(
+      "Capítulo I do Título III deste anexo",
+      Urn2NomeCompacto.format(List("anx42_tit3_cap1"), "anx42_tit3_cap2_art65_par3"))
+  }
+
+  def test_anexo_destinoSecaoPreservaCapituloContextual() {
+    assertEquals(
+      "Seção II do Capítulo III deste anexo",
+      Urn2NomeCompacto.format(List("anx49_cap3_sec2"), "anx49_cap3_sec1_art8_cpt"))
+    assertEquals(
+      "Seção III do Capítulo III deste anexo",
+      Urn2NomeCompacto.format(List("anx49_cap3_sec3"), "anx49_cap3_sec1_art11_cpt"))
+  }
+
+  def test_listaDeCapitulosEmTitulosDiferentesPreservaCadaTitulo() {
+    assertEquals(
+      "Capítulo I do Título II e Capítulo I do Título III deste anexo",
+      Urn2NomeCompacto.format(
+        List("anx60_tit2_cap1", "anx60_tit3_cap1"),
+        "anx60_tit8_art87_par5"))
+  }
+
+  def test_listaDeSubsecoesPreservaSecaoCapituloETitulo() {
+    assertEquals(
+      "Subseções I e II da Seção III do Capítulo XI do Título IV deste anexo",
+      Urn2NomeCompacto.format(
+        List("anx51_tit4_cap11_sec3_sub1", "anx51_tit4_cap11_sec3_sub2"),
+        "anx51_tit4_cap11_sec3_sub1_art205_cpt"))
+  }
+
   def testLabel_art1() {
     assertEquals("art. 1º", Urn2NomeCompacto.format("art1"))
   }
