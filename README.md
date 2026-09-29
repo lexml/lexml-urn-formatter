@@ -12,24 +12,34 @@ A URN dos dispositivos contém informação suficiente para gerar os rótulos de
 
 ## Compilação Scala
 
-Scala precisa ser compilado com Java 8.
+Use o JDK 17 para compilar o projeto. O `pom.xml` define Scala 2.13.18.
 
-First run `/usr/libexec/java_home -V` which will output something like the following:
-
-```sh
-% /usr/libexec/java_home -V
-Matching Java Virtual Machines (2):
-    11.0.4, x86_64:	"AdoptOpenJDK 11"	/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home
-    1.8.0_232, x86_64:	"AdoptOpenJDK 8"	/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
-```
-
-Then, use 
+Configure `JAVA_HOME` com o diretório de instalação do JDK 17 e adicione seu
+diretório `bin` ao `PATH`. No macOS, se o JDK estiver registrado no sistema:
 
 ```sh
-export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+export JAVA_HOME="$(/usr/libexec/java_home -v 17)"
+export PATH="$JAVA_HOME/bin:$PATH"
 ```
 
-Now when you run `java -version` you will see the version 1.8.
+Se o JDK não estiver registrado (por exemplo, em algumas instalações via
+Homebrew), defina `JAVA_HOME` diretamente com o caminho do JDK 17.
+
+Confira se o Maven está usando Java 17 e execute a compilação e os testes:
+
+```sh
+./mvnw -version
+./mvnw clean verify
+```
+
+No IntelliJ, recarregue o projeto Maven após atualizar o `pom.xml`, para que
+o compilador e a biblioteca Scala usem a versão 2.13.18. Configure o SDK do
+projeto e o JDK do compilador Scala para Java 17.
+
+Scala 2.13.18 também é compatível com JDK 21, conforme a
+[tabela oficial de compatibilidade](https://docs.scala-lang.org/overviews/jdk-compatibility/overview.html#scala-2-compatibility).
+A validação local acima foi realizada com JDK 17; a execução pelo IntelliJ
+não foi validada.
 
 
 ## Rótulo de Artigo
@@ -105,6 +115,34 @@ Se a urn for de um bloco de alteração, vale as regras acima de acordo com o ú
 - Ex: `art3_cpt_alt1_art4_par2` = "§ 2º"
 - Ex: `art3_cpt_alt1_tit3` =  "TÍTULO III"
 
+## Referências compactas agrupadas
+
+Além de `format`, o objeto `Urn2NomeCompacto` oferece `formatarGrupos` para
+consumidores que precisam aplicar um conectivo a cada grupo de dispositivos.
+O resultado preserva o texto de cada grupo, seu gênero, pluralidade e o
+complemento compartilhado, como `deste anexo`.
+
+O gênero é representado por `Genero.Masculino` ou `Genero.Feminino`, evitando
+que consumidores dependam de códigos textuais para escolher a concordância.
+
+```scala
+val resultado = Urn2NomeCompacto.formatarGrupos(
+  List("anx60_tit2_cap1", "anx60_tit3_cap1"),
+  "anx60_tit8_art87_par5"
+)
+```
+
+Os grupos são formados por dispositivos do mesmo tipo e do mesmo caminho
+hierárquico. Assim, os capítulos de títulos diferentes permanecem separados,
+enquanto capítulos do mesmo título podem compartilhar a forma plural. A API
+`format` continua sendo a forma recomendada quando não há necessidade de
+prefixos independentes.
+
+Em `format` e `formatarGrupos`, a abreviação pelo contexto só é aplicada quando
+todos os destinos compartilham contexto com a origem. Se a lista combinar
+destinos de anexos diferentes, os nomes completos dos anexos são preservados,
+na ordem recebida, sem um complemento demonstrativo comum.
+
 ## Release
 
 Importar chave
@@ -160,3 +198,5 @@ O repositório será:
 ```
 https://repo1.maven.org/maven2/br/gov/lexml/lexml-urn-formatter/
 ```
+
+O gênero e o plural de cada `GrupoNomeCompacto` concordam com o dispositivo que inicia o texto. Por exemplo, uma referência iniciada por `art. 202` é masculina e singular mesmo quando o destino é uma alínea ou várias alíneas desse artigo.

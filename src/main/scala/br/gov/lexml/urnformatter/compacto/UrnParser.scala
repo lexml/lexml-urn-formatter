@@ -14,6 +14,7 @@ private[compacto] object UrnParser {
   case class ContextReponse(urns: List[Urn], agrupador: Agrupador, referenciaMesmoArtigo: Boolean)
 
   private val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.UrnParser")
+  private val agrupadoresSobAnexo = Set("prt", "liv", "tit", "cap", "sec", "sub")
 
   def parse(urns: List[String]): List[ParsedUrn] = urns.map { urn =>
     val fragmentos = (trataArtigo andThen trataCaputNoMeio andThen removeRaizECppEAtc) (urn.split("_").toList)
@@ -33,14 +34,23 @@ private[compacto] object UrnParser {
   }
 
   def extractContext(urns: List[String], context: String): ContextReponse = {
+    val raizContexto = context.split("_").headOption
+    val preservarHierarquiaDoAnexo = urns.size > 1 && urns.forall { urn =>
+      val fragmentos = urn.split("_").toList
+      fragmentos.headOption.exists(_.startsWith(Anexo.sigla)) &&
+        fragmentos.headOption == raizContexto &&
+        fragmentos.tail.nonEmpty &&
+        fragmentos.tail.forall(fragmento => agrupadoresSobAnexo.contains(fragmento.take(3)))
+    }
+
     @tailrec
     def extract(urns: List[String], acc: List[Option[Urn]]): ContextReponseListOpt = urns match {
       case head :: Nil =>
-        val result = extractContext(head, context)
+        val result = extractContext(head, context, preservarHierarquiaDoAnexo)
         ContextReponseListOpt(acc :+ result.urn, result.agrupador, result.referenciaMesmoArtigo)
 
       case head :: tail =>
-        val result = extractContext(head, context)
+        val result = extractContext(head, context, preservarHierarquiaDoAnexo)
         extract(tail, acc :+ result.urn)
 
       case Nil => ContextReponseListOpt(acc, "", false)
@@ -50,10 +60,21 @@ private[compacto] object UrnParser {
     ContextReponse(result.urns.flatten, result.agrupador, result.referenciaMesmoArtigo)
   }
 
-  private def extractContext(urn: String, context: String): ContextReponseOpt = {
+  private def extractContext(urn: String, context: String, preservarHierarquiaDoAnexo: Boolean): ContextReponseOpt = {
     if (!hasCommonContext(urn, context)) throw new IllegalArgumentException("Sem contexto em comum.")
     val urnSpplited = urn.split("_")
     val commonContext = extractCommonContext(urn, context)
+    val isFilhoDeAnx = urnSpplited.head.startsWith(Anexo.sigla)
+    val fragmentosAposAnexo = urnSpplited.drop(1)
+    val ehAgrupadorSobAnexo = fragmentosAposAnexo.nonEmpty && fragmentosAposAnexo.forall { fragmento =>
+      agrupadoresSobAnexo.contains(fragmento.take(3))
+    }
+    val destinoEhAncestral = context == urn || context.startsWith(urn + "_")
+
+    if (isFilhoDeAnx && urnSpplited.head == context.split("_").head && ehAgrupadorSobAnexo &&
+      (preservarHierarquiaDoAnexo || !destinoEhAncestral)) {
+      return ContextReponseOpt(Some(urnSpplited.drop(1).mkString("_")), Anexo.sigla, false)
+    }
 
     if (urn == commonContext) {
       ContextReponseOpt(if (ehArtigo(urnSpplited.last)) Some(Caput.sigla) else Some(urnSpplited.last), "", false)
@@ -63,8 +84,6 @@ private[compacto] object UrnParser {
 
       val posArt = urnSpplited.indexWhere(ehArtigo)
       val isArt = posArt == (urnSpplited.length - 1)
-      val isFilhoDeAnx = urnSpplited.head.startsWith(Anexo.sigla)
-
       if (isArt) {
         if (commonContext == urn) {
           ContextReponseOpt(None, Artigo.sigla, false)
