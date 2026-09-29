@@ -13,10 +13,6 @@ A URN dos dispositivos contém informação suficiente para gerar os rótulos de
 ## Compilação Scala
 
 Use o JDK 17 para compilar o projeto. O `pom.xml` define Scala 2.13.18.
-A compilação foi validada com OpenJDK 17.0.18 e Maven Wrapper 3.9.9,
-incluindo os 442 testes, sem falhas.
-O `pom.xml` configura o compilador Java com `release` 11; Java 8 não atende
-a essa configuração.
 
 Configure `JAVA_HOME` com o diretório de instalação do JDK 17 e adicione seu
 diretório `bin` ao `PATH`. No macOS, se o JDK estiver registrado no sistema:
