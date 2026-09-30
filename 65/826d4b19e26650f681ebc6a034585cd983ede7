@@ -1,0 +1,21 @@
+src/main/scala/br/gov/lexml/urnformatter/compacto/Nomeador.scala
+  s_36c6692c94cd46::t_e5490bf84d7ca7 11,135,137
+src/main/scala/br/gov/lexml/urnformatter/compacto/Urn2NomeCompacto.scala
+  s_36c6692c94cd46::t_6420f9471d9903 29,52,81-83,88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "65826d4b19e26650f681ebc6a034585cd983ede7",
+  "prompts": {},
+  "sessions": {
+    "s_36c6692c94cd46": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0e951-c6b8-74c2-8269-65eaddd81b43",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Luciano Molinari <lucmolinari@gmail.com>"
+    }
+  }
+}
