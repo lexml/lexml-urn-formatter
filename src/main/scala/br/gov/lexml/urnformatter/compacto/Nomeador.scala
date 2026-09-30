@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 import scala.annotation.tailrec
 import scala.util.Try
 
-private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo: Boolean) {
+private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo: Boolean, nivelAnexoContexto: Int = 0) {
 
   private val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.Nomeador")
   private var groupPosicao = -1
@@ -132,9 +132,9 @@ private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo:
   private def nomearAnexo(a: Anexo): String = {
     val sNumeracoesList = a.numeros.zipWithIndex.map {
       case (Numero.IntNumero(n), _) =>
-        if (a.nivel == 1) {
+        if (a.nivel + nivelAnexoContexto == 1) {
           formatRomano(n)
-        } else if (a.nivel == 2) {
+        } else if (a.nivel + nivelAnexoContexto == 2) {
           n.toString
         } else {
           formatAlfa(n).toUpperCase

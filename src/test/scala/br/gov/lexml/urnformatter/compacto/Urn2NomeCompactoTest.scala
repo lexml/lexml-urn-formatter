@@ -102,6 +102,45 @@ class Urn2NomeCompactoTest extends TestCase {
     assertEquals("Capítulo I deste anexo", resultado.formatar(_ => ""))
   }
 
+  def testMesmoAnexoEOutroAnexo() {
+    val contexto = "anx8_cap3_art7_cpt"
+
+    assertEquals("art. 6º deste anexo", Urn2NomeCompacto.format(List("anx8_cap3_art6"), contexto))
+    assertEquals("art. 4º do Anexo I", Urn2NomeCompacto.format(List("anx1_art4"), contexto))
+    assertEquals("art. 4º do Anexo 1 deste anexo", Urn2NomeCompacto.format(List("anx8_anx1_art4"), contexto))
+    assertEquals(
+      "art. 4º do Anexo 1 deste anexo",
+      Urn2NomeCompacto.formatarGrupos(List("anx8_anx1_art4"), contexto).formatar(_ => "")
+    )
+  }
+
+  def testSubanexosPreservamNivelAoAbreviarContexto() {
+    assertEquals(
+      "arts. 3º e 4º do Anexo 1 deste anexo",
+      Urn2NomeCompacto.format(List("anx8_anx1_art3", "anx8_anx1_art4"), "anx8_cap3_art7_cpt")
+    )
+    assertEquals(
+      "art. 4º do Anexo A deste anexo",
+      Urn2NomeCompacto.format(List("anx8_anx1_anx1_art4"), "anx8_anx1_art7_cpt")
+    )
+    assertEquals(
+      "art. 4º deste anexo",
+      Urn2NomeCompacto.format(List("anx8_anx1_art4"), "anx8_anx1_art7_cpt")
+    )
+    assertEquals(
+      "art. 42 do Anexo LXIV",
+      Urn2NomeCompacto.format(List("anx64_tit8_art42"), "anx64_anx2_art1_cpt")
+    )
+    assertEquals(
+      "art. 4º do Anexo 2 do Anexo VIII",
+      Urn2NomeCompacto.format(List("anx8_anx2_art4"), "anx8_anx1_art7_cpt")
+    )
+    assertEquals(
+      "art. 3º do Anexo 1 deste anexo",
+      Urn2NomeCompacto.format(List("anx8_anx1_art3"), "anx8_cap3_art7_cpt")
+    )
+  }
+
   def test_resultadoNomeCompactoFormataResultadoVazio() {
     assertEquals("", ResultadoNomeCompacto(Nil, "").formatar(_ => "no"))
     assertEquals("deste anexo", ResultadoNomeCompacto(Nil, "deste anexo").formatar(_ => "no"))

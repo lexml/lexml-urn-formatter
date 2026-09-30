@@ -11,7 +11,7 @@ private[compacto] object UrnParser {
   type Agrupador = String
   private case class ContextReponseListOpt(urns: List[Option[Urn]], agrupador: Agrupador, referenciaMesmoArtigo: Boolean)
   private case class ContextReponseOpt(urn: Option[Urn], agrupador: Agrupador, referenciaMesmoArtigo: Boolean)
-  case class ContextReponse(urns: List[Urn], agrupador: Agrupador, referenciaMesmoArtigo: Boolean)
+  case class ContextReponse(urns: List[Urn], agrupador: Agrupador, referenciaMesmoArtigo: Boolean, nivelAnexoContexto: Int = 0)
 
   private val logger = LoggerFactory.getLogger("br.gov.lexml.urnformatter.compacto.UrnParser")
   private val agrupadoresSobAnexo = Set("prt", "liv", "tit", "cap", "sec", "sub")
@@ -30,34 +30,52 @@ private[compacto] object UrnParser {
     val urnSpplited = urn.split("_")
     val commonContext = extractCommonContext(urn, context)
     logger.info(s"hasCommonContext: urn $urn - context $context - commonContext $commonContext")
-    urnSpplited.size > 1 && commonContext != ""
+    val anexosDestino = urnSpplited.filter(_.startsWith(Anexo.sigla)).toList
+    val anexosContexto = context.split("_").filter(_.startsWith(Anexo.sigla)).toList
+    // Um anexo externo ou irmão não pode ser chamado de "este anexo" a partir de um subanexo.
+    urnSpplited.size > 1 && commonContext != "" && anexosDestino.startsWith(anexosContexto)
   }
 
   def extractContext(urns: List[String], context: String): ContextReponse = {
-    val raizContexto = context.split("_").headOption
-    val preservarHierarquiaDoAnexo = urns.size > 1 && urns.forall { urn =>
-      val fragmentos = urn.split("_").toList
-      fragmentos.headOption.exists(_.startsWith(Anexo.sigla)) &&
-        fragmentos.headOption == raizContexto &&
-        fragmentos.tail.nonEmpty &&
-        fragmentos.tail.forall(fragmento => agrupadoresSobAnexo.contains(fragmento.take(3)))
+    // Preserve os subanexos que não fazem parte do caminho comum com o contexto.
+    val fragmentosContexto = context.split("_").toList
+    val prefixoComum = urns.map(_.split("_").toList).foldLeft(fragmentosContexto) { (comum, fragmentos) =>
+      comum.zip(fragmentos).takeWhile { case (a, b) => a == b }.map(_._1)
     }
-
-    @tailrec
-    def extract(urns: List[String], acc: List[Option[Urn]]): ContextReponseListOpt = urns match {
-      case head :: Nil =>
-        val result = extractContext(head, context, preservarHierarquiaDoAnexo)
-        ContextReponseListOpt(acc :+ result.urn, result.agrupador, result.referenciaMesmoArtigo)
-
-      case head :: tail =>
-        val result = extractContext(head, context, preservarHierarquiaDoAnexo)
-        extract(tail, acc :+ result.urn)
-
-      case Nil => ContextReponseListOpt(acc, "", false)
+    val posUltimoAnexoComum = prefixoComum.lastIndexWhere(_.startsWith(Anexo.sigla))
+    val possuiSubanexoForaDoContexto = posUltimoAnexoComum >= 0 && urns.exists { urn =>
+      urn.split("_").drop(posUltimoAnexoComum + 1).exists(_.startsWith(Anexo.sigla))
     }
+    if (possuiSubanexoForaDoContexto) {
+      val destinos = urns.map(_.split("_").drop(posUltimoAnexoComum + 1).mkString("_"))
+      val nivel = prefixoComum.take(posUltimoAnexoComum + 1).count(_.startsWith(Anexo.sigla))
+      ContextReponse(destinos, Anexo.sigla, false, nivel)
+    } else {
+      val raizContexto = context.split("_").headOption
+      val preservarHierarquiaDoAnexo = urns.size > 1 && urns.forall { urn =>
+        val fragmentos = urn.split("_").toList
+        fragmentos.headOption.exists(_.startsWith(Anexo.sigla)) &&
+          fragmentos.headOption == raizContexto &&
+          fragmentos.tail.nonEmpty &&
+          fragmentos.tail.forall(fragmento => agrupadoresSobAnexo.contains(fragmento.take(3)))
+      }
 
-    val result = extract(urns, List())
-    ContextReponse(result.urns.flatten, result.agrupador, result.referenciaMesmoArtigo)
+      @tailrec
+      def extract(urns: List[String], acc: List[Option[Urn]]): ContextReponseListOpt = urns match {
+        case head :: Nil =>
+          val result = extractContext(head, context, preservarHierarquiaDoAnexo)
+          ContextReponseListOpt(acc :+ result.urn, result.agrupador, result.referenciaMesmoArtigo)
+
+        case head :: tail =>
+          val result = extractContext(head, context, preservarHierarquiaDoAnexo)
+          extract(tail, acc :+ result.urn)
+
+        case Nil => ContextReponseListOpt(acc, "", false)
+      }
+
+      val result = extract(urns, List())
+      ContextReponse(result.urns.flatten, result.agrupador, result.referenciaMesmoArtigo)
+    }
   }
 
   private def extractContext(urn: String, context: String, preservarHierarquiaDoAnexo: Boolean): ContextReponseOpt = {

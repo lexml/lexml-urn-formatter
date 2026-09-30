@@ -26,7 +26,7 @@ object Urn2NomeCompacto {
       if (urns.forall(UrnParser.hasCommonContext(_, context))) {
         val contextResponse = UrnParser.extractContext(urns, context)
         logger.info(s"formating with context. urnsWithoutContext: ${contextResponse.urns} - agrupador: ${contextResponse.agrupador}")
-        val nome = if (contextResponse.urns.isEmpty) None else Some(format(contextResponse.urns, contextResponse.referenciaMesmoArtigo))
+        val nome = if (contextResponse.urns.isEmpty) None else Some(format(contextResponse.urns, contextResponse.referenciaMesmoArtigo, contextResponse.nivelAnexoContexto))
         logger.info(s"nome: $nome")
         new Nomeador(Nil, contextResponse.referenciaMesmoArtigo).nomearDispositivo(nome, contextResponse.agrupador)
       } else {
@@ -49,7 +49,7 @@ object Urn2NomeCompacto {
       val contextResponse = UrnParser.extractContext(urns, context)
       val grupos = AgrupadorUrn.agrupar(UrnParser.parse(contextResponse.urns))
       val nomes = grupos.map { grupo =>
-        val texto = new Nomeador(List(grupo), false).nomearGrupos
+        val texto = new Nomeador(List(grupo), false, contextResponse.nivelAnexoContexto).nomearGrupos
         criarGrupoNomeCompacto(grupo, texto)
       }
       val complemento = if (contextResponse.agrupador.isEmpty) "" else {
@@ -78,11 +78,14 @@ object Urn2NomeCompacto {
   def format(urns: List[String]): String = format(urns, false)
 
   private def format(urns: List[String], referenciaMesmoArtigo: Boolean): String =
+    format(urns, referenciaMesmoArtigo, 0)
+
+  private def format(urns: List[String], referenciaMesmoArtigo: Boolean, nivelAnexoContexto: Int): String =
     if (urns.isEmpty) ""
     else {
       Try {
         val grupos = (UrnParser.parse _ andThen AgrupadorUrn.agrupar) (urns)
-        new Nomeador(grupos, referenciaMesmoArtigo).nomearGrupos
+        new Nomeador(grupos, referenciaMesmoArtigo, nivelAnexoContexto).nomearGrupos
       }.recover {
         case t: Throwable =>
           logger.warn(s"Erro ao gerar urn compacta: $urns - ${t.getMessage}")
