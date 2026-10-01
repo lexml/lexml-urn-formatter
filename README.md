@@ -141,7 +141,22 @@ prefixos independentes.
 Em `format` e `formatarGrupos`, a abreviação pelo contexto só é aplicada quando
 todos os destinos compartilham contexto com a origem. Se a lista combinar
 destinos de anexos diferentes, os nomes completos dos anexos são preservados,
-na ordem recebida, sem um complemento demonstrativo comum.
+na ordem recebida, sem um complemento demonstrativo comum. Em blocos consecutivos
+de artigos e seus dispositivos subordinados pertencentes ao mesmo caminho de
+anexos, o complemento é escrito apenas no último grupo. Por exemplo:
+`art. 1º, art. 2º, § 1º do Anexo LX e art. 3º do Anexo LII`.
+Referências consecutivas ao mesmo artigo são reunidas, como
+`art. 8º, caput e inciso I` ou `art. 9º, caput e § 1º`. Os pais dos
+dispositivos subordinados permanecem explícitos, por exemplo
+`art. 8º, § 1º, inciso I e § 2º, inciso I`.
+Mudanças de anexo encerram o bloco; agrupadores preservam sua hierarquia completa.
+
+Quando há blocos com complemento de anexo compartilhado, `ResultadoNomeCompacto`
+também os expõe em `blocos`, como valores de `BlocoNomeCompacto`. Sua função
+`formatar` aplica o conectivo ao primeiro grupo de cada bloco e separa os
+artigos por vírgulas; entre blocos, conserva `e` e reaplica o conectivo.
+As referências abreviadas pelo contexto continuam usando o complemento
+compartilhado, como `deste anexo`.
 
 ## Release
 
