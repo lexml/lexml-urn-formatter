@@ -14,6 +14,10 @@ private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo:
   private var groupPosicao = -1
 
   def nomearGrupos: String = {
+    val blocos = nomearBlocos
+    if (blocos.nonEmpty) {
+      return ResultadoNomeCompacto(Nil, "", blocos).formatar(_ => "")
+    }
     @tailrec
     def go(acc: String, grupos: List[GrupoUrns]): String = {
       groupPosicao = groupPosicao + 1
@@ -26,7 +30,78 @@ private[compacto] class Nomeador(grupos: List[GrupoUrns], referenciaMesmoArtigo:
       }
     }
 
-    go("", grupos)
+    go("", gruposComAnexoCompartilhado)
+  }
+
+  /** Preserva os caminhos estruturais até concluir a união de artigos e anexos. */
+  def nomearBlocos: List[BlocoNomeCompacto] = {
+    def anexos(grupo: GrupoUrns): List[Anexo] =
+      if (grupo.dispPrincipal == TipoUrnFragmento.Artigo || grupo.fragmentosComum.exists(_.isInstanceOf[Artigo]))
+        grupo.fragmentosComum.collect { case a: Anexo => a }
+      else Nil
+
+    def consecutivos[A, K](valores: List[A])(chave: A => K): List[List[A]] = valores match {
+      case Nil => Nil
+      case primeiro :: _ =>
+        val (bloco, restante) = valores.span(v => chave(v) == chave(primeiro))
+        bloco :: consecutivos(restante)(chave)
+    }
+
+    val blocos = consecutivos(grupos)(anexos)
+    if (!blocos.exists(b => b.size > 1 && anexos(b.head).nonEmpty)) Nil
+    else blocos.flatMap { bloco =>
+      val caminho = anexos(bloco.head)
+      if (caminho.isEmpty) {
+        bloco.map { grupo =>
+          val artigo = grupo.fragmentosComum.collectFirst { case a: Artigo => a }
+          val genero = artigo.map(_.tipo.genero).getOrElse(grupo.dispPrincipal.genero)
+          val plural = artigo.map(_.numeros.size > 1).getOrElse(grupo.numeros.size > 1)
+          BlocoNomeCompacto(List(GrupoNomeCompacto(nomear(grupo), genero, plural)), "")
+        }
+      } else {
+        // O artigo integra a identidade; incisos de parágrafos distintos conservam seus pais.
+        def artigo(grupo: GrupoUrns): Option[Artigo] =
+          if (grupo.dispPrincipal == TipoUrnFragmento.Artigo) Some(Artigo(grupo.numeros))
+          else grupo.fragmentosComum.collectFirst { case a: Artigo => a }
+
+        val nomes = consecutivos(bloco)(artigo).map { referencias =>
+          val primeiro = referencias.head
+          val art = artigo(primeiro).get
+          val semAnexo = primeiro.copy(fragmentosComum = primeiro.fragmentosComum.filterNot(_.isInstanceOf[Anexo]))
+          val inicio = nomear(semAnexo)
+          val filhos = referencias.tail.map { grupo =>
+            val fragmentos = grupo.fragmentosComum.filterNot(f => f.isInstanceOf[Anexo] || f.isInstanceOf[Artigo])
+            if (grupo.dispPrincipal == TipoUrnFragmento.Artigo) nomear(grupo.copy(fragmentosComum = Nil))
+            else nomear(grupo.copy(fragmentosComum = fragmentos))
+          }
+          GrupoNomeCompacto((inicio :: filhos).mkString(" e "), Genero.Masculino, art.numeros.size > 1)
+        }
+        val complemento = "do " + nomear(caminho.zipWithIndex.map { case (a, i) => a.copy(nivel = caminho.size - i) })
+        List(BlocoNomeCompacto(nomes, complemento))
+      }
+    }
+  }
+
+  /** Nomes individuais para consumidores que aplicam um conectivo por grupo. */
+  def nomearGruposIndividuais: List[String] =
+    gruposComAnexoCompartilhado.map(grupo =>
+      new Nomeador(List(grupo), referenciaMesmoArtigo, nivelAnexoContexto).nomearGrupos)
+
+  // O complemento do anexo fica no último grupo de cada bloco consecutivo.
+  // Agrupadores mantêm a hierarquia completa; a elipse vale para artigos e seus filhos.
+  private def gruposComAnexoCompartilhado: List[GrupoUrns] = {
+    def caminhoAnexos(grupo: GrupoUrns): List[Anexo] =
+      if (grupo.dispPrincipal == TipoUrnFragmento.Artigo ||
+          grupo.fragmentosComum.exists(_.isInstanceOf[Artigo])) {
+        grupo.fragmentosComum.collect { case anexo: Anexo => anexo }
+      } else Nil
+
+    grupos.zipWithIndex.map { case (grupo, indice) =>
+      val anexos = caminhoAnexos(grupo)
+      if (anexos.nonEmpty && grupos.lift(indice + 1).exists(caminhoAnexos(_) == anexos)) {
+        grupo.copy(fragmentosComum = grupo.fragmentosComum.filterNot(_.isInstanceOf[Anexo]))
+      } else grupo
+    }
   }
 
   def nomearDispositivo(nomeDispositivo: Option[String], urnAgrupadorInput: String): String = {

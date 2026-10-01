@@ -48,20 +48,21 @@ object Urn2NomeCompacto {
     } else if (urns.forall(UrnParser.hasCommonContext(_, context))) {
       val contextResponse = UrnParser.extractContext(urns, context)
       val grupos = AgrupadorUrn.agrupar(UrnParser.parse(contextResponse.urns))
-      val nomes = grupos.map { grupo =>
-        val texto = new Nomeador(List(grupo), false, contextResponse.nivelAnexoContexto).nomearGrupos
-        criarGrupoNomeCompacto(grupo, texto)
-      }
+      val nomeador = new Nomeador(grupos, false, contextResponse.nivelAnexoContexto)
+      val blocos = nomeador.nomearBlocos
+      val textos = nomeador.nomearGruposIndividuais
+      val nomes = grupos.zip(textos).map { case (grupo, texto) => criarGrupoNomeCompacto(grupo, texto) }
       val complemento = if (contextResponse.agrupador.isEmpty) "" else {
         new Nomeador(Nil, false).nomearDispositivo(Some(""), contextResponse.agrupador).trim
       }
-      ResultadoNomeCompacto(nomes, complemento)
+      ResultadoNomeCompacto(nomes, complemento, blocos)
     } else {
-      val nomes = AgrupadorUrn.agrupar(UrnParser.parse(urns)).map { grupo =>
-        val texto = new Nomeador(List(grupo), false).nomearGrupos
-        criarGrupoNomeCompacto(grupo, texto)
-      }
-      ResultadoNomeCompacto(nomes, "")
+      val grupos = AgrupadorUrn.agrupar(UrnParser.parse(urns))
+      val nomeador = new Nomeador(grupos, false)
+      val blocos = nomeador.nomearBlocos
+      val textos = nomeador.nomearGruposIndividuais
+      val nomes = grupos.zip(textos).map { case (grupo, texto) => criarGrupoNomeCompacto(grupo, texto) }
+      ResultadoNomeCompacto(nomes, "", blocos)
     }
   }
 

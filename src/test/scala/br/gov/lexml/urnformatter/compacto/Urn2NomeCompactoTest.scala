@@ -5,6 +5,45 @@ import junit.framework.TestCase
 
 class Urn2NomeCompactoTest extends TestCase {
 
+  def test_compartilhaAnexoEntreArtigosEFilhosConsecutivos() {
+    val urns = List("anx60_art1", "anx60_art2", "anx60_art7_par1", "anx60_art8_cpt", "anx60_art8_cpt_inc1", "anx52_art1_cpt_inc3")
+    val contexto = "anx60_art87_cpt"
+    val esperado = "arts. 1º e 2º, art. 7º, § 1º, art. 8º, caput e inciso I do Anexo LX e art. 1º, inciso III do Anexo LII"
+    assertEquals(esperado, Urn2NomeCompacto.format(urns, contexto))
+    assertEquals(esperado, Urn2NomeCompacto.formatarGrupos(urns, contexto).formatar(_ => ""))
+    assertEquals("nos arts. 1º e 2º, art. 7º, § 1º, art. 8º, caput e inciso I do Anexo LX e no art. 1º, inciso III do Anexo LII",
+      Urn2NomeCompacto.formatarGrupos(urns, contexto).formatar(g => if (g.plural) "nos" else "no"))
+  }
+
+  def test_mudancaDeAnexoEncerraBlocoSemReordenar() {
+    val urns = List("anx60_art1", "anx52_art1", "anx60_art2_par1", "anx60_art3_cpt")
+    val esperado = "art. 1º do Anexo LX e art. 1º do Anexo LII e art. 2º, § 1º, art. 3º, caput do Anexo LX"
+    assertEquals(esperado, Urn2NomeCompacto.format(urns))
+    assertEquals(esperado, Urn2NomeCompacto.formatarGrupos(urns, "").formatar(_ => ""))
+  }
+
+  def test_subanexosHomonimosNaoCompartilhamComplemento() {
+    val urns = List("anx60_anx1_art1", "anx60_anx1_art2_par1", "anx52_anx1_art1", "anx52_anx1_art2_par1")
+    val esperado = "art. 1º, art. 2º, § 1º do Anexo 1 do Anexo LX e art. 1º, art. 2º, § 1º do Anexo 1 do Anexo LII"
+    assertEquals(esperado, Urn2NomeCompacto.format(urns))
+    assertEquals(esperado, Urn2NomeCompacto.formatarGrupos(urns, "").formatar(_ => ""))
+  }
+
+  def test_uniaoPreservaParagrafosPaisDosIncisos() {
+    val urns = List("anx60_art8_par1_inc1", "anx60_art8_par2_inc1", "anx52_art1")
+    val esperado = "art. 8º, § 1º, inciso I e § 2º, inciso I do Anexo LX e art. 1º do Anexo LII"
+    assertEquals(esperado, Urn2NomeCompacto.format(urns))
+    assertEquals(esperado, Urn2NomeCompacto.formatarGrupos(urns, "").formatar(_ => ""))
+  }
+
+  def test_uniaoPreservaCaputIncisosEParagrafosExplicitamenteAnotados() {
+    val urns = List("anx60_art8_cpt", "anx60_art8_cpt_inc1", "anx60_art9_cpt", "anx60_art9_par1",
+      "anx60_art12_cpt_inc1", "anx60_art12_cpt_inc2", "anx60_art12_par2", "anx60_art12_par4", "anx52_art1")
+    val esperado = "art. 8º, caput e inciso I, art. 9º, caput e § 1º, art. 12, incisos I e II e §§ 2º e 4º do Anexo LX e art. 1º do Anexo LII"
+    assertEquals(esperado, Urn2NomeCompacto.format(urns))
+    assertEquals(esperado, Urn2NomeCompacto.formatarGrupos(urns, "").formatar(_ => ""))
+  }
+
   def test_generoEPluralConcordamComArtigoQueIniciaReferencia() {
     val resultado = Urn2NomeCompacto.formatarGrupos(
       List("art202_cpt_inc4_ali1_ite1", "art202_cpt_inc4_ali8"), "art203_cpt")
